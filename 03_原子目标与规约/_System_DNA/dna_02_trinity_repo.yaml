@@ -1,0 +1,5 @@
+# DNA 映射文件：02_三位一体仓库规约.md
+# 说明：索引 `_System_DNA/global_const.yaml` 中 Trinity-Repo 相关配置。
+
+trinity_repos:
+  $ref: "global_const.yaml#trinity_repos"

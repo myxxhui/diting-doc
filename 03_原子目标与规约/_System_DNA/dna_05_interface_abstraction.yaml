@@ -1,0 +1,10 @@
+# DNA 映射文件：05_接口抽象层规约.md
+# 说明：索引 `_System_DNA/global_const.yaml` 中接口抽象层配置。
+
+abstraction_layer:
+  broker_driver:
+    $ref: "global_const.yaml#abstraction_layer.broker_driver"
+  cognitive_engine:
+    $ref: "global_const.yaml#abstraction_layer.cognitive_engine"
+  market_data_feed:
+    $ref: "global_const.yaml#abstraction_layer.market_data_feed"

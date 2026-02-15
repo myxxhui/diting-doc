@@ -1,0 +1,23 @@
+# DNA 映射文件：09_核心模块架构规约.md
+# 说明：索引 `_System_DNA/global_const.yaml` 中核心模块与生产工业级要求配置。
+
+core_modules:
+  $ref: "global_const.yaml#core_modules"
+
+production_requirements:
+  fault_tolerance:
+    $ref: "global_const.yaml#production_requirements.fault_tolerance"
+  performance:
+    $ref: "global_const.yaml#production_requirements.performance"
+  observability:
+    $ref: "global_const.yaml#production_requirements.observability"
+  consistency:
+    $ref: "global_const.yaml#production_requirements.consistency"
+  security:
+    $ref: "global_const.yaml#production_requirements.security"
+  testing:
+    $ref: "global_const.yaml#production_requirements.testing"
+  deployment:
+    $ref: "global_const.yaml#production_requirements.deployment"
+  error_handling:
+    $ref: "global_const.yaml#production_requirements.error_handling"

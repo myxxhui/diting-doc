@@ -1,0 +1,5 @@
+# DNA 映射文件：06_动态配置中心规约.md
+# 说明：索引 `_System_DNA/global_const.yaml` 中动态配置中心配置。
+
+dynamic_config:
+  $ref: "global_const.yaml#dynamic_config"

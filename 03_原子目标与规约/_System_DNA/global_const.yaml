@@ -1,0 +1,1417 @@
+# 全局常量配置
+# 本文件为机器可读的配置，用于 AI 解析与脚本生成
+
+# 项目元信息
+project:
+  name: "Diting"
+  doc_repo: "diting-doc"
+  code_repo: "diting-core"
+  infra_repo: "diting-infra"
+
+# 三位一体仓库配置（Trinity-Repo）- 方案 A：无独立 diting-design
+trinity_repos:
+  # 新建 diting-core、diting-infra 时，默认创建于此路径下。"." 表示当前工作区根或与文档仓同级（即 diting-core、diting-infra 与 diting-doc 并列）；可改为 "../" 表示文档仓父目录。L4 Stage0_pre 工作目录引用本键。
+  parent_path_default: "."
+
+  # 设计产物与 ADR：方案 A 下 ADR 在 diting-doc，设计产物在 diting-core/design 或 diting-doc 约定目录
+  design_and_adr:
+    adr_location: "diting-doc/06_追溯与审计/ADR/"
+    design_location: "diting-core/design/" # 或 diting-doc/03_原子目标与规约/_Design_Artifacts/
+    directories:
+      - "schemas/" # 数据真理 SQL/GX
+      - "protocols/" # 通信契约 Proto
+      - "rules/" # 业务规则 YAML
+      - "knowledge_graph/" # 知识图谱 Schema
+    principles:
+      - "Schema First"
+      - "Single Source of Truth"
+
+  repo_i:
+    name: "diting-core"
+    purpose: "血肉与大脑"
+    directories:
+      - "diting/abstraction/"
+      - "diting/drivers/"
+      - "diting/moe/"
+      - "diting/risk/"
+      - "diting/strategy/"
+      - "tests/"
+      - "design/" # 可选，方案 A 时设计产物可放此处
+    dockerfile_path: "." # 或 "docker/"
+    make_targets:
+      - "test" # 本地单测
+      - "build" # 构建镜像
+      - "test-docker" # 镜像内测试
+    principles:
+      - "Interface Separation"
+      - "No Secrets"
+
+  repo_a:
+    name: "diting-infra"
+    purpose: "Chart 与配置，部署由 deploy-engine 执行"
+    directories:
+      - "charts/" # 或 helm/
+      - "config/" # 符合 deploy-engine DeploymentConfig
+      - "observability/"
+      - "secrets/" # 当前 Sealed-Secrets
+    deploy_engine_repo: "deploy-engine"
+    deploy_engine_version: ">= 0.1.0" # 可选，PATH 方式时约定最低版本
+    config_schema: "deploy-engine/pkg/config/spec.go DeploymentConfig" # 配置须符合此契约
+    chart_path: "charts/" # 或 helm/
+    env_config_path: "config/environments/{env}/deploy.json" # 环境配置路径模板
+    secrets:
+      current: "sealed_secrets"
+      future: "vault_or_kms" # 可选，后期迁移由 ADR 约定
+    principles:
+      - "仅提供 Chart 与 config，不实现 Terraform/Helm 执行逻辑"
+      - "部署通过调用 deploy-engine 完成"
+  used_by_l4_stages: ["s0_pre", "s0", "s3", "s4"]
+
+# 环境定义
+environments:
+  - dev
+  - test
+  - staging
+  - prod
+
+# 全局约束 - 基于不可能三角（The Impossible Triangle）
+constraints:
+  # 认知边界 (Certainty)
+  certainty:
+    min_win_rate: 0.80 # ≥ 80% 胜率
+    explainable_targets_ratio: 0.10 # 只做能被特定领域逻辑解释的 10% 标的
+
+  # 复利增长 (Growth)
+  growth:
+    min_annual_cagr: 0.30 # ≥ 30% 年化复利
+    cash_drag_monitor_threshold_days: 5 # 空仓 > 5 天触发阈值放宽
+
+  # 生存底线 (Survival)
+  survival:
+    max_drawdown: 0.12 # < 12% 最大回撤
+    single_trade_risk_limit: 0.02 # 单笔风险 < 2%
+    min_payoff_ratio: 1.5 # 盈亏比 > 1.5
+
+  # 工程性能
+  performance:
+    full_market_scan_timeout_minutes: 30 # 全市场扫描+推理 < 30 分钟
+    rto_minutes: 5 # RTO（恢复时间目标）< 5 分钟
+
+  # 风控
+  risk_control:
+    risk_shield_intercept_rate: 1.0 # Risk Shield 拦截率 100%（高波动模拟）
+
+# 技术栈
+tech_stack:
+  language: "Python 3.11+"
+  framework: "FastAPI"
+  database: "PostgreSQL"
+  cache: "Redis"
+  message_queue: "RabbitMQ"
+
+# 产品范围与路线图（L2 产品设计维度 → L3 01_需求与产品范围）
+# 引用：03_原子目标与规约/产品设计/01_需求与产品范围.md
+product_scope:
+  phases:
+    - id: "Phase0-Infra"
+      goal: "仓库骨架、基础设施与 IaC 准备"
+      lifecycle_stage: "阶段 0（骨架）+ 部分阶段 2"
+      modules: "三位一体仓库结构、可选 Docker/IaC 骨架"
+      steps:
+        - step_id: "01"
+          l4_doc_name: "01_三位一体仓库初始化"
+          delivery_scope: "三仓目录符合 02_三位一体；diting-core 含 Makefile（test 可为占位）；diting-infra 初始化"
+          exit_criteria: "三仓存在且目录与 global_const.trinity_repos 一致；diting-core make test 占位通过"
+          l5_anchor: null
+          l5_acceptance_criterion: "工程：三仓目录符合 02_三位一体规约；diting-core 含 Makefile 且 make test 可运行（可为占位）"
+          verification_method: "目录存在性、make test 占位"
+    - id: "Phase1-xxx"
+      goal: "核心链路最小可跑通：量化信号 → 判官 → 风控占位"
+      lifecycle_stage: "阶段 1 + 可选 1b（Mock）+ 阶段 2"
+      modules: "Module A/B 骨架 + Module D 判官最小闭环 + Module E 占位"
+      steps:
+        - step_id: "01"
+          l4_doc_name: "01_ModuleA_B骨架与接口"
+          delivery_scope: "Module A/B 目录与接口存在，量化信号可产出"
+          exit_criteria: "单测或占位通过、接口契约满足"
+          l5_anchor: "l5-func-01"
+          l5_acceptance_criterion: "Module A/B 目录与接口存在，量化信号可产出"
+          verification_method: "单测或占位通过、接口契约满足；由 Phase1 01_ 准出时更新本行"
+        - step_id: "02"
+          l4_doc_name: "02_ModuleD判官最小闭环"
+          delivery_scope: "判官投票+Kelly+Alpha 输出与 01_核心公式一致"
+          exit_criteria: "Table-Driven 单测、边界覆盖"
+          l5_anchor: "l5-func-02"
+          l5_acceptance_criterion: "判官投票+Kelly+Alpha 输出与 01_核心公式一致"
+          verification_method: "Table-Driven 单测、边界覆盖；由 Phase1 02_ 准出时更新本行"
+        - step_id: "03"
+          l4_doc_name: "03_ModuleE风控占位"
+          delivery_scope: "风控接口与占位（硬止损 2%、盈亏比≥1.5）"
+          exit_criteria: "单测或集成路径验证"
+          l5_anchor: "l5-func-03"
+          l5_acceptance_criterion: "风控接口与占位（硬止损 2%、盈亏比≥1.5）"
+          verification_method: "单测或集成路径验证；由 Phase1 03_ 准出时更新本行"
+        - step_id: "04"
+          l4_doc_name: "04_A到E集成与Mock准备"
+          delivery_scope: "A→B→D→E 最小路径可跑通，Mock/Table-Driven 可验证"
+          exit_criteria: "集成测试或主路径执行"
+          l5_anchor: "l5-func-04"
+          l5_acceptance_criterion: "A→B→D→E 最小路径可跑通，Mock/Table-Driven 可验证"
+          verification_method: "集成测试或主路径执行；由 Phase1 04_ 准出时更新本行"
+    - id: "Phase2-xxx"
+      goal: "MoE 议会与执行网关接入，回测/仿真可验证"
+      lifecycle_stage: "阶段 3 + 阶段 4"
+      modules: "Module C 议会、Module F 执行网关"
+      steps:
+        - step_id: "01"
+          l4_doc_name: "01_MoE议会与Router"
+          delivery_scope: "Router 按 Tag 分发，专家意见与 D 对接"
+          exit_criteria: "单测/集成、Alpha 链路可执行"
+          l5_anchor: "l5-func-05"
+          l5_acceptance_criterion: "Router 按 Tag 分发，专家意见与 D 对接"
+          verification_method: "单测/集成、Alpha 链路可执行；由 Phase2 01_ 准出时更新本行"
+        - step_id: "02"
+          l4_doc_name: "02_执行网关与Broker占位"
+          delivery_scope: "Broker 抽象与占位/仿真实现，E→F 衔接"
+          exit_criteria: "单测或 place_order 调用验证"
+          l5_anchor: "l5-func-06"
+          l5_acceptance_criterion: "Broker 抽象与占位/仿真实现，E→F 衔接"
+          verification_method: "单测或 place_order 调用验证；由 Phase2 02_ 准出时更新本行"
+        - step_id: "03"
+          l4_doc_name: "03_研产同构与回测仿真"
+          delivery_scope: "Docker/K3s 下回测或仿真路径跑通"
+          exit_criteria: "回测/仿真任务成功、结果可判定"
+          l5_anchor: "l5-func-07"
+          l5_acceptance_criterion: "Docker/K3s 下回测或仿真路径跑通"
+          verification_method: "回测/仿真任务成功、结果可判定；由 Phase2 03_ 准出时更新本行"
+    - id: "Phase3-xxx"
+      goal: "优化与扩展（多策略池、可观测性、成本治理等）"
+      lifecycle_stage: "阶段 3、4"
+      modules: "按 09 规约与 L1 价值查漏补缺"
+      steps:
+        - step_id: "01"
+          l4_doc_name: "01_可观测性与健康检查"
+          delivery_scope: "日志/指标/健康检查满足 L3"
+          exit_criteria: "Prometheus 与健康端点验证"
+          l5_anchor: "l5-func-08"
+          l5_acceptance_criterion: "日志/指标/健康检查满足 L3"
+          verification_method: "Prometheus 与健康端点验证；由 Phase3 01_ 准出时更新本行"
+        - step_id: "02"
+          l4_doc_name: "02_成本治理与Token熔断"
+          delivery_scope: "Token 预算与熔断逻辑可生效"
+          exit_criteria: "配置读取与熔断路径验证"
+          l5_anchor: "l5-func-09"
+          l5_acceptance_criterion: "Token 预算与熔断逻辑可生效"
+          verification_method: "配置读取与熔断路径验证；由 Phase3 02_ 准出时更新本行"
+        - step_id: "03"
+          l4_doc_name: "03_多策略与扩展"
+          delivery_scope: "按 09 规约与 L1 价值查漏补缺"
+          exit_criteria: "按 Phase3 03_ 约定"
+          l5_anchor: null
+          l5_acceptance_criterion: null
+          verification_method: null
+        - step_id: "04"
+          l4_doc_name: "04_Level1入口与L5表补齐"
+          delivery_scope: "满足三级流水线 Level 1、功能/不可能三角可追溯"
+          exit_criteria: "入口条件核对、L5 表补齐"
+          l5_anchor: "l5-func-10"
+          l5_acceptance_criterion: "满足三级流水线 Level 1、功能/不可能三角可追溯"
+          verification_method: "入口条件核对、L5 表补齐"
+  priority_rules:
+    p0: "生存底线相关：风控盾（Module E）、密钥与合规、回撤与止损"
+    p1: "认知边界与复利：量化信号与判官闭环（A/B/D）、MoE 议会（C）、研产同构"
+  l1_mapping_ref: "01_需求与产品范围 第四节"
+
+# 成本治理（L2 07_成本治理维度 → L3 10_运营治理与灾备等）
+# 引用：02_战略维度/产品设计/07_成本治理维度.md；06/09/10 规约引用本子树
+cost_governance:
+  used_by_l4_stages: ["s1", "s3"]
+  token_budget:
+    max_token_per_decision: null  # 待项目设定；单决策最大 Token 预算
+    technical_score_skip_below: 60   # 低于此分跳过 LLM 推理
+    technical_score_deep_think_above: 80  # 高于此分开启 Deep Think Mode
+    roi_fuse_threshold: null  # 待项目设定；Token 成本/收益 ROI 低于此触发熔断
+  scale_to_zero:
+    enabled: true  # 任务结束后缩容到 0
+    cold_start_rto_minutes: 5  # 冷启动需满足 RTO
+    spot_ecs_preferred: true   # 优先竞价实例
+  cold_archive:
+    retention_days: null  # 待项目设定；冷归档保留天数
+    storage_tier: "oss_cold"  # OSS 冷归档，价格约为标准存储 1/10
+
+# 数据架构与分层存储（L2 03_数据架构与分层存储维度 → L3 07_数据版本控制等）
+# 引用：02_战略维度/产品设计/03_数据架构与分层存储维度.md
+data_architecture:
+  l1_hot:
+    timescaledb:
+      purpose: "实时行情/指标存储"
+      constraint: "ESSD PL1，禁止 NAS"
+      write_latency_ms_max: 100
+    redis:
+      purpose: "信号总线/去重"
+      streams: true
+  l2_knowledge:
+    storage: "pgvector"
+    knowledge_bases:
+      - "Agri-KG"
+      - "Tech-KG"
+      - "Macro-KG"
+    retrieval_timeout_align: "full_market_scan_timeout_minutes"  # 与 constraints.performance 协调
+  l3_cold:
+    storage: "OSS"
+    wal:
+      rpo_target: "≈0"
+      storage_tier: "standard"
+    decision_snapshots:
+      storage_tier: "standard"
+    backtest_data:
+      storage_tier: "cold_archive"
+  data_firewall:
+    great_expectations_rules_path: null  # 待项目设定；GE 规则路径或引用
+
+# 战略维度与 DNA 映射（主责 L3 见 06_追溯与审计/00_L2_L3_DNA_映射.md）
+strategic_dimensions:
+  dim_00_product_design:
+    doc: "02_战略维度/产品设计/01_产品设计维度.md"
+    primary_l3_docs:
+      - "03_原子目标与规约/产品设计/01_需求与产品范围.md"
+    dna_nodes:
+      - "product_scope"
+  dim_01_tech_and_arch:
+    doc: "02_战略维度/产品设计/02_技术栈与架构维度.md"
+    primary_l3_docs:
+      - "03_原子目标与规约/01_核心公式与MoE架构规约.md"
+    dna_nodes:
+      - "tech_stack"
+      - "trinity_repos"
+      - "core_modules"
+      - "abstraction_layer"
+  dim_02_data_arch_and_storage:
+    doc: "02_战略维度/产品设计/03_数据架构与分层存储维度.md"
+    primary_l3_docs:
+      - "03_原子目标与规约/07_数据版本控制规约.md"
+    dna_nodes:
+      - "data_version_control"
+      - "data_architecture"
+      - "governance_and_dr.disaster_recovery.backup_strategy"
+      - "traceability_and_audit.data_traceability"
+  dim_03_production_and_observability:
+    doc: "02_战略维度/产品设计/04_生产保障与可观测性维度.md"
+    primary_l3_docs:
+      - "03_原子目标与规约/08_心跳协议与健康检查规约.md"
+    dna_nodes:
+      - "production_requirements.observability"
+      - "heartbeat_protocol"
+      - "production_requirements.deployment"
+  dim_04_security_and_secrets:
+    doc: "02_战略维度/产品设计/05_安全与机密治理维度.md"
+    primary_l3_docs:
+      - "03_原子目标与规约/10_运营治理与灾备规约.md"
+    dna_nodes:
+      - "governance_and_dr.compliance"
+      - "success_markers.security_acceptance"
+      - "traceability_and_audit.audit_logging"
+  dim_05_research_production_isomorphism:
+    doc: "02_战略维度/产品设计/06_研产同构维度.md"
+    primary_l3_docs:
+      - "03_原子目标与规约/05_接口抽象层规约.md"
+    dna_nodes:
+      - "architecture_consensus.gitflow"
+      - "data_version_control"
+      - "environments"
+      - "abstraction_layer"
+  dim_06_cost_governance:
+    doc: "02_战略维度/产品设计/07_成本治理维度.md"
+    primary_l3_docs:
+      - "03_原子目标与规约/10_运营治理与灾备规约.md"
+    dna_nodes:
+      - "cost_governance"
+      - "governance_and_dr.disaster_recovery"
+      - "production_requirements.performance"
+  dim_07_broker_decoupling_and_redundancy:
+    doc: "02_战略维度/产品设计/08_经纪商解耦与冗余维度.md"
+    primary_l3_docs:
+      - "03_原子目标与规约/05_接口抽象层规约.md"
+    dna_nodes:
+      - "abstraction_layer.broker_driver"
+      - "core_modules.module_f_execution_gateway"
+      - "governance_and_dr.compliance.allowed_channels"
+  dim_08_dev_and_delivery:
+    doc: "02_战略维度/开发与交付/01_开发与交付流程维度.md"
+    primary_l3_docs:
+      - "03_原子目标与规约/开发与交付/01_开发生命周期与实践流程规约.md"
+    dna_nodes:
+      - "_System_DNA/dna_dev_workflow.yaml"
+
+# 核心公式参数
+core_formula:
+  # Alpha = (Quant_Signal ∩ Router(Experts)) × Kelly_Position
+  quant_signal:
+    score_range: [0, 100] # 量化得分范围
+    strategy_sources: ["Trend", "Reversion", "Breakout"] # 策略池来源
+
+  router_experts:
+    moe_enabled: true # 启用混合专家架构
+    expert_selection_logic: "dynamic" # 动态选择专家
+
+  kelly_position:
+    fraction_range: [0.0, 1.0] # 凯利仓位范围
+    calculation_method: "dynamic" # 动态凯利计算
+
+# 架构设计共识
+architecture_consensus:
+  # ADR 强制令
+  adr_mandate:
+    enabled: true
+    location: "diting-doc/06_追溯与审计/ADR/"
+    rule: "No Ticket, No Code" # 无文档，不编码
+
+  # 金融级 GitFlow（三级流水线）
+  gitflow:
+    level_1_unit_test:
+      trigger: "git commit"
+      action: "运行 tests/unit/"
+      hard_requirement: "100% Table-Driven Tests 通过"
+
+    level_2_paper_trading:
+      trigger: "Merge to develop"
+      action: "部署到 Staging，Redis Stream 10倍速回放30天行情"
+      hard_requirement: "净值曲线偏差度 < 1%"
+
+    level_3_live_trading:
+      trigger: "Tag Release + 人工审批"
+      action: "Terraform 部署到 Prod"
+      hard_requirement: "2FA 密钥 + 零信任部署"
+
+  # 版本控制铁律（SemVer for Money）
+  semver:
+    major: "架构级变更，必须清仓"
+    minor: "策略/逻辑变更，平滑升级"
+    patch: "修复/补丁，热更新"
+
+# 接口抽象层
+abstraction_layer:
+  broker_driver:
+    location: "diting-core/diting/abstraction/broker.py"
+    purpose: "交易执行抽象，支持回测/实盘同构"
+    implementations:
+      - "BacktestBroker"
+      - "XtQuantBroker"
+      - "PTradeBroker"
+
+  cognitive_engine:
+    location: "diting-core/diting/abstraction/brain.py"
+    purpose: "大脑认知抽象，支持多模型切换"
+    implementations:
+      - "DeepSeekR1Engine"
+      - "MockBrain"
+
+  market_data_feed:
+    location: "diting-core/diting/abstraction/feed.py"
+    purpose: "数据源抽象，支持冷热数据透明切换"
+    implementations:
+      - "TimescaleDBFeed"
+      - "S3ParquetFeed"
+
+# 通信协议矩阵（Protocol Buffers）
+protocols:
+  expert_protocol:
+    file: "diting-core/design/protocols/brain/expert.proto"
+    message: "ExpertOpinion"
+    key_fields:
+      - "is_supported" # 认知边界检查
+      - "confidence" # 确信度
+      - "reasoning_summary" # 白盒逻辑
+
+  verdict_protocol:
+    file: "diting-core/design/protocols/brain/verdict.proto"
+    message: "CouncilVerdict"
+    key_fields:
+      - "action" # 最终动作
+      - "win_rate_prediction" # 综合胜率
+      - "suggested_position_ratio" # 建议仓位
+      - "is_defensive_mode" # 防御性复利模式
+
+  execution_protocol:
+    file: "diting-core/design/protocols/execution/order.proto"
+    message: "TradeOrder"
+    key_fields:
+      - "audit_status" # 人工审核状态（合规核心）
+      - "AUTO_EXECUTED" # 仅限止损自动执行
+
+  risk_protocol:
+    file: "diting-core/design/protocols/risk/telemetry.proto"
+    message: "PortfolioState"
+    key_fields:
+      - "year_high_equity" # 年度最高净值
+      - "current_drawdown" # 当前回撤
+      - "is_profit_locked" # 利润锁定线状态
+
+# 动态配置中心
+dynamic_config:
+  storage_backend: "etcd" # etcd / Consul
+  cache_backend: "redis" # Redis 本地缓存
+  config_layers:
+    l1_static:
+      location: "diting-infra/secrets/"
+      change_frequency: "very_low"
+     生效方式: "restart"
+    
+    l2_business_rules:
+      location: "diting-core/design/rules/"
+      change_frequency: "medium"
+      生效方式: "hot_reload"
+    
+    l3_runtime:
+      location: "etcd/"
+      change_frequency: "high"
+      生效方式: "seconds"
+  
+  hot_reload:
+    enabled: true
+    watch_api: true # 使用 Watch API 监听配置变更
+    cache_ttl_seconds: 300 # 本地缓存 TTL（5分钟）
+  
+  version_control:
+    enabled: true
+    rollback_support: true # 支持配置回滚
+    version_format: "{key}/v{version}" # 版本存储格式
+
+# 数据版本控制 (DVC)
+data_version_control:
+  enabled: true
+  backend: "dvc" # Data Version Control
+  storage_backend: "oss" # OSS 对象存储
+  versioning_granularity:
+    ohlcv: "daily" # 按交易日版本化
+    news: "hourly" # 按小时版本化
+    config_snapshot: "on_change" # 按变更版本化
+    decision_snapshot: "on_decision" # 按决策时间点版本化
+  
+  retention_policy:
+    decision_snapshots: "permanent" # 决策快照永久保留
+    ohlcv_data:
+      recent_1_year: "daily" # 最近1年保留每日版本
+      older: "monthly" # 1年以上保留月度版本
+    news_data: "1_year" # 新闻数据保留1年
+  
+  query_interface:
+    timepoint_query: true # 支持时间点查询
+    replay_engine: true # 支持决策回放
+
+# 心跳协议与健康检查
+heartbeat_protocol:
+  enabled: true
+  monitor_backend: "redis_pubsub" # Redis Pub/Sub 或 gRPC
+  heartbeat_frequencies:
+    moe_router:
+      interval_seconds: 5
+      timeout_seconds: 15
+      熔断动作: "停止路由，拒绝新请求"
+    
+    cognitive_engine:
+      interval_seconds: 10
+      timeout_seconds: 30
+      熔断动作: "终止 LLM 请求，降级处理"
+    
+    execution_gateway:
+      interval_seconds: 3
+      timeout_seconds: 9
+      熔断动作: "立即撤销所有挂单"
+    
+    risk_shield:
+      interval_seconds: 2
+      timeout_seconds: 6
+      熔断动作: "触发全局熔断，禁止所有交易"
+  
+  circuit_breaker:
+    enabled: true
+    failure_threshold: 3 # 连续失败次数阈值
+    recovery_timeout_seconds: 60 # 恢复超时（秒）
+  
+  health_check_endpoints:
+    enabled: true
+    http_endpoint: "/health"
+    component_endpoint: "/health/{component_name}"
+  
+  monitoring:
+    prometheus_metrics: true
+    alert_rules: true # Prometheus 告警规则
+
+# 核心模块架构（Module A-F）
+core_modules:
+  used_by_l4_stages: ["s1", "s1b", "s2", "s3", "s4"]
+  module_a_semantic_classifier:
+    purpose: "语义分类器：不做预测，只做分类"
+    input:
+      - "标的代码"
+      - "申万行业分类"
+      - "营收占比数据"
+    output:
+      - "Domain Tag (AGRI/TECH/GEO/UNKNOWN)"
+      - "置信度分数 (0.0-1.0)"
+    classification_rules:
+      agri: "申万行业=农林牧渔 或 营收占比>50%"
+      tech: "申万行业=电子/计算机/通信 或 研发投入>10%"
+      geo: "申万行业=有色金属/石油石化 或 大宗商品营收>50%"
+  
+  module_b_quant_engine:
+    purpose: "左脑 - 量化扫描引擎：机会丰度"
+    strategy_pools:
+      pool_1_trend:
+        name: "趋势策略"
+        conditions:
+          - "均线多头排列：MA5 > MA10 > MA20 > MA60"
+          - "MACD 水上金叉：MACD > 0 且 DIF > DEA"
+        score_range: [0, 100]
+      
+      pool_2_reversion:
+        name: "反转策略"
+        conditions:
+          - "RSI < 20（超卖）"
+          - "价格触及 Bollinger 下轨支撑"
+        score_range: [0, 100]
+      
+      pool_3_breakout:
+        name: "突破策略"
+        conditions:
+          - "价格突破 20 日高点"
+          - "成交量 > 2x 均量"
+        score_range: [0, 100]
+    
+    scanner:
+      universe_size: 5000  # 扫描标的数量
+      technical_score_threshold: 70  # 技术面得分阈值
+      sector_strength_threshold: 1.1  # 板块强弱阈值（强于板块 10%）
+  
+  module_c_moe_council:
+    purpose: "右脑 - 混合专家议会"
+    router:
+      routing_logic: "根据 Domain Tag 分发到对应专家"
+    
+    sub_agents:
+      agri_agent:
+        focus: ["季节性因素", "期货升贴水"]
+        domain_tag: "AGRI"
+      
+      tech_agent:
+        focus: ["研发投入占比", "大基金动向"]
+        domain_tag: "TECH"
+      
+      geo_agent:
+        focus: ["大宗商品价格", "汇率变动"]
+        domain_tag: "GEO"
+      
+      trash_bin:
+        purpose: "无法归类或逻辑不清的标的，直接丢弃"
+        domain_tag: "UNKNOWN"
+  
+  module_d_gavel:
+    purpose: "决策中枢 - 判官"
+    voting_mechanism:
+      rule: "Quant (Pass) + Expert (Strong Buy) = 有效信号"
+      quant_threshold: 70  # 技术面得分阈值
+      expert_requirement: "至少一个专家 is_supported=True 且 direction=BULLISH"
+    
+    dynamic_kelly:
+      calculation_method: "根据 Expert 确信度调整仓位"
+      formula: "base_kelly * expert_confidence"
+      range: [0.0, 1.0]
+    
+    cash_drag_monitor:
+      enabled: true
+      threshold_days: 5  # 空仓时间阈值
+      action: "自动降低 Module B 筛选阈值"
+      threshold_adjustments:
+        rsi_threshold: [20, 25]  # 从 20 放宽到 25
+        technical_score_threshold: [70, 65]  # 从 70 降低到 65
+        sector_strength_threshold: [1.1, 1.05]  # 从 1.1 降低到 1.05
+    
+    defensive_mode:
+      enabled: true
+      trigger_condition: "年化收益 >= 30%"
+      rules:
+        - "胜率阈值从 80% 提至 90%"
+        - "仓位减半"
+        - "锁定 25% 利润垫"
+  
+  module_e_risk_shield:
+    purpose: "绝对风控盾：纯 Python 硬编码规则（无 AI 参与）"
+    rules:
+      hard_stop_loss:
+        fixed_stop: "单笔亏损 > 2% -> 市价斩仓"
+        atr_stop: "价格跌破 ATR 下轨 -> 市价斩仓"
+        execution: "AUTO_EXECUTED（自动执行，无需审批）"
+      
+      payoff_ratio:
+        threshold: 1.5  # 预期收益/风险 >= 1.5
+        action: "拒绝开仓"
+      
+      correlation_limit:
+        max_domain_exposure: 0.4  # 同一 Domain 最大暴露度 40%
+        action: "限制同一 Domain 的持仓总上限"
+  
+  module_f_execution_gateway:
+    purpose: "执行网关：Redis Streams -> OMS Lite -> MiniQMT"
+    architecture: "Redis Streams -> OMS Lite -> MiniQMT (xtquant)"
+    
+    human_in_the_loop:
+      enabled: true
+      approval_required:
+        buy: true  # 买入需要人工确认
+        take_profit: true  # 止盈需要人工确认
+        stop_loss: false  # 止损自动执行（最高权限）
+      
+      notification:
+        channel: "手机推送"
+        timeout_seconds: 300  # 5 分钟超时
+    
+    order_splitting:
+      enabled: true
+      chunk_size: 10000  # 大单拆分（> 10000 股）
+
+# 生产工业级要求
+production_requirements:
+  # 容错与恢复机制
+  fault_tolerance:
+    retry_config:
+      max_attempts: 3
+      initial_wait_seconds: 1
+      max_wait_seconds: 10
+      exponential_base: 2
+    
+    circuit_breakers:
+      llm_api:
+        failure_threshold: 5
+        recovery_timeout_seconds: 60
+      broker_api:
+        failure_threshold: 3
+        recovery_timeout_seconds: 30
+    
+    fallback_strategies:
+      module_a: "使用缓存数据（TTL=24h）"
+      module_b: "分批扫描，优先处理高流动性标的"
+      module_c: "降级到规则引擎（基于关键词匹配）"
+      module_d: "降级到单一信号源（优先 Quant）"
+      module_e: "拒绝所有交易（Fail-Safe）"
+      module_f: "订单进入死信队列，延迟重试"
+  
+  # 性能优化与扩展性
+  performance:
+    concurrency:
+      module_a: 100  # 异步批处理并发度
+      module_b: "CPU核心数"  # 多进程
+      module_c: 10  # 异步并发（asyncio）
+      module_d: 1   # 同步处理
+      module_e: 1   # 同步处理（低延迟）
+      module_f: 5   # 异步队列处理
+    
+    cache_strategy:
+      module_a_classification: "24h"  # 分类结果缓存
+      module_b_indicators: "5min"      # 技术指标缓存
+      module_c_llm: "1h"               # LLM 推理结果缓存
+    
+    resource_limits:
+      scanner:
+        max_memory: "8GB"
+        max_cpu: "4 cores"
+        timeout_seconds: 1800  # 30分钟
+      llm_api:
+        max_concurrent: 10
+        rate_limit_per_minute: 100
+        timeout_seconds: 30
+      execution:
+        max_pending_orders: 100
+        rate_limit_per_second: 10
+  
+  # 监控与可观测性
+  observability:
+    metrics:
+      prometheus_enabled: true
+      key_metrics:
+        - "diting_classifier_latency_seconds"
+        - "diting_scanner_duration_seconds"
+        - "diting_llm_api_latency_seconds"
+        - "diting_verdict_win_rate"
+        - "diting_execution_success_rate"
+    
+    logging:
+      structured_logging: true
+      log_level: "INFO"
+      log_retention_days: 30
+    
+    tracing:
+      opentelemetry_enabled: true
+      trace_sampling_rate: 0.1  # 10% 采样率
+  
+  # 数据一致性与幂等性
+  consistency:
+    idempotency:
+      enabled: true
+      ttl_seconds: 3600  # 1小时
+    
+    eventual_consistency:
+      enabled: true
+      sync_delay_seconds: 5
+  
+  # 安全与合规
+  security:
+    encryption:
+      enabled: true
+      algorithm: "Fernet"
+    
+    access_control:
+      enabled: true
+      required_permissions:
+        execute_order: "execute_order"
+    
+    audit_logging:
+      enabled: true
+      retention_days: 365  # 1年
+  
+  # 测试策略
+  testing:
+    unit_test_coverage:
+      module_a: 0.90
+      module_b: 0.85
+      module_c: 0.80
+      module_d: 0.95
+      module_e: 1.00  # 100% 覆盖率要求
+      module_f: 0.90
+    
+    integration_testing:
+      enabled: true
+      e2e_test_enabled: true
+    
+    performance_testing:
+      scanner_timeout_seconds: 1800  # 30分钟
+      llm_concurrent_success_rate: 0.95
+  
+  # 部署与运维
+  deployment:
+    rolling_update:
+      max_surge: 1
+      max_unavailable: 0
+    
+    health_checks:
+      liveness_probe:
+        initial_delay_seconds: 30
+        period_seconds: 10
+      readiness_probe:
+        initial_delay_seconds: 10
+        period_seconds: 5
+    
+    feature_flags:
+      new_scanner_algorithm:
+        enabled: true
+        rollout_percentage: 10  # 10% 灰度发布
+  
+  # 错误处理与死信队列
+  error_handling:
+    error_classification:
+      retryable:
+        - "ConnectionError"
+        - "TimeoutError"
+        - "RateLimitError"
+      non_retryable:
+        - "ValueError"
+        - "PermissionDeniedError"
+        - "InvalidInputError"
+      fatal:
+        - "DatabaseCorruptionError"
+        - "ConfigurationError"
+    
+    dead_letter_queue:
+      enabled: true
+      alert_on_dlq: true
+
+# 运营、治理与灾备
+governance_and_dr:
+  # 合规性策略
+  compliance:
+    # 交易通道合规
+    allowed_channels:
+      - "MiniQMT"
+      - "PTrade"
+    prohibited_channels:
+      - "模拟点击"
+      - "第三方接口"
+    
+    # 程序化交易报备
+    programmatic_trading_report:
+      enabled: true
+      required: true
+      report_components:
+        - "strategy_description"
+        - "trading_frequency"
+        - "trading_scale"
+        - "risk_controls"
+        - "system_architecture"
+        - "compliance_measures"
+    
+    # 交易行为红线
+    trading_red_lines:
+      simulated_clicking:
+        prohibited: true
+        monitoring: ["代码审计", "运行时检测"]
+        penalty: "立即停止交易"
+      
+      high_frequency_cancellation:
+        threshold_per_second: 5
+        prohibited: true
+        monitoring: "实时监控"
+        penalty: "触发熔断，暂停交易"
+    
+    # 合规性审计
+    audit:
+      enabled: true
+      audit_checks:
+        - "交易通道验证"
+        - "撤单频率监控"
+        - "交易频率监控"
+      log_retention_days: 365  # 1年
+  
+  # 灾难恢复 (DR)
+  disaster_recovery:
+    # 故障分级
+    fault_levels:
+      l1_app_crash:
+        rto_minutes: 1
+        rpo_minutes: 0
+        recovery_strategy: "自动重启"
+        auto_recovery: true
+      
+      l2_spot_instance_reclaim:
+        rto_minutes: 5
+        rpo_minutes: 1
+        recovery_strategy: "异地拉起 + 数据恢复"
+        metadata_service_notice_minutes: 2
+        graceful_shutdown_steps:
+          - "kubectl drain"
+          - "DB CHECKPOINT"
+          - "wal-g push"
+          - "脚本自杀"
+        recovery_steps:
+          - "Terraform 异地拉起新实例"
+          - "从 OSS/快照恢复数据"
+      
+      l3_market_data_interruption:
+        rto_minutes: 30
+        rpo_minutes: 0
+        recovery_strategy: "数据防火墙 + 止损监控"
+        data_firewall:
+          timeout_minutes: 5
+          action: "暂停所有开仓，仅维持止损监控"
+      
+      l4_database_failure:
+        rto_minutes: 60
+        rpo_minutes: 5
+        recovery_strategy: "主从切换"
+      
+      l5_region_failure:
+        rto_hours: 4
+        rpo_hours: 1
+        recovery_strategy: "跨区域切换"
+    
+    # 数据备份策略
+    backup_strategy:
+      wal_logs:
+        frequency: "实时"
+        retention_days: 7
+        storage: "OSS"
+        rpo_minutes: 1
+      
+      database_snapshots:
+        frequency: "每小时"
+        retention_hours: 24
+        storage: "OSS"
+        rpo_minutes: 60
+      
+      decision_snapshots:
+        frequency: "每次决策"
+        retention: "永久"
+        storage: "OSS + DVC"
+        rpo_minutes: 0
+      
+      config_snapshots:
+        frequency: "每次变更"
+        retention: "永久"
+        storage: "Git + OSS"
+        rpo_minutes: 0
+    
+    # 业务连续性计划 (BCP)
+    bcp:
+      recovery_verification:
+        checks:
+          - "数据库连接性"
+          - "Redis 连接性"
+          - "券商 API"
+          - "数据新鲜度"
+          - "交易能力"
+    
+    # 灾备演练
+    drills:
+      l1_drill:
+        frequency: "每月"
+        scenario: "App 崩溃恢复"
+        target_rto_minutes: 1
+      
+      l2_drill:
+        frequency: "每季度"
+        scenario: "实例回收恢复"
+        target_rto_minutes: 5
+        target_rpo_minutes: 1
+      
+      l3_drill:
+        frequency: "每半年"
+        scenario: "行情中断恢复"
+        target: "熔断机制验证"
+      
+      l4_drill:
+        frequency: "每年"
+        scenario: "数据库故障恢复"
+        target: "主从切换验证"
+      
+      l5_drill:
+        frequency: "每年"
+        scenario: "区域故障恢复"
+        target: "跨区域切换验证"
+  
+  # 运营监控与告警
+  operations_monitoring:
+    compliance_monitoring:
+      enabled: true
+      metrics:
+        - "channel_compliance_rate"
+        - "cancellation_rate"
+        - "reporting_status"
+      alert_thresholds:
+        channel_compliance_rate: 1.0  # 必须 100%
+        cancellation_rate: 0.05       # 撤单率 < 5%
+    
+    dr_monitoring:
+      enabled: true
+      checks:
+        - "备份状态"
+        - "恢复能力"
+        - "数据同步状态"
+
+# 成功标识与验收标准 (Success Markers - DoD)
+success_markers:
+  # MoE 验收
+  moe_acceptance:
+    expert_win_rate:
+      requirement: "垂类 Agent 胜率比通用 LLM 高出 15% 以上"
+      threshold: 0.80  # 专家胜率 ≥ 80%
+      improvement_threshold: 0.15  # 提升幅度 ≥ 15%
+      min_sample_size: 50  # 最小样本量
+      confidence_level: 0.95  # 置信区间
+    
+    overall_win_rate:
+      requirement: "系统整体胜率 ≥ 80%（80% 正确率验证）"
+      threshold: 0.80
+      explainable_ratio_threshold: 0.10  # 可解释标的占比 ≥ 10%
+      min_sample_size: 100  # 最小样本量/月
+      measurement_period_months: 6  # 连续 6 个月
+    
+    chaos_rejection_rate:
+      requirement: "市场混沌期弃单率 > 95%"
+      threshold: 0.95
+      min_chaos_periods: 5  # 最小混沌期样本数
+      min_signals_per_period: 10  # 每个周期最小信号数
+  
+  # 工程验收
+  engineering_acceptance:
+    performance:
+      scan_and_reasoning_time:
+        threshold_seconds: 1800  # < 30 分钟
+        scan_time_threshold_seconds: 1500  # < 25 分钟
+        moe_time_threshold_seconds: 300  # < 5 分钟
+        measurement_frequency: "daily"
+        consecutive_days_required: 7
+      
+      stop_loss_execution_time:
+        p50_threshold_ms: 300
+        p95_threshold_ms: 500
+        p99_threshold_ms: 1000
+        success_rate_threshold: 0.999
+    
+    reliability:
+      system_availability:
+        monthly_threshold: 0.999  # ≥ 99.9%
+        annual_threshold: 0.999
+        planned_maintenance_hours_per_month: 4
+        consecutive_months_required: 3
+      
+      rto:
+        l1_threshold_seconds: 60  # < 1 分钟
+        l2_threshold_seconds: 300  # < 5 分钟
+        l3_threshold_seconds: 1800  # < 30 分钟
+  
+  # 复利验收
+  compound_growth_acceptance:
+    backtest:
+      cagr:
+        threshold: 0.30  # ≥ 30%
+        backtest_period_years: 3
+        consecutive_years_required: 3
+      
+      maxdd:
+        threshold: 0.12  # ≤ 12%
+      
+      sharpe_ratio:
+        threshold: 2.0
+      
+      calmar_ratio:
+        threshold: 2.5  # CAGR / MaxDD
+    
+    live_trading:
+      profit_lock_line:
+        requirement: "连续 6 个月未触及利润锁定线"
+        months_required: 6
+        annual_return_threshold: 0.30
+        defensive_mode_trigger_count: 0
+  
+  # 合规性验收
+  compliance_acceptance:
+    trading_channels:
+      compliance_rate: 1.0  # 100%
+      non_compliant_trades_threshold: 0  # 0 容忍
+      allowed_channels: ["MiniQMT", "PTrade"]
+      measurement_frequency: "daily"
+    
+    programmatic_trading_report:
+      report_required: true
+      report_completeness: 1.0  # 100%
+      authorization_status: "approved"
+    
+    trading_behavior:
+      cancellation_frequency:
+        max_per_second: 5
+        cancellation_rate_threshold: 0.05  # < 5%
+        violation_count_threshold: 0
+      
+      simulated_clicking:
+        prohibited: true
+        code_audit_required: true
+        runtime_detection_required: true
+  
+  # 安全性验收
+  security_acceptance:
+    data_encryption:
+      orders_encryption_rate: 1.0  # 100%
+      keys_encryption_rate: 1.0  # 100%
+      transport_encryption: "TLS 1.2+"
+    
+    access_control:
+      critical_operations_protection_rate: 1.0  # 100%
+      unauthorized_access_count_threshold: 0
+      audit_log_coverage: 1.0  # 100%
+    
+    audit_logging:
+      log_coverage: 1.0  # 100%
+      logs_immutable: true
+      retention_days: 365  # 1 年
+  
+  # 质量验收
+  quality_acceptance:
+    code_coverage:
+      overall_threshold: 0.80  # ≥ 80%
+      risk_module_threshold: 1.0  # Module E 100%
+      critical_path_threshold: 1.0  # 关键路径 100%
+    
+    static_analysis:
+      critical_vulnerabilities_threshold: 0
+      high_vulnerabilities_threshold: 0
+      medium_vulnerabilities_threshold: 5
+      code_smells_threshold: 10
+  
+  # 可观测性验收
+  observability_acceptance:
+    monitoring_coverage:
+      metrics_coverage: 1.0  # 100%
+      alert_rules_coverage: 1.0  # 100%
+      dashboard_completeness: 1.0  # 100%
+  
+  # 验收优先级
+  acceptance_priority:
+    p0:
+      - "合规性验收"
+      - "安全性验收"
+      failure_consequence: "系统无法上线"
+    
+    p1:
+      - "MoE 验收"
+      - "复利验收"
+      failure_consequence: "业务目标未达成"
+    
+      p2:
+        - "工程验收"
+        - "质量验收"
+        failure_consequence: "用户体验下降/维护成本增加"
+
+# 追溯与审计 (Traceability & Audit)
+traceability_and_audit:
+  # ADR 管理
+  adr_management:
+    location: "diting-doc/06_追溯与审计/ADR/"
+    template: "adr_template.md"
+    lifecycle:
+      - "Proposed"
+      - "Accepted"
+      - "Rejected"
+      - "Superseded"
+      - "Deprecated"
+    
+    adrs:
+      adr_001:
+        title: "采用 ${PROJECT_KEY} 动态命名"
+        status: "Accepted"
+        date: "2026-02-11"
+        traceability:
+          l1: "可追溯性"
+          l2: "技术栈与架构维度"
+          l3: "三位一体仓库规约"
+      
+      adr_002:
+        title: "采用 MoE (混合专家) 架构"
+        status: "Accepted"
+        date: "2026-02-11"
+        traceability:
+          l1: "不可能三角"
+          l2: "技术栈与架构维度"
+          l3: "核心公式与MoE架构规约"
+      
+      adr_003:
+        title: "采用 Spot ECS + 存算分离"
+        status: "Accepted"
+        date: "2026-02-11"
+        traceability:
+          l1: "成本控制"
+          l2: ["成本治理维度", "数据架构与分层存储维度"]
+          l3: "运营治理与灾备规约"
+      
+      adr_004:
+        title: "采用 Human-in-the-Loop (买入确认/止损自动) 模式"
+        status: "Accepted"
+        date: "2026-02-11"
+        traceability:
+          l1: "合规性"
+          l2: "安全与机密治理维度"
+          l3: "核心模块架构规约"
+      
+      adr_005:
+        title: "引入防御性复利模式"
+        status: "Accepted"
+        date: "2026-02-11"
+        traceability:
+          l1: "不可能三角"
+          l2: "技术栈与架构维度"
+          l3: "核心模块架构规约"
+  
+  # 审计日志体系
+  audit_logging:
+    decision_audit_logs:
+      retention: "permanent"
+      storage: ["PostgreSQL", "Git"]
+      immutability: true
+    
+    trade_audit_logs:
+      retention_days: 2555  # 7 年
+      storage: ["PostgreSQL", "OSS"]
+      immutability: true
+    
+    compliance_audit_logs:
+      retention_days: 2555  # 7 年
+      storage: ["PostgreSQL", "OSS"]
+      immutability: true
+    
+    config_change_logs:
+      retention: "permanent"
+      storage: ["Git", "etcd"]
+      immutability: true
+    
+    operation_audit_logs:
+      retention_days: 2555  # 7 年
+      storage: ["PostgreSQL", "OSS"]
+      immutability: true
+    
+    data_change_logs:
+      retention: "permanent"
+      storage: ["DVC", "OSS"]
+      immutability: true
+  
+  # 变更追踪
+  change_tracking:
+    change_types:
+      architecture_change:
+        traceability_required: true
+        approval_required: true
+        adr_required: true
+      
+      config_change:
+        traceability_required: true
+        approval_required: "conditional"  # 风控阈值需审批
+        version_control: true
+      
+      code_change:
+        traceability_required: true
+        approval_required: "code_review"
+        git_commit_required: true
+      
+      data_change:
+        traceability_required: true
+        approval_required: "conditional"  # Schema 变更需 ADR
+        version_control: true
+      
+      protocol_change:
+        traceability_required: true
+        approval_required: true
+        adr_required: true
+  
+  # 版本追溯
+  version_traceability:
+    components:
+      diting_core:
+        version_format: "v{Major}.{Minor}.{Patch}"
+        trace_to: ["Git Commit", "ADR", "Config Version", "Data Version"]
+      
+      diting_infra:
+        version_format: "v{Major}.{Minor}.{Patch}"
+        trace_to: ["Git Commit", "ADR", "Deploy Version"]
+      
+      diting_design:
+        version_format: "v{Major}.{Minor}.{Patch}"
+        trace_to: ["Git Commit", "ADR"]
+  
+  # 操作追溯
+  operation_traceability:
+    critical_operations:
+      execute_order:
+        audit_required: true
+        approval_required: "conditional"  # 买入/止盈需审批
+        trace_to_decision_id: true
+      
+      modify_risk_thresholds:
+        audit_required: true
+        approval_required: true
+        trace_to_adr: true
+      
+      modify_config:
+        audit_required: true
+        approval_required: "conditional"  # 风控阈值需审批
+        trace_to_config_version: true
+      
+      key_rotation:
+        audit_required: true
+        approval_required: true
+        trace_to_operation_log: true
+      
+      data_restore:
+        audit_required: true
+        approval_required: true
+        trace_to_backup_version: true
+  
+  # 数据追溯
+  data_traceability:
+    data_types:
+      ohlcv_data:
+        version_control: "DVC"
+        trace_to_decision: true
+        retention: "permanent"
+      
+      news_data:
+        version_control: "DVC"
+        trace_to_decision: true
+        retention_days: 365
+      
+      knowledge_graph:
+        version_control: "DVC"
+        trace_to_decision: true
+        retention: "permanent"
+      
+      decision_snapshots:
+        version_control: "DVC"
+        trace_to_all_versions: true
+        retention: "permanent"
+  
+  # 合规性审计
+  compliance_audit:
+    audit_items:
+      trading_channels:
+        check_content: "100% 交易通过合规通道"
+        frequency: "daily"
+        acceptance_criteria: "compliance_rate = 100%"
+      
+      programmatic_trading_report:
+        check_content: "报备文档完整、已授权"
+        frequency: "before_deployment"
+        acceptance_criteria: "authorization_status = Approved"
+      
+      high_frequency_cancellation:
+        check_content: "每秒撤单数 ≤ 5 笔"
+        frequency: "realtime"
+        acceptance_criteria: "violation_count = 0"
+      
+      simulated_clicking:
+        check_content: "代码审计 + 运行时检测"
+        frequency: "per_deployment"
+        acceptance_criteria: "detection_result = none"
+      
+      data_encryption:
+        check_content: "敏感数据加密率 = 100%"
+        frequency: "per_storage"
+        acceptance_criteria: "encryption_rate = 100%"
+      
+      access_control:
+        check_content: "关键操作权限验证 = 100%"
+        frequency: "per_operation"
+        acceptance_criteria: "protection_rate = 100%"
+      
+      audit_logging:
+        check_content: "审计日志覆盖率 = 100%"
+        frequency: "daily"
+        acceptance_criteria: "coverage = 100%"
+  
+  # 一致性检查
+  consistency_check:
+    hierarchy_consistency:
+      enabled: true
+      checks:
+        - "L1 → L2 一致性"
+        - "L2 → L3 一致性"
+        - "L3 → L4 一致性"
+        - "L4 → L5 一致性"
+      frequency: "weekly"
+    
+    terminology_consistency:
+      enabled: true
+      checks:
+        - "术语定义一致性"
+        - "术语使用一致性"
+      frequency: "weekly"
+    
+    config_consistency:
+      enabled: true
+      checks:
+        - "配置值一致性"
+        - "配置版本一致性"
+      frequency: "daily"
+  
+  # 审计报告生成
+  audit_reporting:
+    monthly_report:
+      enabled: true
+      generation_date: "每月最后一天"
+      includes:
+        - "ADR 审计"
+        - "合规性审计"
+        - "追溯矩阵审计"
+        - "一致性检查"
+    
+    ad_hoc_report:
+      enabled: true
+      trigger_conditions:
+        - "重大变更后"
+        - "合规性违规后"
+        - "追溯链路断裂后"

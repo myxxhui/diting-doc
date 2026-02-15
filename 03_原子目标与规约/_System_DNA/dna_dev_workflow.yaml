@@ -1,0 +1,271 @@
+# 开发工作流阶段与模块映射
+# 说明：L4 执行顺序来源于本文件 workflow_stages；与 01_开发生命周期与实践流程规约、01_需求与产品范围 对齐。
+# 引用：03_原子目标与规约/开发与交付/01_开发生命周期与实践流程规约.md
+
+execution_order: ["s0_pre", "s0", "s1", "s1b", "s2", "s3", "s4"]
+
+workflow_stages:
+  - stage_id: "s0_pre"
+    name: "仓库与 L3 就绪"
+    l4_stage_dir: "Stage0_pre_仓库与L3就绪"
+    step_count: 1
+    delivery_scope: "三仓目录符合 02_三位一体；diting-core 含最小 Makefile（test 可为占位）"
+    env_stage: "local"
+    entry_criteria: "L3 规约与 DNA 已定稿"
+    exit_criteria: "三仓存在且目录与 global_const.trinity_repos 一致；diting-core 可执行 make test（占位通过）"
+    test_focus: "bootstrap"
+    deploy_action: "none"
+    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s0_pre"
+    l5_stage_anchor: "l5-stage-s0_pre"
+    work_dir:
+      type: "parent_path"
+      repo_ref: null
+      description: "新建仓库的父路径（global_const.trinity_repos.parent_path_default）"
+    verification_commands:
+      - cmd: "make -C diting-core test"
+        cwd_ref: "parent_path"
+        expected_exit: 0
+        expected_outcome: "退出码 0（占位通过）"
+        failure_hint: "检查 diting-core 目录与 Makefile 是否存在；占位 test 目标是否可执行"
+    on_failure:
+      retry_max: 3
+      rollback_to: "previous_stage_last_step"
+    five_d_steps: ["Design", "Drive"]
+    phase_steps:
+      - phase_id: "Phase0-Infra"
+        step_ids: ["01"]
+    consumes: ["L3 规约与 DNA 定稿"]
+    artifacts: ["diting-core 目录与 Makefile", "diting-infra 目录"]
+
+  - stage_id: "s0"
+    name: "本地骨架期"
+    l4_stage_dir: "Stage0_骨架期"
+    step_count: 1
+    delivery_scope: "核心接口、目录与占位实现"
+    env_stage: "local"
+    entry_criteria: "项目已具备 L3 规约与仓库结构（02_三位一体）"
+    exit_criteria: "核心接口存在且本地单测通过；目录与占位实现可运行"
+    test_focus: "unit"
+    deploy_action: "none"
+    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s0"
+    l5_stage_anchor: "l5-stage-s0"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core 代码仓"
+    verification_commands:
+      - cmd: "make test"
+        cwd_ref: "repo_i"
+        expected_exit: 0
+        expected_outcome: "退出码 0；本地单测全绿"
+        failure_hint: "运行单测定位失败用例；对照 03_ 架构与占位实现"
+    on_failure:
+      retry_max: 3
+      rollback_to: "previous_stage_last_step"
+    five_d_steps: ["Design", "Drive"]
+    phase_steps: []
+    consumes: ["Stage0_pre 准出"]
+    artifacts: ["核心接口与占位实现", "本地单测通过"]
+
+  - stage_id: "s1"
+    name: "逻辑填充期"
+    l4_stage_dir: "Stage1_逻辑填充期"
+    step_count: 2
+    delivery_scope: "Module A/B 骨架 + D 判官最小闭环 + E 占位"
+    env_stage: "local"
+    entry_criteria: "阶段 s0 准出"
+    exit_criteria: "业务逻辑按 L3 与 5D 填充完毕；本地单测 + 必要集成测试通过"
+    test_focus: "unit,integration"
+    deploy_action: "none"
+    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s1"
+    l5_stage_anchor: "l5-stage-s1"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core 代码仓"
+    verification_commands:
+      - cmd: "make test"
+        cwd_ref: "repo_i"
+        expected_exit: 0
+        expected_outcome: "退出码 0；单测+必要集成全绿"
+        failure_hint: "运行单测或集成定位失败用例；对照 Phase1 01_～04_ 或最小任务补全"
+    on_failure:
+      retry_max: 3
+      rollback_to: "previous_stage_last_step"
+    five_d_steps: ["Decompose", "Drive", "Defense"]
+    phase_steps:
+      - phase_id: "Phase1-xxx"
+        step_ids: ["01", "02", "03", "04"]
+    recommended_models:
+      design: "待项目选定"
+      code: "待项目选定"
+      defense: "待项目选定"
+    definition_of_ready: "Stage s0 准出；L3 与 product_scope 已读；diting-core 可运行 make test"
+    consumes: ["Stage s0 准出"]
+    artifacts: ["Module A/B 骨架与 D/E 占位", "单测与集成测试通过"]
+
+  - stage_id: "s1b"
+    name: "Mock 数据验证准出"
+    l4_stage_dir: "Stage1b_Mock数据验证准出"
+    step_count: 1
+    delivery_scope: "核心路径在 MockBroker/MockBrain 下跑通"
+    env_stage: "local"
+    entry_criteria: "阶段 s1 核心链路已实现、可被 Mock 驱动"
+    exit_criteria: "Table-Driven Tests 及约定集成测试通过；无真实券商/LLM 调用"
+    test_focus: "integration_mock"
+    deploy_action: "none"
+    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s1b"
+    l5_stage_anchor: "l5-stage-s1b"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core 代码仓"
+    verification_commands:
+      - cmd: "make test"
+        cwd_ref: "repo_i"
+        expected_exit: 0
+        expected_outcome: "Mock 路径跑通；Table-Driven Tests 通过"
+        failure_hint: "确认 MockBroker/MockBrain 已接入；无真实券商/LLM 调用"
+    on_failure:
+      retry_max: 3
+      rollback_to: "previous_stage_last_step"
+    five_d_steps: ["Drive", "Defense"]
+    phase_steps:
+      - phase_id: "Phase1-xxx"
+        step_ids: ["01", "02", "03", "04"]
+    consumes: ["Stage s1 准出"]
+    artifacts: ["Mock 路径跑通", "Table-Driven Tests 通过"]
+
+  - stage_id: "s2"
+    name: "Docker 统一环境期"
+    l4_stage_dir: "Stage2_Docker统一环境期"
+    step_count: 2
+    delivery_scope: "全链路在容器内可测；Module C/F 可在此阶段接入"
+    env_stage: "docker"
+    entry_criteria: "阶段 s1 或 s1b 准出"
+    exit_criteria: "make build、make test-docker 通过；开发与测试均在容器内完成"
+    test_focus: "docker"
+    deploy_action: "build_image"
+    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s2"
+    l5_stage_anchor: "l5-stage-s2"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core；可选 diting-infra"
+    verification_commands:
+      - cmd: "make build"
+        cwd_ref: "repo_i"
+        expected_exit: 0
+        expected_outcome: "镜像构建成功"
+        failure_hint: "检查 Dockerfile 与 make 目标"
+      - cmd: "make test-docker"
+        cwd_ref: "repo_i"
+        expected_exit: 0
+        expected_outcome: "容器内测试通过"
+        failure_hint: "检查镜像与 test-docker 目标"
+    on_failure:
+      retry_max: 3
+      rollback_to: "previous_stage_last_step"
+    five_d_steps: ["Design", "Decompose"]
+    phase_steps:
+      - phase_id: "Phase2-xxx"
+        step_ids: ["01", "02", "03"]
+    consumes: ["Stage s1 或 s1b 准出"]
+    artifacts: ["make build / test-docker 通过", "镜像可构建"]
+
+  - stage_id: "s3"
+    name: "K3s 测试开发期"
+    l4_stage_dir: "Stage3_K3s测试开发期"
+    step_count: 2
+    delivery_scope: "编排、Secret、网络与生产一致（非生产命名空间）"
+    env_stage: "k3s_dev"
+    entry_criteria: "阶段 s2 准出"
+    exit_criteria: "deploy-engine Up 成功；KubeConfig 可用 / Helm release 存在"
+    test_focus: "k3s_e2e"
+    deploy_action: "deploy_k3s_dev"
+    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s3"
+    l5_stage_anchor: "l5-stage-s3"
+    work_dir:
+      type: "repo_a"
+      repo_ref: "repo_a"
+      description: "diting-infra、deploy-engine"
+    verification_commands:
+      - cmd: "deploy-engine Up 或等价调用"
+        cwd_ref: "repo_a"
+        expected_exit: 0
+        expected_outcome: "deploy-engine Up 成功；Helm release 存在"
+        failure_hint: "确认 deploy-engine 版本与 diting-infra 配置兼容；KubeConfig 可用"
+    on_failure:
+      retry_max: 3
+      rollback_to: "previous_stage_last_step"
+    five_d_steps: ["Design", "Decompose"]
+    phase_steps:
+      - phase_id: "Phase2-xxx"
+        step_ids: ["01", "02", "03"]
+    consumes: ["Stage s2 准出", "diting-infra 已存在"]
+    artifacts: ["deploy-engine Up", "Helm release 存在"]
+
+  - stage_id: "s4"
+    name: "与流水线衔接"
+    l4_stage_dir: "Stage4_与流水线衔接"
+    step_count: 1
+    delivery_scope: "满足三级流水线 Level 1 入口要求"
+    env_stage: "k3s_dev"
+    entry_criteria: "阶段 s3 准出"
+    exit_criteria: "代码/镜像满足 Level 1 入口（Table-Driven Tests、边界覆盖）；可进入 merge develop / tag 流程"
+    test_focus: "k3s_e2e"
+    deploy_action: "none"
+    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s4"
+    l5_stage_anchor: "l5-stage-s4"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core、diting-infra"
+    verification_commands:
+      - cmd: "Level 1 验收表逐条确认"
+        cwd_ref: "repo_i"
+        expected_exit: null
+        expected_outcome: "满足 Level 1 入口；可进入 merge develop / tag"
+        failure_hint: "对照 03_ 流水线 Level 1 验收；补全 Table-Driven Tests、边界覆盖"
+    on_failure:
+      retry_max: 3
+      rollback_to: "previous_stage_last_step"
+    five_d_steps: ["Defense"]
+    phase_steps:
+      - phase_id: "Phase3-xxx"
+        step_ids: ["01", "02", "03", "04"]
+    consumes: ["Stage s3 准出"]
+    artifacts: ["Level 1 入口满足", "可进入 merge develop / tag"]
+
+# Module A–F 与 workflow_stages 的映射（首次交付阶段 / 首次 Docker 或 K3s 验证阶段）
+module_to_stages:
+  module_a:
+    name: "Module A 语义分类器"
+    first_delivery_stage: "s1"
+    first_docker_stage: "s2"
+    first_k3s_stage: "s3"
+  module_b:
+    name: "Module B 量化扫描引擎"
+    first_delivery_stage: "s1"
+    first_docker_stage: "s2"
+    first_k3s_stage: "s3"
+  module_c:
+    name: "Module C MoE 议会"
+    first_delivery_stage: "s1"
+    first_docker_stage: "s2"
+    first_k3s_stage: "s3"
+  module_d:
+    name: "Module D 判官"
+    first_delivery_stage: "s1"
+    first_docker_stage: "s2"
+    first_k3s_stage: "s3"
+  module_e:
+    name: "Module E 风控盾"
+    first_delivery_stage: "s1"
+    first_docker_stage: "s2"
+    first_k3s_stage: "s3"
+  module_f:
+    name: "Module F 执行网关"
+    first_delivery_stage: "s1"
+    first_docker_stage: "s2"
+    first_k3s_stage: "s3"

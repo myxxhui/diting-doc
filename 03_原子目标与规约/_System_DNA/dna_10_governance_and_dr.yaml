@@ -1,0 +1,16 @@
+# DNA 映射文件：10_运营治理与灾备规约.md
+# 说明：索引 `_System_DNA/global_const.yaml` 中运营、治理与灾备配置。
+
+governance_and_dr:
+  compliance:
+    $ref: "global_const.yaml#governance_and_dr.compliance"
+  disaster_recovery:
+    $ref: "global_const.yaml#governance_and_dr.disaster_recovery"
+  backup_strategy:
+    $ref: "global_const.yaml#governance_and_dr.disaster_recovery.backup_strategy"
+  bcp:
+    $ref: "global_const.yaml#governance_and_dr.disaster_recovery.bcp"
+  drills:
+    $ref: "global_const.yaml#governance_and_dr.disaster_recovery.drills"
+  operations_monitoring:
+    $ref: "global_const.yaml#governance_and_dr.operations_monitoring"

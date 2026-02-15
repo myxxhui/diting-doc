@@ -1,0 +1,12 @@
+# DNA 映射文件：04_全链路通信协议矩阵.md
+# 说明：索引 `_System_DNA/global_const.yaml` 中通信协议矩阵配置。
+
+protocols:
+  expert_protocol:
+    $ref: "global_const.yaml#protocols.expert_protocol"
+  verdict_protocol:
+    $ref: "global_const.yaml#protocols.verdict_protocol"
+  execution_protocol:
+    $ref: "global_const.yaml#protocols.execution_protocol"
+  risk_protocol:
+    $ref: "global_const.yaml#protocols.risk_protocol"
