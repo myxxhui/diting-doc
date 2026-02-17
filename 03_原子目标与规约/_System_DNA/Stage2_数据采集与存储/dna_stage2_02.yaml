@@ -1,0 +1,14 @@
+# Stage2-02 采集逻辑与 Dockerfile
+stage_id: "stage2_02"
+name: "采集逻辑与Dockerfile"
+design_doc: "03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage2_数据采集与存储/02_采集逻辑与Dockerfile.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "OHLCV/新闻/行业 全结构；Dockerfile；前期可少存数据"
+exit_criteria: "采集逻辑实现；make ingest-test 或等价可运行"
+l5_stage_anchor: "l5-stage-stage2_02"
+consumes: ["Stage2-01 准出"]
+artifacts: ["采集任务", "Dockerfile"]

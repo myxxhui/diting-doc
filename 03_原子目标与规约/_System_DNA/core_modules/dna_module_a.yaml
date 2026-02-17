@@ -1,0 +1,17 @@
+# DNA：Module A 语义分类器
+# 引用：09_核心模块架构规约.md
+# L4 步骤引用：Phase1 按模块实践 01_ModuleA
+
+module_a_semantic_classifier:
+  purpose: "语义分类器：不做预测，只做分类"
+  input:
+    - "标的代码"
+    - "申万行业分类"
+    - "营收占比数据"
+  output:
+    - "Domain Tag (AGRI/TECH/GEO/UNKNOWN)"
+    - "置信度分数 (0.0-1.0)"
+  classification_rules:
+    agri: "申万行业=农林牧渔 或 营收占比>50%"
+    tech: "申万行业=电子/计算机/通信 或 研发投入>10%"
+    geo: "申万行业=有色金属/石油石化 或 大宗商品营收>50%"

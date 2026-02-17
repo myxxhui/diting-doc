@@ -1,0 +1,29 @@
+# DNA：Module B 量化扫描引擎
+# 引用：09_核心模块架构规约.md
+# L4 步骤引用：Phase1 按模块实践 02_ModuleB
+
+module_b_quant_engine:
+  purpose: "左脑 - 量化扫描引擎：机会丰度"
+  strategy_pools:
+    pool_1_trend:
+      name: "趋势策略"
+      conditions:
+        - "均线多头排列：MA5 > MA10 > MA20 > MA60"
+        - "MACD 水上金叉：MACD > 0 且 DIF > DEA"
+      score_range: [0, 100]
+    pool_2_reversion:
+      name: "反转策略"
+      conditions:
+        - "RSI < 20（超卖）"
+        - "价格触及 Bollinger 下轨支撑"
+      score_range: [0, 100]
+    pool_3_breakout:
+      name: "突破策略"
+      conditions:
+        - "价格突破 20 日高点"
+        - "成交量 > 2x 均量"
+      score_range: [0, 100]
+  scanner:
+    universe_size: 5000
+    technical_score_threshold: 70
+    sector_strength_threshold: 1.1

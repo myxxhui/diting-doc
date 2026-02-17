@@ -1,0 +1,19 @@
+# Stage1-02 核心接口与 Proto 占位
+stage_id: "stage1_02"
+name: "核心接口与Proto占位"
+design_doc: "03_原子目标与规约/Stage1_仓库与骨架/02_核心接口与Proto设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage1_仓库与骨架/02_核心接口与Proto占位.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core 代码仓"
+delivery_scope: "核心接口、Proto 占位与目录占位实现"
+exit_criteria: "核心接口存在且本地单测通过；目录与占位实现可运行"
+verification_commands:
+  - cmd: "make test"
+    cwd_ref: "repo_i"
+    expected_exit: 0
+    expected_outcome: "退出码 0；单测全绿"
+l5_stage_anchor: "l5-stage-stage1_02"
+consumes: ["Stage1-01 准出"]
+artifacts: ["核心接口与占位实现", "本地单测通过"]

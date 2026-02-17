@@ -58,6 +58,8 @@ trinity_repos:
     deploy_engine_version: ">= 0.1.0" # 可选，PATH 方式时约定最低版本
     config_schema: "deploy-engine/pkg/config/spec.go DeploymentConfig" # 配置须符合此契约
     chart_path: "charts/" # 或 helm/
+    schema_init_job: true  # 基础组件 Chart 的 init Job 执行建表
+    sealed_secrets: true  # 密钥通过 Sealed-Secrets 注入
     env_config_path: "config/environments/{env}/deploy.json" # 环境配置路径模板
     secrets:
       current: "sealed_secrets"
@@ -65,7 +67,7 @@ trinity_repos:
     principles:
       - "仅提供 Chart 与 config，不实现 Terraform/Helm 执行逻辑"
       - "部署通过调用 deploy-engine 完成"
-  used_by_l4_stages: ["s0_pre", "s0", "s3", "s4"]
+  used_by_l4_stages: ["stage1_01", "stage1_02", "stage1_03", "stage2_01", "stage2_05"]
 
 # 环境定义
 environments:
@@ -125,6 +127,47 @@ product_scope:
           l5_anchor: null
           l5_acceptance_criterion: "工程：三仓目录符合 02_三位一体规约；diting-core 含 Makefile 且 make test 可运行（可为占位）"
           verification_method: "目录存在性、make test 占位"
+    - id: "Phase0-DataIngestion"
+      goal: "数据采集与输入层：真实数据可写入 L1/L2 且可被 Module A/B/C 消费"
+      lifecycle_stage: "s0_data（数据采集）"
+      modules: "采集任务、L1 TimescaleDB、L2 知识库写入"
+      steps:
+        - step_id: "01"
+          l4_doc_name: "01_数据采集与输入层实现与验证"
+          delivery_scope: "采集任务实现；OHLCV/行业/营收/新闻可写入 L1/L2；验证真实数据可被消费"
+          exit_criteria: "make ingest-test 或 DNA 约定命令通过；MarketDataFeed 可读取 L1"
+          l5_anchor: "l5-func-00"
+          l5_acceptance_criterion: "真实数据可写入 L1/L2 且可被 Module A/B/C 消费"
+          verification_method: "make ingest-test 或 DNA 约定命令；写入与读取验证"
+    - id: "Phase1-按模块实践"
+      goal: "按模块四项 100% 验证：接口、结构、逻辑功能（配置驱动+真实数据）、代码测试"
+      lifecycle_stage: "阶段 1 + 1b；依赖 s0_data 准出"
+      modules: "Module A～F 每模块独立实践"
+      steps:
+        - step_id: "01"
+          l4_doc_name: "01_ModuleA"
+          delivery_scope: "Module A 语义分类器，四项 100%，单模块+联动+全链路验证"
+          l5_anchor: "l5-mod-A"
+        - step_id: "02"
+          l4_doc_name: "02_ModuleB"
+          delivery_scope: "Module B 量化扫描引擎，四项 100%"
+          l5_anchor: "l5-mod-B"
+        - step_id: "03"
+          l4_doc_name: "03_ModuleC"
+          delivery_scope: "Module C MoE 议会，四项 100%"
+          l5_anchor: "l5-mod-C"
+        - step_id: "04"
+          l4_doc_name: "04_ModuleD"
+          delivery_scope: "Module D 判官，四项 100%"
+          l5_anchor: "l5-mod-D"
+        - step_id: "05"
+          l4_doc_name: "05_ModuleE"
+          delivery_scope: "Module E 风控盾，四项 100%"
+          l5_anchor: "l5-mod-E"
+        - step_id: "06"
+          l4_doc_name: "06_ModuleF"
+          delivery_scope: "Module F 执行网关，四项 100%；全链路 A→F 验证"
+          l5_anchor: "l5-mod-F"
     - id: "Phase1-xxx"
       goal: "核心链路最小可跑通：量化信号 → 判官 → 风控占位"
       lifecycle_stage: "阶段 1 + 可选 1b（Mock）+ 阶段 2"
@@ -225,7 +268,7 @@ product_scope:
 # 成本治理（L2 07_成本治理维度 → L3 10_运营治理与灾备等）
 # 引用：02_战略维度/产品设计/07_成本治理维度.md；06/09/10 规约引用本子树
 cost_governance:
-  used_by_l4_stages: ["s1", "s3"]
+  used_by_l4_stages: ["stage3_01", "stage5_02", "stage5_03"]
   token_budget:
     max_token_per_decision: null  # 待项目设定；单决策最大 Token 预算
     technical_score_skip_below: 60   # 低于此分跳过 LLM 推理
@@ -238,6 +281,52 @@ cost_governance:
   cold_archive:
     retention_days: null  # 待项目设定；冷归档保留天数
     storage_tier: "oss_cold"  # OSS 冷归档，价格约为标准存储 1/10
+  # 按可部署单元区分 Scale-to-Zero（多服务部署时）
+  deployable_scale_to_zero:
+    ingestion: true    # 数据采集与存储：任务结束后可缩零
+    module_a: null     # 待项目设定；可为 true 按需扩缩
+    module_b: null
+    module_c: null
+    hot_path_def: false  # 热路径 D+E+F：常驻，不缩零
+
+# 可部署单元（方案 B：多服务；与 09_ 可部署单元清单一致）
+# 引用：03_原子目标与规约/_共享规约/09_核心模块架构规约.md
+deployable_units:
+  ingestion:
+    name: "数据采集与存储"
+    image_name: "diting-ingestion"  # 待项目确定 registry 前缀
+    dockerfile_path: "diting-core/docker/ingestion"  # 或项目约定路径
+    chart_path: "diting-infra/charts/ingestion"     # 或项目约定
+    scale_to_zero: true
+    workflow_stages: ["stage2_01", "stage2_02", "stage2_03", "stage2_04", "stage2_05"]
+  module_a:
+    name: "Module A 语义分类器"
+    image_name: "diting-module-a"
+    dockerfile_path: "diting-core/docker/module_a"
+    chart_path: "diting-infra/charts/module_a"
+    scale_to_zero: null  # 见 cost_governance.deployable_scale_to_zero
+    workflow_stages: ["stage3_01"]
+  module_b:
+    name: "Module B 量化扫描引擎"
+    image_name: "diting-module-b"
+    dockerfile_path: "diting-core/docker/module_b"
+    chart_path: "diting-infra/charts/module_b"
+    scale_to_zero: null
+    workflow_stages: ["stage3_02"]
+  module_c:
+    name: "Module C MoE 议会"
+    image_name: "diting-module-c"
+    dockerfile_path: "diting-core/docker/module_c"
+    chart_path: "diting-infra/charts/module_c"
+    scale_to_zero: null
+    workflow_stages: ["stage3_03"]
+  hot_path_def:
+    name: "热路径 D+E+F（判官+风控+执行）"
+    image_name: "diting-hot-path"
+    dockerfile_path: "diting-core/docker/hot_path"  # 单镜像单进程
+    chart_path: "diting-infra/charts/hot_path"
+    scale_to_zero: false
+    workflow_stages: ["stage3_04", "stage3_05", "stage3_06"]  # 实现阶段；构建/部署可合并
 
 # 数据架构与分层存储（L2 03_数据架构与分层存储维度 → L3 07_数据版本控制等）
 # 引用：02_战略维度/产品设计/03_数据架构与分层存储维度.md
@@ -269,6 +358,44 @@ data_architecture:
   data_firewall:
     great_expectations_rules_path: null  # 待项目设定；GE 规则路径或引用
 
+# 数据采集与输入层（L3 11_数据采集与输入层规约）
+# 引用：03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md
+data_ingestion:
+  used_by_l4_stages: ["stage2_01", "stage2_02", "stage2_03", "stage2_04", "stage2_05"]
+  data_sources:
+    ohlcv:
+      purpose: "Module B 量化扫描"
+      target: "L1 TimescaleDB"
+      api_options: ["Tushare", "Wind", "自建"]  # 待项目选定
+      schedule: "daily"  # 或 minute_level
+      timeout_minutes: 30
+    industry_revenue:
+      purpose: "Module A 语义分类"
+      target: "L1 或 Redis 缓存"
+      api_options: ["Wind", "Tushare"]
+      schedule: "daily"
+      timeout_minutes: 15
+    news:
+      purpose: "Module C 专家推理、知识库"
+      target: "L2 知识库 + L3 冷归档"
+      schedule: "hourly"
+      timeout_minutes: 60
+  tasks:
+    ingest_ohlcv:
+      data_source: "ohlcv"
+      write_target: "timescaledb"
+    ingest_industry_revenue:
+      data_source: "industry_revenue"
+      write_target: "redis_or_table"
+    ingest_news:
+      data_source: "news"
+      write_target: "knowledge_bases"
+  verification_commands:
+    - cmd: "make ingest-test"
+      cwd_ref: "repo_i"
+      expected_exit: 0
+      description: "采集任务可执行且写入可被读取"
+
 # 战略维度与 DNA 映射（主责 L3 见 06_追溯与审计/00_L2_L3_DNA_映射.md）
 strategic_dimensions:
   dim_00_product_design:
@@ -280,7 +407,7 @@ strategic_dimensions:
   dim_01_tech_and_arch:
     doc: "02_战略维度/产品设计/02_技术栈与架构维度.md"
     primary_l3_docs:
-      - "03_原子目标与规约/01_核心公式与MoE架构规约.md"
+      - "03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md"
     dna_nodes:
       - "tech_stack"
       - "trinity_repos"
@@ -289,7 +416,7 @@ strategic_dimensions:
   dim_02_data_arch_and_storage:
     doc: "02_战略维度/产品设计/03_数据架构与分层存储维度.md"
     primary_l3_docs:
-      - "03_原子目标与规约/07_数据版本控制规约.md"
+      - "03_原子目标与规约/_共享规约/07_数据版本控制规约.md"
     dna_nodes:
       - "data_version_control"
       - "data_architecture"
@@ -298,7 +425,7 @@ strategic_dimensions:
   dim_03_production_and_observability:
     doc: "02_战略维度/产品设计/04_生产保障与可观测性维度.md"
     primary_l3_docs:
-      - "03_原子目标与规约/08_心跳协议与健康检查规约.md"
+      - "03_原子目标与规约/_共享规约/08_心跳协议与健康检查规约.md"
     dna_nodes:
       - "production_requirements.observability"
       - "heartbeat_protocol"
@@ -306,7 +433,7 @@ strategic_dimensions:
   dim_04_security_and_secrets:
     doc: "02_战略维度/产品设计/05_安全与机密治理维度.md"
     primary_l3_docs:
-      - "03_原子目标与规约/10_运营治理与灾备规约.md"
+      - "03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md"
     dna_nodes:
       - "governance_and_dr.compliance"
       - "success_markers.security_acceptance"
@@ -314,7 +441,7 @@ strategic_dimensions:
   dim_05_research_production_isomorphism:
     doc: "02_战略维度/产品设计/06_研产同构维度.md"
     primary_l3_docs:
-      - "03_原子目标与规约/05_接口抽象层规约.md"
+      - "03_原子目标与规约/_共享规约/05_接口抽象层规约.md"
     dna_nodes:
       - "architecture_consensus.gitflow"
       - "data_version_control"
@@ -323,7 +450,7 @@ strategic_dimensions:
   dim_06_cost_governance:
     doc: "02_战略维度/产品设计/07_成本治理维度.md"
     primary_l3_docs:
-      - "03_原子目标与规约/10_运营治理与灾备规约.md"
+      - "03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md"
     dna_nodes:
       - "cost_governance"
       - "governance_and_dr.disaster_recovery"
@@ -331,7 +458,7 @@ strategic_dimensions:
   dim_07_broker_decoupling_and_redundancy:
     doc: "02_战略维度/产品设计/08_经纪商解耦与冗余维度.md"
     primary_l3_docs:
-      - "03_原子目标与规约/05_接口抽象层规约.md"
+      - "03_原子目标与规约/_共享规约/05_接口抽象层规约.md"
     dna_nodes:
       - "abstraction_layer.broker_driver"
       - "core_modules.module_f_execution_gateway"
@@ -540,7 +667,7 @@ heartbeat_protocol:
 
 # 核心模块架构（Module A-F）
 core_modules:
-  used_by_l4_stages: ["s1", "s1b", "s2", "s3", "s4"]
+  used_by_l4_stages: ["stage3_01", "stage3_02", "stage3_03", "stage3_04", "stage3_05", "stage3_06", "stage3_07", "stage4_01", "stage4_02", "stage4_03", "stage5_01"]
   module_a_semantic_classifier:
     purpose: "语义分类器：不做预测，只做分类"
     input:

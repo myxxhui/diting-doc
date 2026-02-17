@@ -1,0 +1,16 @@
+# Stage3-06 Module F 执行网关
+# 语义详见 _System_DNA/core_modules/dna_module_f.yaml
+stage_id: "stage3_06"
+name: "Module F 执行网关"
+design_doc: "03_原子目标与规约/Stage3_模块实践/06_ModuleF设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage3_模块实践/06_ModuleF.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "Module F 四项 100%；全链路 A→F 验证"
+exit_criteria: "Module F 实现；全链路 A→F 可跑通"
+l5_stage_anchor: "l5-mod-F"
+consumes: ["Stage3-05 准出"]
+artifacts: ["Module F 实现"]
+semantic_ref: "03_原子目标与规约/_System_DNA/core_modules/dna_module_f.yaml"

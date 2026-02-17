@@ -1,22 +1,51 @@
-# 开发工作流阶段与模块映射
+# 开发工作流阶段与模块映射（单轨 Stage1～5）
 # 说明：L4 执行顺序来源于本文件 workflow_stages；与 01_开发生命周期与实践流程规约、01_需求与产品范围 对齐。
 # 引用：03_原子目标与规约/开发与交付/01_开发生命周期与实践流程规约.md
+# 2026-02 重构：双轨（00_交付流程步骤 + Phase）合并为单轨 Stage1～5
 
-execution_order: ["s0_pre", "s0", "s1", "s1b", "s2", "s3", "s4"]
+execution_order:
+  - stage1_01
+  - stage1_02
+  - stage1_03
+  - stage1_04
+  - stage2_01
+  - stage2_02
+  - stage2_03
+  - stage2_04
+  - stage2_05
+  - stage3_01
+  - stage3_02
+  - stage3_03
+  - stage3_04
+  - stage3_05
+  - stage3_06
+  - stage3_07
+  - stage4_01
+  - stage4_02
+  - stage4_03
+  - stage5_01
+  - stage5_02
+  - stage5_03
+  - stage5_04
 
 workflow_stages:
-  - stage_id: "s0_pre"
-    name: "仓库与 L3 就绪"
-    l4_stage_dir: "Stage0_pre_仓库与L3就绪"
+  # ----- Stage1 仓库与骨架 -----
+  - stage_id: "stage1_01"
+    name: "三位一体仓库初始化"
+    l4_stage_dir: "Stage1_仓库与骨架"
+    l4_step_doc: "01_三位一体仓库初始化.md"
+    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/01_三位一体仓库设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/dna_stage1_01.yaml"
     step_count: 1
-    delivery_scope: "三仓目录符合 02_三位一体；diting-core 含最小 Makefile（test 可为占位）"
+    delivery_scope: "三仓目录符合 02_三位一体；diting-core 含 Makefile（test 可为占位）；diting-infra 初始化"
     env_stage: "local"
+    env_minimal_full: "Minimal"
     entry_criteria: "L3 规约与 DNA 已定稿"
-    exit_criteria: "三仓存在且目录与 global_const.trinity_repos 一致；diting-core 可执行 make test（占位通过）"
+    exit_criteria: "三仓存在且目录与 global_const.trinity_repos 一致；diting-core make test 占位通过"
     test_focus: "bootstrap"
     deploy_action: "none"
-    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s0_pre"
-    l5_stage_anchor: "l5-stage-s0_pre"
+    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-stage1_01"
+    l5_stage_anchor: "l5-stage-stage1_01"
     work_dir:
       type: "parent_path"
       repo_ref: null
@@ -26,246 +55,471 @@ workflow_stages:
         cwd_ref: "parent_path"
         expected_exit: 0
         expected_outcome: "退出码 0（占位通过）"
-        failure_hint: "检查 diting-core 目录与 Makefile 是否存在；占位 test 目标是否可执行"
+        failure_hint: "检查 diting-core 目录与 Makefile 是否存在"
     on_failure:
       retry_max: 3
       rollback_to: "previous_stage_last_step"
     five_d_steps: ["Design", "Drive"]
-    phase_steps:
-      - phase_id: "Phase0-Infra"
-        step_ids: ["01"]
     consumes: ["L3 规约与 DNA 定稿"]
     artifacts: ["diting-core 目录与 Makefile", "diting-infra 目录"]
 
-  - stage_id: "s0"
-    name: "本地骨架期"
-    l4_stage_dir: "Stage0_骨架期"
-    step_count: 1
-    delivery_scope: "核心接口、目录与占位实现"
+  - stage_id: "stage1_02"
+    name: "核心接口与Proto占位"
+    l4_stage_dir: "Stage1_仓库与骨架"
+    l4_step_doc: "02_核心接口与Proto占位.md"
+    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/02_核心接口与Proto设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/dna_stage1_02.yaml"
+    delivery_scope: "核心接口、Proto 占位与目录占位实现"
     env_stage: "local"
-    entry_criteria: "项目已具备 L3 规约与仓库结构（02_三位一体）"
+    entry_criteria: "Stage1-01 准出"
     exit_criteria: "核心接口存在且本地单测通过；目录与占位实现可运行"
     test_focus: "unit"
-    deploy_action: "none"
-    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s0"
-    l5_stage_anchor: "l5-stage-s0"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
-      description: "diting-core 代码仓"
+      description: "diting-core"
     verification_commands:
       - cmd: "make test"
         cwd_ref: "repo_i"
         expected_exit: 0
-        expected_outcome: "退出码 0；本地单测全绿"
-        failure_hint: "运行单测定位失败用例；对照 03_ 架构与占位实现"
-    on_failure:
-      retry_max: 3
-      rollback_to: "previous_stage_last_step"
-    five_d_steps: ["Design", "Drive"]
-    phase_steps: []
-    consumes: ["Stage0_pre 准出"]
+        expected_outcome: "退出码 0；单测全绿"
+    l5_stage_anchor: "l5-stage-stage1_02"
+    consumes: ["Stage1-01 准出"]
     artifacts: ["核心接口与占位实现", "本地单测通过"]
 
-  - stage_id: "s1"
-    name: "逻辑填充期"
-    l4_stage_dir: "Stage1_逻辑填充期"
-    step_count: 2
-    delivery_scope: "Module A/B 骨架 + D 判官最小闭环 + E 占位"
+  - stage_id: "stage1_03"
+    name: "基础设施 ECS 与 K3s 就绪"
+    l4_stage_dir: "Stage1_仓库与骨架"
+    l4_step_doc: "03_基础设施ECS与K3s就绪.md"
+    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/03_基础设施ECS与K3s设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/dna_stage1_03.yaml"
+    delivery_scope: "deploy-engine 引用与单一 YAML config 就绪；Up 产出 ECS+K3s；验证后 Down 回收"
     env_stage: "local"
-    entry_criteria: "阶段 s0 准出"
-    exit_criteria: "业务逻辑按 L3 与 5D 填充完毕；本地单测 + 必要集成测试通过"
-    test_focus: "unit,integration"
-    deploy_action: "none"
-    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s1"
-    l5_stage_anchor: "l5-stage-s1"
+    entry_criteria: "Stage1-02 准出"
+    exit_criteria: "Up 成功、KubeConfig 可用、验证通过；准出前已执行 Down 回收"
     work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core 代码仓"
+      type: "repo_a"
+      repo_ref: "repo_a"
+      description: "diting-infra"
     verification_commands:
-      - cmd: "make test"
-        cwd_ref: "repo_i"
+      - cmd: "deploy-engine Up（或 make deploy）；KUBECONFIG 指向产出；kubectl get nodes 成功"
+        cwd_ref: "repo_a"
         expected_exit: 0
-        expected_outcome: "退出码 0；单测+必要集成全绿"
-        failure_hint: "运行单测或集成定位失败用例；对照 Phase1 01_～04_ 或最小任务补全"
+        expected_outcome: "集群可用"
+      - cmd: "deploy-engine Down（或 make down）；确认资源释放"
+        cwd_ref: "repo_a"
+        expected_exit: 0
+        expected_outcome: "竞价 ECS 等资源已回收"
+    l5_stage_anchor: "l5-stage-stage1_03"
+    consumes: ["Stage1-02 准出"]
+    artifacts: ["K3s 集群可用（验证后已回收）"]
     on_failure:
       retry_max: 3
-      rollback_to: "previous_stage_last_step"
-    five_d_steps: ["Decompose", "Drive", "Defense"]
-    phase_steps:
-      - phase_id: "Phase1-xxx"
-        step_ids: ["01", "02", "03", "04"]
-    recommended_models:
-      design: "待项目选定"
-      code: "待项目选定"
-      defense: "待项目选定"
-    definition_of_ready: "Stage s0 准出；L3 与 product_scope 已读；diting-core 可运行 make test"
-    consumes: ["Stage s0 准出"]
-    artifacts: ["Module A/B 骨架与 D/E 占位", "单测与集成测试通过"]
+      rollback_to: "执行 Down 回收后回退到上一阶段最后一步"
 
-  - stage_id: "s1b"
-    name: "Mock 数据验证准出"
-    l4_stage_dir: "Stage1b_Mock数据验证准出"
-    step_count: 1
-    delivery_scope: "核心路径在 MockBroker/MockBrain 下跑通"
+  - stage_id: "stage1_04"
+    name: "密钥与配置模板就绪"
+    l4_stage_dir: "Stage1_仓库与骨架"
+    l4_step_doc: "04_密钥与配置模板就绪.md"
+    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/04_密钥与配置模板设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/dna_stage1_04.yaml"
+    delivery_scope: "Sealed-Secrets 模板或说明；.env.template 双仓占位；config 单一 YAML 模板可用"
     env_stage: "local"
-    entry_criteria: "阶段 s1 核心链路已实现、可被 Mock 驱动"
-    exit_criteria: "Table-Driven Tests 及约定集成测试通过；无真实券商/LLM 调用"
-    test_focus: "integration_mock"
-    deploy_action: "none"
-    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s1b"
-    l5_stage_anchor: "l5-stage-s1b"
+    entry_criteria: "Stage1-03 准出"
+    exit_criteria: "secrets/ 含 Sealed-Secrets 模板或说明；config 模板可用；三项验证通过"
+    work_dir:
+      type: "repo_a"
+      repo_ref: "repo_a"
+      description: "diting-infra"
+    l5_stage_anchor: "l5-stage-stage1_04"
+    consumes: ["Stage1-03 准出"]
+    artifacts: ["Sealed-Secrets 模板", "config 模板", ".env.template 双仓"]
+
+  # ----- Stage2 数据采集与存储 -----
+  - stage_id: "stage2_01"
+    name: "基础设施与依赖部署"
+    l4_stage_dir: "Stage2_数据采集与存储"
+    l4_step_doc: "01_基础设施与依赖部署.md"
+    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/01_基础设施与依赖设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/dna_stage2_01.yaml"
+    delivery_scope: "TimescaleDB/Redis/PostgreSQL + init Job + Sealed-Secrets"
+    env_stage: "local"
+    env_minimal_full: "Minimal: 本地或轻量；Full: K3s 全栈"
+    entry_criteria: "Stage1-04 准出"
+    exit_criteria: "TimescaleDB/Redis/PostgreSQL 可用；Schema init Job 成功"
+    work_dir:
+      type: "repo_a"
+      repo_ref: "repo_a"
+      description: "diting-infra"
+    l5_stage_anchor: "l5-stage-stage2_01"
+    consumes: ["Stage1-04 准出"]
+    artifacts: ["基础组件 Chart", "Schema init Job 成功"]
+
+  - stage_id: "stage2_02"
+    name: "采集逻辑与Dockerfile"
+    l4_stage_dir: "Stage2_数据采集与存储"
+    l4_step_doc: "02_采集逻辑与Dockerfile.md"
+    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/dna_stage2_02.yaml"
+    delivery_scope: "OHLCV/新闻/行业 全结构；Dockerfile；前期可少存数据"
+    entry_criteria: "Stage2-01 准出"
+    exit_criteria: "采集逻辑实现；make ingest-test 或等价可运行"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
-      description: "diting-core 代码仓"
+      description: "diting-core"
     verification_commands:
-      - cmd: "make test"
+      - cmd: "make ingest-test"
         cwd_ref: "repo_i"
         expected_exit: 0
-        expected_outcome: "Mock 路径跑通；Table-Driven Tests 通过"
-        failure_hint: "确认 MockBroker/MockBrain 已接入；无真实券商/LLM 调用"
-    on_failure:
-      retry_max: 3
-      rollback_to: "previous_stage_last_step"
-    five_d_steps: ["Drive", "Defense"]
-    phase_steps:
-      - phase_id: "Phase1-xxx"
-        step_ids: ["01", "02", "03", "04"]
-    consumes: ["Stage s1 准出"]
-    artifacts: ["Mock 路径跑通", "Table-Driven Tests 通过"]
+    l5_stage_anchor: "l5-stage-stage2_02"
+    consumes: ["Stage2-01 准出"]
+    artifacts: ["采集任务", "Dockerfile"]
 
-  - stage_id: "s2"
-    name: "Docker 统一环境期"
-    l4_stage_dir: "Stage2_Docker统一环境期"
-    step_count: 2
-    delivery_scope: "全链路在容器内可测；Module C/F 可在此阶段接入"
-    env_stage: "docker"
-    entry_criteria: "阶段 s1 或 s1b 准出"
-    exit_criteria: "make build、make test-docker 通过；开发与测试均在容器内完成"
-    test_focus: "docker"
-    deploy_action: "build_image"
-    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s2"
-    l5_stage_anchor: "l5-stage-s2"
+  - stage_id: "stage2_03"
+    name: "本地测试与K3s连调"
+    l4_stage_dir: "Stage2_数据采集与存储"
+    l4_step_doc: "03_本地测试与K3s连调.md"
+    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/03_本地测试与K3s连调设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/dna_stage2_03.yaml"
+    delivery_scope: "本地测试 + K3s 连调；本地进程连 K3s DB（NodePort）"
+    entry_criteria: "Stage2-02 准出"
+    exit_criteria: "本地采集可写 L1；MarketDataFeed 可读取"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
-      description: "diting-core；可选 diting-infra"
+      description: "diting-core"
+    verification_commands:
+      - cmd: "make ingest-test"
+        cwd_ref: "repo_i"
+        expected_exit: 0
+    l5_stage_anchor: "l5-stage-stage2_03"
+    consumes: ["Stage2-02 准出"]
+    artifacts: ["连调路径跑通"]
+
+  - stage_id: "stage2_04"
+    name: "镜像打包与ACR推送"
+    l4_stage_dir: "Stage2_数据采集与存储"
+    l4_step_doc: "04_镜像打包与ACR推送.md"
+    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/04_镜像打包与ACR推送设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/dna_stage2_04.yaml"
+    delivery_scope: "镜像 tag = 时间+分支+版本号；DoD 含 git SHA、镜像 digest"
+    entry_criteria: "Stage2-03 准出"
+    exit_criteria: "make build 成功；镜像可推送"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
     verification_commands:
       - cmd: "make build"
         cwd_ref: "repo_i"
         expected_exit: 0
-        expected_outcome: "镜像构建成功"
-        failure_hint: "检查 Dockerfile 与 make 目标"
-      - cmd: "make test-docker"
-        cwd_ref: "repo_i"
-        expected_exit: 0
-        expected_outcome: "容器内测试通过"
-        failure_hint: "检查镜像与 test-docker 目标"
-    on_failure:
-      retry_max: 3
-      rollback_to: "previous_stage_last_step"
-    five_d_steps: ["Design", "Decompose"]
-    phase_steps:
-      - phase_id: "Phase2-xxx"
-        step_ids: ["01", "02", "03"]
-    consumes: ["Stage s1 或 s1b 准出"]
-    artifacts: ["make build / test-docker 通过", "镜像可构建"]
+    l5_stage_anchor: "l5-stage-stage2_04"
+    consumes: ["Stage2-03 准出"]
+    artifacts: ["镜像可推送"]
 
-  - stage_id: "s3"
-    name: "K3s 测试开发期"
-    l4_stage_dir: "Stage3_K3s测试开发期"
-    step_count: 2
-    delivery_scope: "编排、Secret、网络与生产一致（非生产命名空间）"
-    env_stage: "k3s_dev"
-    entry_criteria: "阶段 s2 准出"
-    exit_criteria: "deploy-engine Up 成功；KubeConfig 可用 / Helm release 存在"
-    test_focus: "k3s_e2e"
-    deploy_action: "deploy_k3s_dev"
-    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s3"
-    l5_stage_anchor: "l5-stage-s3"
+  - stage_id: "stage2_05"
+    name: "采集模块部署与验收"
+    l4_stage_dir: "Stage2_数据采集与存储"
+    l4_step_doc: "05_采集模块部署与验收.md"
+    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/05_采集模块部署与验收设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/dna_stage2_05.yaml"
+    delivery_scope: "采集模块部署；真实数据可写入 L1/L2 且可被 Module A/B/C 消费"
+    entry_criteria: "Stage2-04 准出"
+    exit_criteria: "make ingest-test 或 DNA 约定命令退出码 0；写入与读取验证通过"
     work_dir:
       type: "repo_a"
       repo_ref: "repo_a"
-      description: "diting-infra、deploy-engine"
+      description: "diting-infra"
     verification_commands:
-      - cmd: "deploy-engine Up 或等价调用"
-        cwd_ref: "repo_a"
+      - cmd: "make ingest-test"
+        cwd_ref: "repo_i"
         expected_exit: 0
-        expected_outcome: "deploy-engine Up 成功；Helm release 存在"
-        failure_hint: "确认 deploy-engine 版本与 diting-infra 配置兼容；KubeConfig 可用"
-    on_failure:
-      retry_max: 3
-      rollback_to: "previous_stage_last_step"
-    five_d_steps: ["Design", "Decompose"]
-    phase_steps:
-      - phase_id: "Phase2-xxx"
-        step_ids: ["01", "02", "03"]
-    consumes: ["Stage s2 准出", "diting-infra 已存在"]
-    artifacts: ["deploy-engine Up", "Helm release 存在"]
+    l5_stage_anchor: "l5-stage-stage2_05"
+    consumes: ["Stage2-04 准出"]
+    artifacts: ["采集模块部署成功", "Stage2 准出"]
 
-  - stage_id: "s4"
-    name: "与流水线衔接"
-    l4_stage_dir: "Stage4_与流水线衔接"
-    step_count: 1
-    delivery_scope: "满足三级流水线 Level 1 入口要求"
-    env_stage: "k3s_dev"
-    entry_criteria: "阶段 s3 准出"
-    exit_criteria: "代码/镜像满足 Level 1 入口（Table-Driven Tests、边界覆盖）；可进入 merge develop / tag 流程"
-    test_focus: "k3s_e2e"
-    deploy_action: "none"
-    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-s4"
-    l5_stage_anchor: "l5-stage-s4"
+  # ----- Stage3 模块实践 -----
+  - stage_id: "stage3_01"
+    name: "Module A 语义分类器"
+    l4_stage_dir: "Stage3_模块实践"
+    l4_step_doc: "01_ModuleA.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/01_ModuleA设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_01.yaml"
+    delivery_scope: "Module A 四项 100%，单模块+联动+全链路验证"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
-      description: "diting-core、diting-infra"
-    verification_commands:
-      - cmd: "Level 1 验收表逐条确认"
-        cwd_ref: "repo_i"
-        expected_exit: null
-        expected_outcome: "满足 Level 1 入口；可进入 merge develop / tag"
-        failure_hint: "对照 03_ 流水线 Level 1 验收；补全 Table-Driven Tests、边界覆盖"
-    on_failure:
-      retry_max: 3
-      rollback_to: "previous_stage_last_step"
-    five_d_steps: ["Defense"]
-    phase_steps:
-      - phase_id: "Phase3-xxx"
-        step_ids: ["01", "02", "03", "04"]
-    consumes: ["Stage s3 准出"]
-    artifacts: ["Level 1 入口满足", "可进入 merge develop / tag"]
+      description: "diting-core"
+    l5_stage_anchor: "l5-mod-A"
+    consumes: ["Stage2-05 准出"]
+    artifacts: ["Module A 实现"]
 
-# Module A–F 与 workflow_stages 的映射（首次交付阶段 / 首次 Docker 或 K3s 验证阶段）
+  - stage_id: "stage3_02"
+    name: "Module B 量化扫描引擎"
+    l4_stage_dir: "Stage3_模块实践"
+    l4_step_doc: "02_ModuleB.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_02.yaml"
+    delivery_scope: "Module B 四项 100%"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-mod-B"
+    consumes: ["Stage3-01 准出"]
+    artifacts: ["Module B 实现"]
+
+  - stage_id: "stage3_03"
+    name: "Module C MoE 议会"
+    l4_stage_dir: "Stage3_模块实践"
+    l4_step_doc: "03_ModuleC.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/03_ModuleC设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_03.yaml"
+    delivery_scope: "Module C 四项 100%"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-mod-C"
+    consumes: ["Stage3-02 准出"]
+    artifacts: ["Module C 实现"]
+
+  - stage_id: "stage3_04"
+    name: "Module D 判官"
+    l4_stage_dir: "Stage3_模块实践"
+    l4_step_doc: "04_ModuleD.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/04_ModuleD设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_04.yaml"
+    delivery_scope: "Module D 四项 100%"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-mod-D"
+    consumes: ["Stage3-03 准出"]
+    artifacts: ["Module D 实现"]
+
+  - stage_id: "stage3_05"
+    name: "Module E 风控盾"
+    l4_stage_dir: "Stage3_模块实践"
+    l4_step_doc: "05_ModuleE.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/05_ModuleE设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_05.yaml"
+    delivery_scope: "Module E 四项 100%"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-mod-E"
+    consumes: ["Stage3-04 准出"]
+    artifacts: ["Module E 实现"]
+
+  - stage_id: "stage3_06"
+    name: "Module F 执行网关"
+    l4_stage_dir: "Stage3_模块实践"
+    l4_step_doc: "06_ModuleF.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/06_ModuleF设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_06.yaml"
+    delivery_scope: "Module F 四项 100%；全链路 A→F 验证"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-mod-F"
+    consumes: ["Stage3-05 准出"]
+    artifacts: ["Module F 实现"]
+
+  - stage_id: "stage3_07"
+    name: "全链路验证"
+    l4_stage_dir: "Stage3_模块实践"
+    l4_step_doc: "07_全链路验证.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/07_全链路验证设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_07.yaml"
+    delivery_scope: "A→F 全链路可运行；Mock/Table-Driven 验证通过"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    verification_commands:
+      - cmd: "make test"
+        cwd_ref: "repo_i"
+        expected_exit: 0
+    l5_stage_anchor: "l5-stage-stage3_07"
+    consumes: ["Stage3-06 准出"]
+    artifacts: ["全链路验证通过", "Stage3 准出"]
+
+  # ----- Stage4 MoE 与执行网关 -----
+  - stage_id: "stage4_01"
+    name: "Module C MoE 议会接入"
+    l4_stage_dir: "Stage4_MoE与执行网关"
+    l4_step_doc: "01_ModuleC_MoE议会接入.md"
+    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/01_ModuleC_MoE议会接入设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_01.yaml"
+    delivery_scope: "Router 按 Tag 分发，专家意见与 D 对接"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-func-05"
+    consumes: ["Stage3-07 准出"]
+    artifacts: ["MoE 议会接入"]
+
+  - stage_id: "stage4_02"
+    name: "Module F 执行网关接入"
+    l4_stage_dir: "Stage4_MoE与执行网关"
+    l4_step_doc: "02_ModuleF执行网关接入.md"
+    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/02_ModuleF执行网关接入设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_02.yaml"
+    delivery_scope: "Broker 抽象与占位/仿真实现，E→F 衔接"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-func-06"
+    consumes: ["Stage4-01 准出"]
+    artifacts: ["执行网关接入"]
+
+  - stage_id: "stage4_03"
+    name: "回测或仿真验证"
+    l4_stage_dir: "Stage4_MoE与执行网关"
+    l4_step_doc: "03_回测或仿真验证.md"
+    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/03_回测或仿真验证设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_03.yaml"
+    delivery_scope: "Docker/K3s 下回测或仿真路径跑通"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-func-07"
+    consumes: ["Stage4-02 准出"]
+    artifacts: ["回测/仿真验证", "Stage4 准出"]
+
+  # ----- Stage5 优化与扩展 -----
+  - stage_id: "stage5_01"
+    name: "可观测性与日志指标"
+    l4_stage_dir: "Stage5_优化与扩展"
+    l4_step_doc: "01_可观测性与日志指标.md"
+    design_doc: "03_原子目标与规约/Stage5_优化与扩展/01_可观测性与日志指标设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/dna_stage5_01.yaml"
+    delivery_scope: "日志/指标/健康检查满足 L3"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-func-08"
+    consumes: ["Stage4-03 准出"]
+    artifacts: ["可观测性就绪"]
+
+  - stage_id: "stage5_02"
+    name: "成本治理与Token熔断"
+    l4_stage_dir: "Stage5_优化与扩展"
+    l4_step_doc: "02_成本治理与Token熔断.md"
+    design_doc: "03_原子目标与规约/Stage5_优化与扩展/02_成本治理与Token熔断设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/dna_stage5_02.yaml"
+    delivery_scope: "Token 预算与熔断逻辑可生效"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-func-09"
+    consumes: ["Stage5-01 准出"]
+    artifacts: ["成本治理"]
+
+  - stage_id: "stage5_03"
+    name: "多策略池或配置扩展"
+    l4_stage_dir: "Stage5_优化与扩展"
+    l4_step_doc: "03_多策略池或配置扩展.md"
+    design_doc: "03_原子目标与规约/Stage5_优化与扩展/03_多策略池或配置扩展设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/dna_stage5_03.yaml"
+    delivery_scope: "按 09 规约与 L1 价值查漏补缺"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    consumes: ["Stage5-02 准出"]
+    artifacts: ["多策略扩展"]
+
+  - stage_id: "stage5_04"
+    name: "Level1 入口与 L5 验收对齐"
+    l4_stage_dir: "Stage5_优化与扩展"
+    l4_step_doc: "04_Level1与L5验收对齐.md"
+    design_doc: "03_原子目标与规约/Stage5_优化与扩展/04_Level1与L5验收对齐设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/dna_stage5_04.yaml"
+    delivery_scope: "满足三级流水线 Level 1、功能/不可能三角可追溯"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-func-10"
+    consumes: ["Stage5-03 准出"]
+    artifacts: ["Level 1 入口满足", "Stage5 准出"]
+
+# 可部署单元与 workflow_stages 映射（方案 B：多服务；热路径 D+E+F 同进程）
+# 与 global_const.deployable_units 一致
+deployable_units:
+  ingestion:
+    name: "数据采集与存储"
+    first_delivery_stage: "stage2_02"
+    first_docker_stage: "stage2_04"
+    first_k3s_stage: "stage2_05"
+  module_a:
+    name: "Module A 语义分类器"
+    first_delivery_stage: "stage3_01"
+    first_docker_stage: "stage3_01"  # 每单元独立构建时指向本单元 build stage
+    first_k3s_stage: "stage2_05"    # 或本单元 deploy stage
+  module_b:
+    name: "Module B 量化扫描引擎"
+    first_delivery_stage: "stage3_02"
+    first_docker_stage: "stage3_02"
+    first_k3s_stage: "stage2_05"
+  module_c:
+    name: "Module C MoE 议会"
+    first_delivery_stage: "stage3_03"
+    first_docker_stage: "stage3_03"
+    first_k3s_stage: "stage2_05"
+  hot_path_def:
+    name: "热路径 D+E+F"
+    first_delivery_stage: "stage3_04"  # D/E/F 实现合并为 stage3_04～06，同一镜像
+    first_docker_stage: "stage3_06"     # 热路径镜像在 stage3_06 后构建
+    first_k3s_stage: "stage2_05"
+
+# Release bundle：一次发布包含的镜像列表，与 02_基础设施与部署规约一致
+release_bundle:
+  description: "一次发布使用同一 tag 的全体可部署单元镜像"
+  image_keys: ["ingestion", "module_a", "module_b", "module_c", "hot_path_def"]
+  tag_strategy: "git_sha_or_semver"  # dev: git-sha / latest；prod: SemVer
+  compatibility_ref: "global_const.deployable_units"
+
+# Module A–F 与 workflow_stages 映射（兼容只读：由 deployable_units 推导，L4 可引用；真相源为上方 deployable_units）
 module_to_stages:
   module_a:
     name: "Module A 语义分类器"
-    first_delivery_stage: "s1"
-    first_docker_stage: "s2"
-    first_k3s_stage: "s3"
+    first_delivery_stage: "stage3_01"
+    first_docker_stage: "stage2_04"
+    first_k3s_stage: "stage2_05"
   module_b:
     name: "Module B 量化扫描引擎"
-    first_delivery_stage: "s1"
-    first_docker_stage: "s2"
-    first_k3s_stage: "s3"
+    first_delivery_stage: "stage3_02"
+    first_docker_stage: "stage2_04"
+    first_k3s_stage: "stage2_05"
   module_c:
     name: "Module C MoE 议会"
-    first_delivery_stage: "s1"
-    first_docker_stage: "s2"
-    first_k3s_stage: "s3"
+    first_delivery_stage: "stage3_03"
+    first_docker_stage: "stage2_04"
+    first_k3s_stage: "stage2_05"
   module_d:
     name: "Module D 判官"
-    first_delivery_stage: "s1"
-    first_docker_stage: "s2"
-    first_k3s_stage: "s3"
+    first_delivery_stage: "stage3_04"
+    first_docker_stage: "stage2_04"
+    first_k3s_stage: "stage2_05"
   module_e:
     name: "Module E 风控盾"
-    first_delivery_stage: "s1"
-    first_docker_stage: "s2"
-    first_k3s_stage: "s3"
+    first_delivery_stage: "stage3_05"
+    first_docker_stage: "stage2_04"
+    first_k3s_stage: "stage2_05"
   module_f:
     name: "Module F 执行网关"
-    first_delivery_stage: "s1"
-    first_docker_stage: "s2"
-    first_k3s_stage: "s3"
+    first_delivery_stage: "stage3_06"
+    first_docker_stage: "stage2_04"
+    first_k3s_stage: "stage2_05"

@@ -1,0 +1,29 @@
+# DNA：Module D 判官
+# 引用：09_核心模块架构规约.md
+# L4 步骤引用：Phase1 02_ModuleD
+
+module_d_gavel:
+  purpose: "决策中枢 - 判官"
+  voting_mechanism:
+    rule: "Quant (Pass) + Expert (Strong Buy) = 有效信号"
+    quant_threshold: 70
+    expert_requirement: "至少一个专家 is_supported=True 且 direction=BULLISH"
+  dynamic_kelly:
+    calculation_method: "根据 Expert 确信度调整仓位"
+    formula: "base_kelly * expert_confidence"
+    range: [0.0, 1.0]
+  cash_drag_monitor:
+    enabled: true
+    threshold_days: 5
+    action: "自动降低 Module B 筛选阈值"
+    threshold_adjustments:
+      rsi_threshold: [20, 25]
+      technical_score_threshold: [70, 65]
+      sector_strength_threshold: [1.1, 1.05]
+  defensive_mode:
+    enabled: true
+    trigger_condition: "年化收益 >= 30%"
+    rules:
+      - "胜率阈值从 80% 提至 90%"
+      - "仓位减半"
+      - "锁定 25% 利润垫"

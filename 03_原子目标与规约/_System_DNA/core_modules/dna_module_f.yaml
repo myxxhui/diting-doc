@@ -1,0 +1,19 @@
+# DNA：Module F 执行网关
+# 引用：09_核心模块架构规约.md
+# L4 步骤引用：Phase2 02_ModuleF
+
+module_f_execution_gateway:
+  purpose: "执行网关：Redis Streams -> OMS Lite -> MiniQMT"
+  architecture: "Redis Streams -> OMS Lite -> MiniQMT (xtquant)"
+  human_in_the_loop:
+    enabled: true
+    approval_required:
+      buy: true
+      take_profit: true
+      stop_loss: false
+    notification:
+      channel: "手机推送"
+      timeout_seconds: 300
+  order_splitting:
+    enabled: true
+    chunk_size: 10000

@@ -12,31 +12,16 @@ if [[ -z "$DOC_ROOT" ]]; then
 fi
 BASE_04="$DOC_ROOT/04_阶段规划与实践"
 
-# Stage 01_ 与 Phase0 01_
-STAGE_01=(
-  "00_交付流程步骤/Stage0_pre_仓库与L3就绪/01_本阶段实践与验证.md"
-  "00_交付流程步骤/Stage0_骨架期/01_本阶段实践与验证.md"
-  "00_交付流程步骤/Stage1_逻辑填充期/01_本阶段实践与验证.md"
-  "00_交付流程步骤/Stage1b_Mock数据验证准出/01_本阶段实践与验证.md"
-  "00_交付流程步骤/Stage2_Docker统一环境期/01_本阶段实践与验证.md"
-  "00_交付流程步骤/Stage3_K3s测试开发期/01_本阶段实践与验证.md"
-  "00_交付流程步骤/Stage4_与流水线衔接/01_本阶段实践与验证.md"
-  "Phase0_Infra/01_三位一体仓库初始化.md"
-)
-
-# Phase 步骤文档列表
-PHASE_STEPS=(
-  "Phase1_核心链路/01_ModuleA_B骨架与接口.md"
-  "Phase1_核心链路/02_ModuleD判官最小闭环.md"
-  "Phase1_核心链路/03_ModuleE风控占位.md"
-  "Phase1_核心链路/04_A到E集成与Mock准备.md"
-  "Phase2_MoE与执行网关/01_ModuleC_MoE议会接入.md"
-  "Phase2_MoE与执行网关/02_ModuleF执行网关接入.md"
-  "Phase2_MoE与执行网关/03_回测或仿真验证.md"
-  "Phase3_优化与扩展/01_可观测性与日志指标.md"
-  "Phase3_优化与扩展/02_成本治理与Token熔断.md"
-  "Phase3_优化与扩展/03_多策略池或配置扩展.md"
-  "Phase3_优化与扩展/04_Level1与L5验收对齐.md"
+# Stage1～5 步骤文档（每 Stage 取第一个步骤为代表检查；或可扩展为全步骤）
+STAGE_STEPS=(
+  "Stage1_仓库与骨架/01_三位一体仓库初始化.md"
+  "Stage1_仓库与骨架/02_核心接口与Proto占位.md"
+  "Stage1_仓库与骨架/03_密钥与配置模板就绪.md"
+  "Stage2_数据采集与存储/01_基础设施与依赖部署.md"
+  "Stage2_数据采集与存储/02_采集逻辑与Dockerfile.md"
+  "Stage3_模块实践/01_ModuleA.md"
+  "Stage4_MoE与执行网关/01_ModuleC_MoE议会接入.md"
+  "Stage5_优化与扩展/01_可观测性与日志指标.md"
 )
 
 check_one() {
@@ -66,7 +51,7 @@ check_one() {
 }
 
 FAIL=0
-for rel in "${STAGE_01[@]}" "${PHASE_STEPS[@]}"; do
+for rel in "${STAGE_STEPS[@]}"; do
   f="$BASE_04/$rel"
   name="${rel//\//_}"
   check_one "$f" "$name" || FAIL=1

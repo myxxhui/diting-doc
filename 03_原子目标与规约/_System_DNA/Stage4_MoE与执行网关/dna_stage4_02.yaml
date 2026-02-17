@@ -1,0 +1,14 @@
+# Stage4-02 Module F 执行网关接入
+stage_id: "stage4_02"
+name: "Module F 执行网关接入"
+design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/02_ModuleF执行网关接入设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage4_MoE与执行网关/02_ModuleF执行网关接入.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "Broker 抽象与占位/仿真实现，E→F 衔接"
+exit_criteria: "执行网关接入；E→F 衔接可验证"
+l5_stage_anchor: "l5-func-06"
+consumes: ["Stage4-01 准出"]
+artifacts: ["执行网关接入"]

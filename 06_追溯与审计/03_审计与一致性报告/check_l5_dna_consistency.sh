@@ -19,9 +19,11 @@ FAIL=0
 
 # 1) workflow_stages: 每个 DNA stage_id 在 L5 02_ 中有对应锚点 l5-stage-*
 echo "=== 1) workflow_stages stage_id vs L5 锚点 ==="
-for stage in s0_pre s0 s1 s1b s2 s3 s4; do
-  anchor="l5-stage-$stage"
-  if grep -q "id=\"$anchor\"" "$L5_02" || grep -q "l5-stage-$stage" "$L5_02"; then
+stage_ids=()
+while IFS= read -r line; do stage_ids+=("$line"); done < <(grep 'stage_id:' "$DNA_WORKFLOW" | sed 's/.*"\([^"]*\)".*/\1/')
+for stage in "${stage_ids[@]}"; do
+  anchor="l5-stage-${stage}"
+  if grep -q "id=\"$anchor\"" "$L5_02" || grep -q "$anchor" "$L5_02"; then
     echo "PASS: $stage -> $anchor 存在于 L5 02_"
   else
     echo "FAIL: $stage -> $anchor 未在 L5 02_ 中找到"
@@ -49,34 +51,34 @@ if ! grep -q "l5_anchor:.*l5-func-" "$DNA_GLOBAL" 2>/dev/null; then
   echo "INFO: DNA global_const 中未找到 l5_anchor（l5-func-*），跳过功能表锚点校验"
 fi
 
-# 3) Stage 01_ 是否引用 DNA 的 work_dir、verification_commands、l5_stage_anchor
+# 3) 各 Stage 步骤文档是否引用 DNA 的 work_dir、verification_commands、l5_stage_anchor
 echo ""
-echo "=== 3) Stage 01_ 引用 DNA work_dir / verification_commands / l5_stage_anchor ==="
-BASE_04="$DOC_ROOT/04_阶段规划与实践/00_交付流程步骤"
+echo "=== 3) Stage 步骤文档引用 DNA work_dir / verification_commands / l5_stage_anchor ==="
+BASE_04="$DOC_ROOT/04_阶段规划与实践"
 STAGE_DIRS=(
-  "Stage0_pre_仓库与L3就绪"
-  "Stage0_骨架期"
-  "Stage1_逻辑填充期"
-  "Stage1b_Mock数据验证准出"
-  "Stage2_Docker统一环境期"
-  "Stage3_K3s测试开发期"
-  "Stage4_与流水线衔接"
+  "Stage1_仓库与骨架"
+  "Stage2_数据采集与存储"
+  "Stage3_模块实践"
+  "Stage4_MoE与执行网关"
+  "Stage5_优化与扩展"
 )
 for dir in "${STAGE_DIRS[@]}"; do
-  f="$BASE_04/$dir/01_本阶段实践与验证.md"
-  if [[ ! -f "$f" ]]; then
-    echo "FAIL: $f 不存在"
-    FAIL=1
-    continue
-  fi
-  missing=""
-  grep -q "work_dir" "$f" || missing="work_dir"
-  grep -q "verification_commands" "$f" || missing="$missing verification_commands"
-  grep -q "l5_stage_anchor" "$f" || missing="$missing l5_stage_anchor"
-  if [[ -z "$missing" ]]; then
-    echo "PASS: $dir/01_ 含 work_dir、verification_commands、l5_stage_anchor 引用"
-  else
-    echo "FAIL: $dir/01_ 缺少 DNA 键引用: $missing"
+  stage_path="$BASE_04/$dir"
+  found=0
+  for f in "$stage_path"/0*.md; do
+    [[ ! -f "$f" ]] && continue
+    missing=""
+    grep -q "work_dir" "$f" || missing="work_dir"
+    grep -q "verification_commands" "$f" || missing="$missing verification_commands"
+    grep -q "l5_stage_anchor" "$f" || missing="$missing l5_stage_anchor"
+    if [[ -z "$missing" ]]; then
+      echo "PASS: $dir 步骤文档含 work_dir、verification_commands、l5_stage_anchor 引用"
+      found=1
+      break
+    fi
+  done
+  if [[ $found -eq 0 ]]; then
+    echo "FAIL: $dir 步骤文档中缺少 DNA 键引用（work_dir / verification_commands / l5_stage_anchor）"
     FAIL=1
   fi
 done

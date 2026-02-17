@@ -1,0 +1,23 @@
+// [Ref: 01_核心公式与MoE架构规约] 全链路 TradeSignal 协议
+// 定义位置：diting-doc/03_原子目标与规约/_Design_Artifacts/protocols/trade_signal.proto
+// 代码仓对应：diting-core/design/protocols/trade_signal.proto
+
+syntax = "proto3";
+
+package diting.core;
+
+// 全链路统一信号格式，判官裁决后至执行层
+// 所有组件必须遵循本协议
+// [Ref: 04_全链路通信协议矩阵] 跨服务字段：correlation_id 与 signal_id（幂等键）
+message TradeSignal {
+  string symbol = 1;
+  string strategy_source = 2;       // 策略池标识（TREND/REVERSION/BREAKOUT）
+  double technical_score = 3;
+  double fundamental_score = 4;
+  double win_rate_prediction = 5;
+  double kelly_fraction = 6;
+  string reasoning_summary = 10;
+  // 跨服务追踪与幂等（多服务部署必填）
+  string correlation_id = 11;       // 全链路唯一请求 ID，透传用于日志与分布式追踪
+  string signal_id = 12;            // 信号幂等键，D/E/F 对同一 signal_id 仅处理一次
+}

@@ -1,0 +1,15 @@
+# Stage2-01 基础设施与依赖部署
+stage_id: "stage2_01"
+name: "基础设施与依赖部署"
+design_doc: "03_原子目标与规约/Stage2_数据采集与存储/01_基础设施与依赖设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage2_数据采集与存储/01_基础设施与依赖部署.md"
+work_dir:
+  type: "repo_a"
+  repo_ref: "repo_a"
+  description: "diting-infra（Chart、init Job）"
+delivery_scope: "TimescaleDB/Redis/PostgreSQL + init Job + Sealed-Secrets"
+exit_criteria: "TimescaleDB/Redis/PostgreSQL 可用；Schema init Job 成功"
+env_minimal_full: "Minimal: 本地或轻量；Full: K3s 全栈"
+l5_stage_anchor: "l5-stage-stage2_01"
+consumes: ["Stage1-03 准出"]
+artifacts: ["基础组件 Chart", "Schema init Job 成功"]

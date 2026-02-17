@@ -1,0 +1,31 @@
+// [Ref: 09_核心模块架构规约] Module A 语义分类器输出
+// 定义位置：diting-doc/03_原子目标与规约/_Design_Artifacts/protocols/classifier/classifier_output.proto
+// 代码仓对应：diting-core/design/protocols/classifier/classifier_output.proto
+
+syntax = "proto3";
+
+package diting.classifier;
+
+// Domain Tag 枚举，与 09_ 规约 DomainTag 一致
+enum DomainTag {
+  DOMAIN_UNSPECIFIED = 0;
+  AGRI = 1;   // 农业（猪周期、气候）
+  TECH = 2;   // 硬科技（半导体、AI）
+  GEO = 3;    // 宏观（大宗商品、汇率）
+  UNKNOWN = 4; // 无法归类 → Trash Bin
+}
+
+// Module A 输出：Domain Tag 列表 + 置信度
+// 输入：标的代码、申万行业分类、营收占比
+// 输出：按置信度降序排列的 Tag 列表
+// [Ref: 04_全链路通信协议矩阵] 跨服务字段
+message ClassifierOutput {
+  string symbol = 1;                    // 标的代码，如 "000998.SZ"
+  repeated TagWithConfidence tags = 2;  // Domain Tag 及置信度，按置信度降序
+  string correlation_id = 3;           // 全链路请求 ID，下游透传
+}
+
+message TagWithConfidence {
+  DomainTag domain_tag = 1;  // Domain Tag
+  double confidence = 2;     // 置信度 0.0-1.0
+}

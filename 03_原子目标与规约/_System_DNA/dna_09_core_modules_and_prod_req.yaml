@@ -1,8 +1,15 @@
 # DNA 映射文件：09_核心模块架构规约.md
-# 说明：索引 `_System_DNA/global_const.yaml` 中核心模块与生产工业级要求配置。
+# 说明：核心模块配置已拆分至 `_System_DNA/core_modules/` 下各 dna_module_*.yaml；
+# L4 步骤应直接引用 core_modules/dna_module_a.yaml 等。
+# 聚合视图仍见 global_const.yaml#core_modules；production_requirements 保留在 global_const。
 
 core_modules:
-  $ref: "global_const.yaml#core_modules"
+  module_a: "core_modules/dna_module_a.yaml"
+  module_b: "core_modules/dna_module_b.yaml"
+  module_c: "core_modules/dna_module_c.yaml"
+  module_d: "core_modules/dna_module_d.yaml"
+  module_e: "core_modules/dna_module_e.yaml"
+  module_f: "core_modules/dna_module_f.yaml"
 
 production_requirements:
   fault_tolerance:

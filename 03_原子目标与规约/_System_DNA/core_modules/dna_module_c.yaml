@@ -1,0 +1,21 @@
+# DNA：Module C MoE 议会
+# 引用：09_核心模块架构规约.md
+# L4 步骤引用：Phase2 01_ModuleC
+
+module_c_moe_council:
+  purpose: "右脑 - 混合专家议会"
+  router:
+    routing_logic: "根据 Domain Tag 分发到对应专家"
+  sub_agents:
+    agri_agent:
+      focus: ["季节性因素", "期货升贴水"]
+      domain_tag: "AGRI"
+    tech_agent:
+      focus: ["研发投入占比", "大基金动向"]
+      domain_tag: "TECH"
+    geo_agent:
+      focus: ["大宗商品价格", "汇率变动"]
+      domain_tag: "GEO"
+    trash_bin:
+      purpose: "无法归类或逻辑不清的标的，直接丢弃"
+      domain_tag: "UNKNOWN"

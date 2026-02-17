@@ -32,20 +32,20 @@
 创建时间：YYYY-MM-DD
 ```
 
-## DNA–00_–L5 一致性校验
+## DNA–04_ Stage–L5 一致性校验
 
-DNA、00_ 交付流程步骤、L5 验收标准三者变更时，可按下述清单或脚本快速发现漏改或断链。**执行时机**：人工定期执行或 CI 集成；与当前 7 个 stage（s0_pre、s0、s1、s1b、s2、s3、s4）一致时均应通过。
+DNA、04_ 阶段目录（Stage1～5）、L5 验收标准三者变更时，可按下述清单或脚本快速发现漏改或断链。**执行时机**：人工定期执行或 CI 集成；与当前 Stage1～5（stage1_01～stage5_04）一致时均应通过。
 
 ### 人工校验清单
 
 | 序号 | 检查项 | 操作方式 |
 |------|--------|----------|
-| 1 | DNA 中每个 `workflow_stages[].stage_id` 在 [04_阶段规划与实践/00_交付流程步骤](../../04_阶段规划与实践/00_交付流程步骤/) 下存在对应目录（即 `l4_stage_dir` 同名目录） | 打开 [dna_dev_workflow.yaml](../../03_原子目标与规约/_System_DNA/dna_dev_workflow.yaml)，逐条 `l4_stage_dir` 在 00_ 下列出目录，逐一确认存在 |
-| 2 | 每个 `stage_id` 在 [05_成功标识与验证/02_验收标准.md](../../05_成功标识与验证/02_验收标准.md) 的 workflow_stages 表中有对应行 | 打开 02_验收标准.md，在「DNA stage_id」列中确认 s0_pre、s0、s1、s1b、s2、s3、s4 各有一行 |
-| 3 | 每个 Stage 的 [01_本阶段实践与验证.md](../../04_阶段规划与实践/00_交付流程步骤/Stage0_pre_仓库与L3就绪/01_本阶段实践与验证.md) 均含「可执行验证清单」与「本步骤失败时」 | 逐阶段打开 01_，全文检索「可执行验证清单」「本步骤失败时」 |
+| 1 | DNA 中每个 `workflow_stages[].stage_id` 在 [04_阶段规划与实践](../../04_阶段规划与实践/) 下存在对应 Stage 目录（即 `l4_stage_dir` 同名目录） | 打开 [dna_dev_workflow.yaml](../../03_原子目标与规约/_System_DNA/dna_dev_workflow.yaml)，逐条 `l4_stage_dir` 在 04_ 下列出目录（Stage1_仓库与骨架、Stage2_数据采集与存储 等），逐一确认存在 |
+| 2 | 每个 `stage_id` 在 [05_成功标识与验证/02_验收标准.md](../../05_成功标识与验证/02_验收标准.md) 的 workflow_stages 表中有对应行 | 打开 02_验收标准.md，在「DNA stage_id」列中确认 stage1_01～stage5_04 各有一行 |
+| 3 | 各 Stage 下步骤文档（01_～0N_）均含「可执行验证清单」与「本步骤失败时」 | 逐阶段打开步骤文档，全文检索「可执行验证清单」「本步骤失败时」 |
 | 4 | （可选）每个 01_ 中「可执行验证清单」下至少有一条可执行项 | 目视或脚本检查 01_ 中该小节非空 |
 | 5 | 各 Stage README「本阶段关联的 Phase 步骤」已回填或显式标注「本阶段无 Phase」 | 逐阶段打开 README，确认该小节为具体 Phase 链接或写明「本阶段无 Phase」/占位说明，审计或发布前无未替换占位 |
-| 6 | L4 阶段文档（00_ 下 01_/README）发生结构性或 DNA 键引用变更后，当次或下次审计须复核与 L4 相关项 | 当 01_ 或 README 结构、DNA 键引用变更时，在审计清单中勾选「已按 [01_L3_DNA_变更对L4影响表](../01_L3_DNA_变更对L4影响表.md) 复核受影响阶段」 |
+| 6 | L4 阶段文档（04_ 各 Stage 下 01_/README）发生结构性或 DNA 键引用变更后，当次或下次审计须复核与 L4 相关项 | 当步骤文档或 README 结构、DNA 键引用变更时，在审计清单中勾选「已按 [01_L3_DNA_变更对L4影响表](../01_L3_DNA_变更对L4影响表.md) 复核受影响阶段」 |
 | 7 | **逻辑密集的 Phase 步骤文档**（见 [04_ README](../../04_阶段规划与实践/README.md) 或各 Phase README「本 Phase 步骤–5D 强度」表）是否包含「本步骤最小上下文」或「5D 执行顺序」、「本步骤失败时」、「本步骤准出」；**占位步骤**是否包含「占位边界」 | 逐条打开逻辑密集/占位步骤文档（如 Phase1 02_/03_、Phase2 01_、Phase3 02_ 等），全文检索上述小节标题，缺则补或标注待补 |
 | 8 | （可选）各 Stage README「本阶段关联的 Phase 步骤」与对应 Phase 步骤文档内的「Phase–Stage 接口」是否一致 | 对照 Stage README 中列出的 Phase 步骤，打开各步骤文档「Phase–Stage 接口」小节，确认「本步产出被哪一 Stage 使用」「本步依赖哪一 Stage 准出」与 README 一致 |
 | 9 | **所有 04_ 实践文档**（含 Stage 01_、Phase0 01_、各 Phase 的 01_～04_）是否含「**核心指令（The Prompt）**」块或明确引用完整版（如 00_5D）；是否含「**验证步骤**」与「**验证结果预期**」（或验收与测试/可执行验证清单 + 期望结果表） | 逐条打开上述文档，全文检索「核心指令」或「The Prompt」或「见 00_5D」；检索「验证步骤」或「可执行验证清单」；检索「验证结果预期」或表格「期望结果」列；缺则补或标注待补（见 [04_ README 实践文档统一必备结构](../../04_阶段规划与实践/README.md)） |
@@ -55,6 +55,7 @@ DNA、00_ 交付流程步骤、L5 验收标准三者变更时，可按下述清�
 | 13 | **可执行验证清单与 DNA 一致**：各 Stage 01_ 可执行验证清单中的命令是否与 [dna_dev_workflow.yaml](../../03_原子目标与规约/_System_DNA/dna_dev_workflow.yaml) 该 stage 的 `verification_commands` 一致或为其子集 | 对照 DNA 中该 stage 的 verification_commands[].cmd 与 01_ 中「可执行验证清单」或「验证步骤」下的命令，不一致时以 DNA 为准更新 01_ |
 | 14 | **L5 workflow_stages 表与 DNA 一致**：L5 02_ 中 workflow_stages 表每行锚点（l5-stage-s0_pre 等）与 DNA 的 `l5_stage_anchor` 一致；表行集与 DNA stage_id 一一对应 | 运行 [check_l5_dna_consistency.sh](check_l5_dna_consistency.sh) 或人工对照 DNA workflow_stages[].l5_stage_anchor 与 L5 02_ 锚点列 |
 | 15 | **L5 功能验收表与 DNA 一致**：功能验收表锚点（l5-func-01～10）与 [global_const product_scope.phases[].steps[].l5_anchor](../../03_原子目标与规约/_System_DNA/global_const.yaml) 一致 | 运行 [check_l5_dna_consistency.sh](check_l5_dna_consistency.sh) 或人工对照 DNA phases[].steps[].l5_anchor 与 L5 02_ 功能验收表 |
+| 16 | **设计–DNA–实践 1:1:1**：每个 workflow_stages 条目的 design_doc、dna_file、04_ 步骤文件（l4_stage_dir + l4_step_doc）均存在 | 运行 [check_111_design_dna_practice.sh](check_111_design_dna_practice.sh) |
 
 ### 脚本校验（可选）
 
@@ -62,9 +63,10 @@ DNA、00_ 交付流程步骤、L5 验收标准三者变更时，可按下述清�
 
 | 脚本 | 对应人工项 | 说明 |
 |------|------------|------|
-| [check_dna_00_l5.sh](check_dna_00_l5.sh) | 清单 1、2、3 | DNA–00_ Stage 目录、L5 stage_id 行、各 Stage 01_ 可执行验证清单与本步骤失败时 |
+| [check_dna_00_l5.sh](check_dna_00_l5.sh) | 清单 1、2、3 | DNA–04_ Stage 目录、L5 stage_id 行、各 Stage 步骤文档可执行验证清单与本步骤失败时 |
 | [check_phase_steps_prompt.sh](check_phase_steps_prompt.sh) | 清单 9、10 | 所有 04_ 实践文档（含 Stage 01_、Phase0 01_、Phase 步骤）是否含「核心指令」/The Prompt/00_5D；是否含可复制命令块（\`\`\`bash 等）或可执行项 |
 | [check_l5_dna_consistency.sh](check_l5_dna_consistency.sh) | 清单 14、15 | L5 02_ workflow_stages 锚点与 DNA l5_stage_anchor 一致；L5 功能验收表锚点与 DNA product_scope.phases[].steps[].l5_anchor 一致 |
+| [check_111_design_dna_practice.sh](check_111_design_dna_practice.sh) | **1:1:1 设计–DNA–实践** | 每个 workflow_stages 条目的 design_doc、dna_file、04_ 步骤文件（l4_stage_dir + l4_step_doc）是否存在 |
 
 可执行脚本从**文档仓根目录**运行：
 
@@ -77,6 +79,8 @@ DNA、00_ 交付流程步骤、L5 验收标准三者变更时，可按下述清�
 ./06_追溯与审计/03_审计与一致性报告/check_dna_00_l5.sh /path/to/diting-doc
 ./06_追溯与审计/03_审计与一致性报告/check_phase_steps_prompt.sh /path/to/diting-doc
 ./06_追溯与审计/03_审计与一致性报告/check_l5_dna_consistency.sh /path/to/diting-doc
+./06_追溯与审计/03_审计与一致性报告/check_111_design_dna_practice.sh
+./06_追溯与审计/03_审计与一致性报告/check_111_design_dna_practice.sh /path/to/diting-doc
 ```
 
 脚本输出为逐项 PASS/FAIL 列表；全部 PASS 时退出码 0，否则非 0。
@@ -126,7 +130,7 @@ L2 战略维度、L3 规约、DNA 子树三者变更时，可按下述清单检�
 |--------|------|------|
 | 01_～06_ 目录层级正确 | ✅ | 文档仓层级未改变，Stage0_pre、Phase0_Infra 已归位 |
 | DNA workflow_stages 与 L5 表 stage_id 一一对应 | ✅ | s0_pre～s4 共 7 个 stage，L5 02_验收标准 表已含 s0_pre 行及「与 DNA 强一致」约定 |
-| 00_/04_ 推荐顺序表含第 0 步 | ✅ | 00_交付流程步骤/README、04_阶段规划与实践/README 均含顺序 0 → s0_pre/Stage0_pre |
+| 04_ 推荐顺序表与 DNA 一致 | ✅ | 04_阶段规划与实践/README 与 dna_dev_workflow 执行顺序一致，Stage1～5 线性执行 |
 | Stage0 准入引用 Stage0_pre | ✅ | Stage0_骨架期 README 与 01_ 前置条件均含「若尚未具备，请先执行 Stage0_pre 或 Phase0_Infra 的 01_」 |
 | 协议 §8.4a 含建仓阶段例外 | ✅ | 00_系统规则、.cursorrules 均已增加建仓阶段工作目录/可执行验证例外 |
 | L6 与 ADR 含 s0_pre/Phase0-Infra 映射 | ✅ | 02_战略追溯矩阵 可交付性行含 Stage0_pre；ADR 追溯前有 Phase–Stage 约定（Phase0-Infra ↔ Stage0_pre/s0_pre） |

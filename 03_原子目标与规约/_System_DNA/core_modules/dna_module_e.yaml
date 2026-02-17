@@ -1,0 +1,17 @@
+# DNA：Module E 风控盾
+# 引用：09_核心模块架构规约.md
+# L4 步骤引用：Phase1 03_ModuleE
+
+module_e_risk_shield:
+  purpose: "绝对风控盾：纯 Python 硬编码规则（无 AI 参与）"
+  rules:
+    hard_stop_loss:
+      fixed_stop: "单笔亏损 > 2% -> 市价斩仓"
+      atr_stop: "价格跌破 ATR 下轨 -> 市价斩仓"
+      execution: "AUTO_EXECUTED（自动执行，无需审批）"
+    payoff_ratio:
+      threshold: 1.5
+      action: "拒绝开仓"
+    correlation_limit:
+      max_domain_exposure: 0.4
+      action: "限制同一 Domain 的持仓总上限"

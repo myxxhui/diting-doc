@@ -1,0 +1,14 @@
+# Stage5-01 可观测性与日志指标
+stage_id: "stage5_01"
+name: "可观测性与日志指标"
+design_doc: "03_原子目标与规约/Stage5_优化与扩展/01_可观测性与日志指标设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage5_优化与扩展/01_可观测性与日志指标.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "日志/指标/健康检查满足 L3"
+exit_criteria: "可观测性就绪；Prometheus 与健康端点可用"
+l5_stage_anchor: "l5-func-08"
+consumes: ["Stage4-03 准出"]
+artifacts: ["可观测性就绪"]

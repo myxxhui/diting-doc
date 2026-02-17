@@ -1,0 +1,16 @@
+# Stage3-04 Module D 判官
+# 语义详见 _System_DNA/core_modules/dna_module_d.yaml
+stage_id: "stage3_04"
+name: "Module D 判官"
+design_doc: "03_原子目标与规约/Stage3_模块实践/04_ModuleD设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage3_模块实践/04_ModuleD.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "Module D 四项 100%"
+exit_criteria: "Module D 实现；判官投票+Kelly+Alpha 与 01_核心公式一致"
+l5_stage_anchor: "l5-mod-D"
+consumes: ["Stage3-03 准出"]
+artifacts: ["Module D 实现"]
+semantic_ref: "03_原子目标与规约/_System_DNA/core_modules/dna_module_d.yaml"

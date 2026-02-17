@@ -1,0 +1,16 @@
+# Stage3-05 Module E 风控盾
+# 语义详见 _System_DNA/core_modules/dna_module_e.yaml
+stage_id: "stage3_05"
+name: "Module E 风控盾"
+design_doc: "03_原子目标与规约/Stage3_模块实践/05_ModuleE设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage3_模块实践/05_ModuleE.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "Module E 四项 100%"
+exit_criteria: "Module E 实现；风控接口与占位（硬止损 2%、盈亏比≥1.5）"
+l5_stage_anchor: "l5-mod-E"
+consumes: ["Stage3-04 准出"]
+artifacts: ["Module E 实现"]
+semantic_ref: "03_原子目标与规约/_System_DNA/core_modules/dna_module_e.yaml"

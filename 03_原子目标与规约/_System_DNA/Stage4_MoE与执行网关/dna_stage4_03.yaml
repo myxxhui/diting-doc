@@ -1,0 +1,14 @@
+# Stage4-03 回测或仿真验证
+stage_id: "stage4_03"
+name: "回测或仿真验证"
+design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/03_回测或仿真验证设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage4_MoE与执行网关/03_回测或仿真验证.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "Docker/K3s 下回测或仿真路径跑通"
+exit_criteria: "回测或仿真验证通过；Stage4 准出"
+l5_stage_anchor: "l5-func-07"
+consumes: ["Stage4-02 准出"]
+artifacts: ["回测/仿真验证", "Stage4 准出"]

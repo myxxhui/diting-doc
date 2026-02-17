@@ -1,0 +1,26 @@
+// [Ref: 09_核心模块架构规约] Module B 量化扫描引擎输出
+// 定义位置：diting-doc/03_原子目标与规约/_Design_Artifacts/protocols/quant/quant_signal.proto
+// 代码仓对应：diting-core/design/protocols/quant/quant_signal.proto
+
+syntax = "proto3";
+
+package diting.quant;
+
+// 策略池来源，与 09_ 三大策略池对应
+enum StrategyPool {
+  STRATEGY_UNSPECIFIED = 0;
+  TREND = 1;     // Pool 1: 趋势策略
+  REVERSION = 2; // Pool 2: 反转策略
+  BREAKOUT = 3;  // Pool 3: 突破策略
+}
+
+// Module B 输出：技术面得分 > 70 的候选信号
+// 条件：technical_score > 70 且 sector_strength > 1.1
+// [Ref: 04_全链路通信协议矩阵] 跨服务字段
+message QuantSignal {
+  string symbol = 1;               // 标的代码
+  double technical_score = 2;      // 技术面得分 0-100，三大策略池最高分
+  StrategyPool strategy_source = 3; // 信号来源策略池
+  double sector_strength = 4;      // 板块强弱，> 1.1 才通过
+  string correlation_id = 5;       // 全链路请求 ID，下游透传
+}

@@ -1,0 +1,31 @@
+# Stage1-04 密钥与配置模板就绪
+stage_id: "stage1_04"
+name: "密钥与配置模板就绪"
+design_doc: "03_原子目标与规约/Stage1_仓库与骨架/04_密钥与配置模板设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage1_仓库与骨架/04_密钥与配置模板就绪.md"
+work_dir:
+  type: "repo_a"
+  repo_ref: "repo_a"
+  description: "diting-infra 代码仓"
+delivery_scope: "Sealed-Secrets 模板或说明；.env.template 双仓占位；config 单一 YAML 模板可用"
+exit_criteria: "secrets/ 含 Sealed-Secrets 模板或说明；config 模板可用；三项验证通过"
+verification_commands:
+  - cmd: "test -d secrets && test -f config/environments/dev/deploy.yaml 或等价"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "目录与 YAML 模板存在"
+  - cmd: "helm template sealed-secrets <chart_path> -f <values> 检查渲染含关键参数"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "模板参数生效"
+  - cmd: "deploy-engine 或等价工具解析 config 路径，退出码 0"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "符合 DeploymentConfig"
+  - cmd: "git submodule status 或 test -d deploy-engine；diting-infra 引用 deploy-engine"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "Git 引用存在"
+l5_stage_anchor: "l5-stage-stage1_04"
+consumes: ["Stage1-03 准出"]
+artifacts: ["Sealed-Secrets 模板", "config 模板", ".env.template 双仓"]

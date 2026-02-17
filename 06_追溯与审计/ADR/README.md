@@ -8,11 +8,11 @@
 
 | ADR ID | 标题 | 状态 | 创建日期 | 相关文档 |
 |--------|------|------|---------|---------|
-| [ADR-001](./001-project-naming.md) | 采用 ${PROJECT_KEY} 动态命名 | Accepted | 2026-02-11 | [三位一体仓库规约](../../03_原子目标与规约/02_三位一体仓库规约.md) |
-| [ADR-002](./002-moe-architecture.md) | 采用 MoE (混合专家) 架构 | Accepted | 2026-02-11 | [核心公式与MoE架构规约](../../03_原子目标与规约/01_核心公式与MoE架构规约.md) |
-| [ADR-003](./003-spot-ecs-compute-storage-separation.md) | 采用 Spot ECS + 存算分离 | Accepted | 2026-02-11 | [运营治理与灾备规约](../../03_原子目标与规约/10_运营治理与灾备规约.md) |
-| [ADR-004](./004-human-in-the-loop.md) | 采用 Human-in-the-Loop (买入确认/止损自动) 模式 | Accepted | 2026-02-11 | [核心模块架构规约](../../03_原子目标与规约/09_核心模块架构规约.md) |
-| [ADR-005](./005-defensive-compound-mode.md) | 引入防御性复利模式 | Accepted | 2026-02-11 | [核心模块架构规约](../../03_原子目标与规约/09_核心模块架构规约.md) |
+| [ADR-001](./001-project-naming.md) | 采用 ${PROJECT_KEY} 动态命名 | Accepted | 2026-02-11 | [三位一体仓库规约](../../03_原子目标与规约/_共享规约/02_三位一体仓库规约.md) |
+| [ADR-002](./002-moe-architecture.md) | 采用 MoE (混合专家) 架构 | Accepted | 2026-02-11 | [核心公式与MoE架构规约](../../03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md) |
+| [ADR-003](./003-spot-ecs-compute-storage-separation.md) | 采用 Spot ECS + 存算分离 | Accepted | 2026-02-11 | [运营治理与灾备规约](../../03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md) |
+| [ADR-004](./004-human-in-the-loop.md) | 采用 Human-in-the-Loop (买入确认/止损自动) 模式 | Accepted | 2026-02-11 | [核心模块架构规约](../../03_原子目标与规约/_共享规约/09_核心模块架构规约.md) |
+| [ADR-005](./005-defensive-compound-mode.md) | 引入防御性复利模式 | Accepted | 2026-02-11 | [核心模块架构规约](../../03_原子目标与规约/_共享规约/09_核心模块架构规约.md) |
 
 ## ADR 状态说明
 

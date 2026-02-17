@@ -1,0 +1,5 @@
+# DNA 映射文件：11_数据采集与输入层规约.md
+# 说明：索引 `_System_DNA/global_const.yaml` 中数据采集与输入层配置。
+
+data_ingestion:
+  $ref: "global_const.yaml#data_ingestion"
