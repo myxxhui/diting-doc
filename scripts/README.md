@@ -20,4 +20,6 @@
 
 **建议频率**：熔断前（每周五或 Sprint 结束前）运行 `check_sticky_count.sh`；发布或重构前运行 `check_matrix_pending.sh`；L4/03_/DNA 结构变更后运行 `check_design_dna_practice_consistency.sh`；L4 锚点或 02_验收标准 变更后运行 `check_anchor_resolvable.sh`。可接入 CI（如 GitHub Actions）在每次 PR 或定时任务中执行。
 
+**L4 实践文档与核心指令**：L4 实践文档与核心指令须满足「**DNA 为核心实践目标**」与「**核心指令引用 AI 可读**」（见 00_系统规则 §8.4d、§12）。对应校验脚本为 [06_追溯与审计/03_审计与一致性报告/check_prompt_refs_ai_readable.sh](../06_追溯与审计/03_审计与一致性报告/check_prompt_refs_ai_readable.sh)：若步骤文档含「本步逻辑引用（AI 可读）」块，则校验其中 dna_file、design_doc 等路径存在。建议在 04_ 步骤文档或核心指令/引用块变更后运行该脚本。
+
 **协议约定**：若项目提供本目录下的一致性检查脚本，其通过可作为 §7.5 一致性检查表的部分满足条件。

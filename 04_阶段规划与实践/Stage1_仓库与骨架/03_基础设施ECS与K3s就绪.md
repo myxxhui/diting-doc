@@ -30,7 +30,7 @@ deploy-engine 通过 Git 引用就绪；单一 YAML 部署配置就绪；执行 
 ## 核心指令
 
 ```
-你是在 diting-infra 中执行 Stage1-03（基础设施 ECS 与 K3s 就绪）的实践者。必读：02_三位一体、02_基础设施与部署规约。
+你是在 diting-infra 中执行 Stage1-03（基础设施 ECS 与 K3s 就绪）的实践者。必读：03_原子目标与规约/_共享规约/02_三位一体仓库规约.md、03_原子目标与规约/开发与交付/02_基础设施与部署规约.md。
 
 任务：
 1. 确认 deploy-engine 以 Git submodule 或等价方式存在于 diting-infra，且调用约定（工作目录、config 路径）已满足。

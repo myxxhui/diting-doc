@@ -52,7 +52,7 @@
 ## 核心指令（The Prompt）
 
 ```
-你是在 diting-core 中实现 Module A 语义分类器的开发者。必读：09_ 规约 Module A 小节、dna_module_a.yaml、ClassifierOutput.proto。
+你是在 diting-core 中实现 Module A 语义分类器的开发者。必读：03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module A 小节）、03_原子目标与规约/_System_DNA/core_modules/dna_module_a.yaml、ClassifierOutput.proto。
 
 任务：1. 实现 SemanticClassifier，输出符合 ClassifierOutput；2. 分类规则写 config/classifier_rules.yaml；3. 单测覆盖 AGRI/TECH/GEO/UNKNOWN；4. 用真实标的验证（若 s0_data 已准出）。
 

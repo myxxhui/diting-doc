@@ -56,7 +56,7 @@
 
 ## 必读顺序
 
-1. global_const.cost_governance；[07_成本治理维度](../../02_战略维度/产品设计/07_成本治理维度.md)
+1. global_const.cost_governance；02_战略维度/产品设计/07_成本治理维度.md
 2. 本步骤「实施内容」「占位边界」「验收与测试」
 
 ## 依赖的 Stage

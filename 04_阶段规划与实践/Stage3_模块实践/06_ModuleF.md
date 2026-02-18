@@ -51,7 +51,7 @@
 ## 核心指令（The Prompt）
 
 ```
-你是在 diting-core 中实现 Module F 执行网关的开发者。必读：09_ Module F、05_接口抽象层、dna_module_f.yaml。
+你是在 diting-core 中实现 Module F 执行网关的开发者。必读：03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module F 小节）、03_原子目标与规约/_共享规约/05_接口抽象层规约.md、03_原子目标与规约/_System_DNA/core_modules/dna_module_f.yaml。
 
 任务：1. 实现 Broker 抽象与占位；2. 配置写 YAML；3. place_order 可调用；4. 单测覆盖。
 

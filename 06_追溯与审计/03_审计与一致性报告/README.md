@@ -56,6 +56,19 @@ DNA、04_ 阶段目录（Stage1～5）、L5 验收标准三者变更时，可按
 | 14 | **L5 workflow_stages 表与 DNA 一致**：L5 02_ 中 workflow_stages 表每行锚点（l5-stage-s0_pre 等）与 DNA 的 `l5_stage_anchor` 一致；表行集与 DNA stage_id 一一对应 | 运行 [check_l5_dna_consistency.sh](check_l5_dna_consistency.sh) 或人工对照 DNA workflow_stages[].l5_stage_anchor 与 L5 02_ 锚点列 |
 | 15 | **L5 功能验收表与 DNA 一致**：功能验收表锚点（l5-func-01～10）与 [global_const product_scope.phases[].steps[].l5_anchor](../../03_原子目标与规约/_System_DNA/global_const.yaml) 一致 | 运行 [check_l5_dna_consistency.sh](check_l5_dna_consistency.sh) 或人工对照 DNA phases[].steps[].l5_anchor 与 L5 02_ 功能验收表 |
 | 16 | **设计–DNA–实践 1:1:1**：每个 workflow_stages 条目的 design_doc、dna_file、04_ 步骤文件（l4_stage_dir + l4_step_doc）均存在 | 运行 [check_111_design_dna_practice.sh](check_111_design_dna_practice.sh) |
+| 17 | **DNA 为核心实践目标**：04_ 步骤文档与核心指令以 DNA 为权威，冲突以 DNA 为准 | 打开各 04_ 步骤文档，确认核心指令与交付范围、验收项与 DNA 一致；若有冲突以 [dna_dev_workflow.yaml](../../03_原子目标与规约/_System_DNA/dna_dev_workflow.yaml) 及对应步骤 DNA 文件为准（见 [00_系统规则 §8.4d、§12](../../../00_系统规则_通用项目协议.md)） |
+| 18 | **核心指令引用 AI 可读**：核心指令内对文档/DNA/L5 的引用为完整路径、DNA 键路径或结构化引用块 | 见下「清单 18 可执行子项」；若任一处存在简称或仅文件名则列于审计报告并标 FAIL（见 [00_系统规则 §8.4d](../../../00_系统规则_通用项目协议.md)） |
+
+**清单 18 可执行子项**（审计时逐项执行）：
+
+| 子项 | 操作 | 判定 |
+|------|------|------|
+| 18.1 | 打开 [dna_dev_workflow.yaml](../../03_原子目标与规约/_System_DNA/dna_dev_workflow.yaml)，列出全部 04_ 步骤文档路径（各 `l4_stage_dir` + `l4_step_doc`） | 得到待检文档列表 |
+| 18.2 | 逐篇打开 04_ 步骤文档，定位「核心指令」或「The Prompt」块（从 \`\`\` 到 \`\`\` 或到下一 \`##\`） | 提取核心指令块全文 |
+| 18.3 | 在块内逐处识别「文档引用」：须为从文档仓根起的完整相对路径（可带 #锚点），如 `03_原子目标与规约/_共享规约/02_三位一体仓库规约.md`、`05_成功标识与验证/02_验收标准.md#l5-stage-stage1_01` | 若出现仅「0X_」开头的文档名（如 04_全链路…、02_三位一体）、仅「XX_规约/协议」无路径 → FAIL，记入审计报告 |
+| 18.4 | 在块内逐处识别「DNA 引用」：须为 DNA 键路径（如 `dna_dev_workflow.workflow_stages[stage1_01]`）或完整 YAML 路径（如 `03_原子目标与规约/_System_DNA/core_modules/dna_module_a.yaml`） | 若出现仅 DNA 文件名（如 dna_module_a.yaml）无键路径或完整路径 → FAIL，记入审计报告 |
+| 18.5 | 在块内逐处识别「L5 引用」：须为 02_验收标准 的完整路径 + 锚点，如 `05_成功标识与验证/02_验收标准.md#l5-stage-stage1_01` | 若出现无路径的「L5 对应行」「02_验收标准」等 → FAIL，记入审计报告 |
+| 18.6 | 汇总：将上述所有 FAIL 项列于审计报告，标明文档路径、核心指令内原文片段、应改为的完整路径或键路径 | 输出可整改清单 |
 
 ### 脚本校验（可选）
 
@@ -67,6 +80,7 @@ DNA、04_ 阶段目录（Stage1～5）、L5 验收标准三者变更时，可按
 | [check_phase_steps_prompt.sh](check_phase_steps_prompt.sh) | 清单 9、10 | 所有 04_ 实践文档（含 Stage 01_、Phase0 01_、Phase 步骤）是否含「核心指令」/The Prompt/00_5D；是否含可复制命令块（\`\`\`bash 等）或可执行项 |
 | [check_l5_dna_consistency.sh](check_l5_dna_consistency.sh) | 清单 14、15 | L5 02_ workflow_stages 锚点与 DNA l5_stage_anchor 一致；L5 功能验收表锚点与 DNA product_scope.phases[].steps[].l5_anchor 一致 |
 | [check_111_design_dna_practice.sh](check_111_design_dna_practice.sh) | **1:1:1 设计–DNA–实践** | 每个 workflow_stages 条目的 design_doc、dna_file、04_ 步骤文件（l4_stage_dir + l4_step_doc）是否存在 |
+| [check_prompt_refs_ai_readable.sh](check_prompt_refs_ai_readable.sh) | 清单 17、18 | 若步骤文档含「本步逻辑引用（AI 可读）」块，则校验其中 dna_file、design_doc 等路径存在 |
 
 可执行脚本从**文档仓根目录**运行：
 
@@ -81,6 +95,8 @@ DNA、04_ 阶段目录（Stage1～5）、L5 验收标准三者变更时，可按
 ./06_追溯与审计/03_审计与一致性报告/check_l5_dna_consistency.sh /path/to/diting-doc
 ./06_追溯与审计/03_审计与一致性报告/check_111_design_dna_practice.sh
 ./06_追溯与审计/03_审计与一致性报告/check_111_design_dna_practice.sh /path/to/diting-doc
+./06_追溯与审计/03_审计与一致性报告/check_prompt_refs_ai_readable.sh
+./06_追溯与审计/03_审计与一致性报告/check_prompt_refs_ai_readable.sh /path/to/diting-doc
 ```
 
 脚本输出为逐项 PASS/FAIL 列表；全部 PASS 时退出码 0，否则非 0。

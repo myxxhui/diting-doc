@@ -26,11 +26,11 @@
 ## 核心指令
 
 ```
-你是在 diting-core 中执行 Stage1-02（核心接口与 Proto 占位）的开发者。必读：dna_dev_workflow.workflow_stages[stage1_02]、04_全链路通信协议矩阵、05_接口抽象层规约。
+你是在 diting-core 中执行 Stage1-02（核心接口与 Proto 占位）的开发者。必读：dna_dev_workflow.workflow_stages[stage1_02]、03_原子目标与规约/_共享规约/04_全链路通信协议矩阵.md、03_原子目标与规约/_共享规约/05_接口抽象层规约.md。
 
 任务：
 1. 按 repo_i.directories 建立目录：diting/abstraction/、drivers/、moe/、risk/、strategy/、tests/、design/。
-2. 定义核心接口（Protocol/抽象类），与 04_ 协议矩阵、05_ 接口抽象层对齐。
+2. 定义核心接口（Protocol/抽象类），与 03_原子目标与规约/_共享规约/04_全链路通信协议矩阵.md、03_原子目标与规约/_共享规约/05_接口抽象层规约.md 对齐。
 3. Proto 占位：brain/expert.proto、verdict.proto、execution/order.proto、classifier/classifier_output.proto、quant/quant_signal.proto。
 4. 为关键接口编写占位实现或 Mock，使「导入 + 最小调用」可运行；make test 可运行。
 ```

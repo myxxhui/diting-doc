@@ -41,7 +41,7 @@
 
 ## 核心指令（The Prompt）
 
-请先阅读 [09_核心模块架构规约](../../03_原子目标与规约/_共享规约/09_核心模块架构规约.md) Module C、本步骤「实施内容」。任务：1. 实现 MoE Router（按 Tag 分发，UNKNOWN→Trash Bin）；2. 至少一个专家接口或占位，输出 ExpertOpinion 与 D 契约一致；3. C→D Alpha 链路可跑通；4. 单测/集成通过。工作目录 diting-core。请输出：变更文件列表、关键类型摘录、单测命令与结果摘要。
+请先阅读 03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module C）、本步骤「实施内容」。任务：1. 实现 MoE Router（按 Tag 分发，UNKNOWN→Trash Bin）；2. 至少一个专家接口或占位，输出 ExpertOpinion 与 D 契约一致；3. C→D Alpha 链路可跑通；4. 单测/集成通过。工作目录 diting-core。请输出：变更文件列表、关键类型摘录、单测命令与结果摘要。
 
 ## Prompt 使用说明
 

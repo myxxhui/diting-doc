@@ -52,7 +52,7 @@
 ## 核心指令（The Prompt）
 
 ```
-你是在 diting-core 中实现 Module C MoE 议会的开发者。必读：09_ Module C、dna_module_c.yaml、expert.proto。
+你是在 diting-core 中实现 Module C MoE 议会的开发者。必读：03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module C 小节）、03_原子目标与规约/_System_DNA/core_modules/dna_module_c.yaml、expert.proto。
 
 任务：1. 实现 MoERouter、Agri/Tech/Geo Agent；2. Router 规则写 YAML；3. 单测覆盖 AGRI/TECH/GEO/UNKNOWN 分发；4. ExpertOpinion 契约满足。
 

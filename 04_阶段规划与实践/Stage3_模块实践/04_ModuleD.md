@@ -52,7 +52,7 @@
 ## 核心指令（The Prompt）
 
 ```
-你是在 diting-core 中实现 Module D 判官的开发者。必读：09_ Module D、01_核心公式、dna_module_d.yaml、verdict.proto。
+你是在 diting-core 中实现 Module D 判官的开发者。必读：03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module D 小节）、03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md、03_原子目标与规约/_System_DNA/core_modules/dna_module_d.yaml、verdict.proto。
 
 任务：1. 实现投票+Kelly+Cash Drag+Defensive；2. 公式与阈值写 YAML；3. Table-Driven 单测覆盖边界；4. 5D 执行：Design 锁逻辑、Drive 锚测试、Decompose 原子、Defense 人把关。
 

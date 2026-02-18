@@ -51,7 +51,7 @@
 ## 核心指令（The Prompt）
 
 ```
-你是在 diting-core 中实现 Module E 风控盾的开发者。必读：09_ Module E、dna_module_e.yaml。
+你是在 diting-core 中实现 Module E 风控盾的开发者。必读：03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module E 小节）、03_原子目标与规约/_System_DNA/core_modules/dna_module_e.yaml。
 
 任务：1. 实现 RiskShield；2. 规则阈值写 YAML；3. 单测覆盖硬止损、盈亏比、相关性；4. 高波动模拟验证拦截率 100%。
 

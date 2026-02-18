@@ -52,7 +52,7 @@
 ## 核心指令（The Prompt）
 
 ```
-你是在 diting-core 中实现 Module B 量化扫描引擎的开发者。必读：09_ Module B、dna_module_b.yaml、QuantSignal.proto。
+你是在 diting-core 中实现 Module B 量化扫描引擎的开发者。必读：03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module B 小节）、03_原子目标与规约/_System_DNA/core_modules/dna_module_b.yaml、QuantSignal.proto。
 
 任务：1. 实现 QuantScanner，输出 QuantSignal；2. 策略池与阈值写 YAML；3. 单测覆盖 TREND/REVERSION/BREAKOUT；4. 用真实 OHLCV 验证（若 s0_data 已准出）。
 
