@@ -66,7 +66,7 @@
 | [ADR-002](./ADR/002-moe-architecture.md) | MoE 架构 | Accepted | 采用 Neuro-Symbolic MoE 架构 |
 | [ADR-003](./ADR/003-spot-ecs-compute-storage-separation.md) | Spot ECS + 存算分离 | Accepted | 采用 Spot ECS + 存算分离架构 |
 | [ADR-004](./ADR/004-human-in-the-loop.md) | Human-in-the-Loop | Accepted | 买入/止盈需人工确认，止损自动执行 |
-| [ADR-005](./ADR/005-defensive-compound-mode.md) | 防御性复利模式 | Accepted | 年化收益 ≥ 30% 时触发防御模式 |
+| [ADR-005](./ADR/005-defensive-compound-mode.md) | 防御性复利模式 | Accepted | 年化收益 ≥ 30% 时触发防御模式（与 L1 不可能三角 45% 目标区分，见 ADR-005 内说明） |
 
 ## 追溯矩阵总览
 

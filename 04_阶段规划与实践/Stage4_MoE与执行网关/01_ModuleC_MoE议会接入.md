@@ -52,7 +52,8 @@
 | 类型 | 内容 |
 |------|------|
 | **DO** | Router 与 09_ Tag 约定一致；ExpertOpinion 与 D 的 vote 输入一致；工作目录 diting-core |
-| **DON'T** | 不要改变 D 判官已约定的 ExpertOpinion 结构 |
+| **DON'T** | 不要改变 D 判官已约定的 ExpertOpinion 结构（可扩展字段如 `horizon`，见 expert.proto） |
+| **可选** | 专家池可包含 VC-Agent（信仰专家），输出 `TimeHorizon = LONG_TERM` 的 ExpertOpinion，供判官双轨分流；见 [09_ Module C VC-Agent](../../03_原子目标与规约/_共享规约/09_核心模块架构规约.md) |
 | **边界** | 其他专家可为 Mock/占位；占位替换见 [Phase2 README 占位与真实实现衔接](README.md#占位与真实实现衔接) |
 
 ## 必读顺序

@@ -19,6 +19,7 @@
 - **凯利**：动态仓位计算，满足不可能三角约束
 - **现金拖累**：空仓 > 5 天触发监控
 - **公式**：Alpha = (Quant_Signal ∩ Router(Experts)) × Kelly_Position
+- **双轨分流**：实现时根据 `ExpertOpinion.horizon` 分支：`LONG_TERM` 豁免 2% 硬止损与现金拖累，仅施加逻辑证伪与大周期反转；`SHORT_TERM` 或未设置时按现有规则。见 [09_ Module D 双轨分流](../_共享规约/09_核心模块架构规约.md)。
 
 <a id="design-stage3-04-dna-keys"></a>
 ## 本步落实的 _System_DNA 键

@@ -19,8 +19,8 @@ Alpha = (Quant_{Signal} \cap Router(Experts)) \times Kelly_{Position}
 $$
 
 **不可能三角（The Impossible Triangle）**：
-- **认知边界 (Certainty)**：胜率 ≥ 80%
-- **复利增长 (Growth)**：年化复利 ≥ 30%
+- **认知边界 (Certainty)**：胜率 ≥ 85%
+- **复利增长 (Growth)**：年化复利 ≥ 45%
 - **生存底线 (Survival)**：回撤 < 12%
 
 ### 文档层级与导航逻辑

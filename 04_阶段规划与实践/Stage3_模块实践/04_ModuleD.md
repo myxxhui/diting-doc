@@ -31,6 +31,7 @@
 2. 输入：QuantSignal、ExpertOpinion；输出 CouncilVerdict（Alpha、suggested_position_ratio）
 3. 凯利公式、投票权重、Cash Drag 阈值写 **YAML 配置**
 4. 逻辑密集，须走 5D（Design-Drive-Decompose-Defense）
+5. **双轨分流**：根据 `ExpertOpinion.horizon`（或上游传入的轨标识）分支——当 `TimeHorizon = LONG_TERM` 时，不施加 2% 硬止损与现金拖累监控，仅施加逻辑证伪与大周期反转规则；`SHORT_TERM` 或未设置时按现有规则。见 [09_ Module D 双轨分流](../../03_原子目标与规约/_共享规约/09_核心模块架构规约.md#双轨分流timehorizon)。
 
 ## 验证部分
 
