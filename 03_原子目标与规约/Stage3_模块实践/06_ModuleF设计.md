@@ -25,6 +25,16 @@
 
 - `core_modules/dna_module_f.yaml`；`abstraction_layer.broker_driver`
 
+<a id="design-stage3-06-integration-vnpy"></a>
+### 逻辑填充期开源接入点：Vn.py（Gateway 与执行抽象）（Phase1 必选）
+
+- **实践重点**：执行层采用 **Gateway 式**抽象：事件驱动、统一接口（连接、订阅、下单、撤单、成交流水），多柜台（CTP/IB/MiniQMT/xtquant 等）通过适配器实现同一 Gateway 接口；逻辑填充期至少完成接口定义与占位/仿真实现，实盘柜台可后续接入。保障实盘稳定性：接口设计要考虑重连、订单状态同步、错单与拒单处理，与 09_ Module F、10_ 运营治理中的熔断与 RTO 一致。
+- **详细需求**：
+  - **Gateway 接口**：列出与 Vn.py 对齐的核心方法（如 connect、subscribe、send_order、cancel_order、on_tick、on_order、on_trade）及事件回调契约；BrokerDriver 与 OMS Lite、Redis Streams 的衔接方式。
+  - **占位/仿真实现**：逻辑填充期必须实现至少一个「仿真 Broker」：接收 order 请求、按规则模拟成交或拒绝、回写状态到 Redis/OMS；便于 E→F 与全链路 A→F 验证无需实盘。
+  - **实盘对接路线**：明确后续实盘接入时，MiniQMT/xtquant 等将以「实现同一 Gateway 接口的适配器」形式接入；可简要列出 Vn.py 中对应柜台的参考点（如 C++ 封装、事件循环）。
+- **验收要点**：place_order 经 BrokerDriver 调用占位实现可验证；单测覆盖「下单 → 状态回调」路径；接口与 05_ 接口抽象层规约一致。实盘/仿真接入的进一步验证见 [Stage4-02 ModuleF 执行网关接入设计](../Stage4_MoE与执行网关/02_ModuleF执行网关接入设计.md)。
+
 <a id="design-stage3-06-exit"></a>
 ## 准出
 

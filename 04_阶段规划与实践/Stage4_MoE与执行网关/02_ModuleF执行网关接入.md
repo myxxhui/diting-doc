@@ -8,7 +8,8 @@
 > - **本步骤**: 执行层抽象、Broker 驱动占位或仿真
 
 **本步设计文档**：[02_ModuleF执行网关接入设计](../../03_原子目标与规约/Stage4_MoE与执行网关/02_ModuleF执行网关接入设计.md#design-stage4-02-exit)  
-**本步 DNA 文件**：[03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_02.yaml](../../03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_02.yaml)
+**本步 DNA 文件**：[03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_02.yaml](../../03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_02.yaml)  
+**逻辑填充期接入点**：本步须按设计文档「Vn.py 对接要点」小节实现实盘/仿真接入与验证，见 [design-stage4-02-vnpy](../../03_原子目标与规约/Stage4_MoE与执行网关/02_ModuleF执行网关接入设计.md#design-stage4-02-vnpy)。
 
 <a id="l4-step-nav"></a>
 ## 步骤导航
@@ -40,7 +41,7 @@
 
 ## 核心指令（The Prompt）
 
-请先阅读 03_原子目标与规约/_共享规约/05_接口抽象层规约.md、03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module F）、本步骤「实施内容」。任务：1. 定义 Broker 抽象接口（与 03_原子目标与规约/_共享规约/05_接口抽象层规约.md 一致）；2. 实现至少一个占位/仿真（MockBroker 或 BacktestBroker）；3. E 通过信号可转换为 TradeOrder 并调用 place_order；4. 单测通过。工作目录 diting-core。请输出：变更文件列表、关键接口摘录、单测命令与结果摘要。
+请先阅读 03_原子目标与规约/_共享规约/05_接口抽象层规约.md、03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module F）、本步骤「实施内容」及设计文档「Vn.py 对接要点」小节。任务：1. 定义 Broker 抽象接口（与 05_ 一致，深度参考 Vn.py Gateway）；2. 按设计文档「Vn.py 对接要点」实现实盘/仿真接入并达标；3. 实现至少一个占位/仿真（MockBroker 或 BacktestBroker）；4. E 通过信号可转换为 TradeOrder 并调用 place_order；5. 单测通过。工作目录 diting-core。请输出：变更文件列表、关键接口摘录、单测命令与结果摘要。
 
 ## Prompt 使用说明
 
@@ -110,7 +111,7 @@ make test
 - [ ] 代码已提交至约定分支/目录（工作目录 diting-core）
 - [ ] Broker 抽象接口与至少一个占位/仿真实现存在，单测或集成测试通过
 - [ ] Code Review 通过（或标注豁免）
-- [ ] 已更新 L5 [02_验收标准](../../05_成功标识与验证/02_验收标准.md) 中**功能验收表**「09_ Module F」一行及 [l5-stage-stage4_02](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_02)（状态与验证方式）
+- [ ] L3 Vn.py 对接要点按设计文档达标；已更新 L5 [02_验收标准](../../05_成功标识与验证/02_验收标准.md) 中**功能验收表**「09_ Module F」一行及 [l5-stage-stage4_02](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_02)（状态与验证方式）
 
 ## 输出格式 / 期望交付形态
 

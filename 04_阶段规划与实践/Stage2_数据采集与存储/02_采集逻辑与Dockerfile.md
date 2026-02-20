@@ -5,6 +5,7 @@
 > - **DNA stage_id**: `stage2_02`
 > - **本步设计文档**: [02_采集逻辑与Dockerfile设计](../../03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-exit)
 > - **本步 DNA 文件**: [dna_stage2_02.yaml](../../03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/dna_stage2_02.yaml)
+> - **逻辑填充期接入点**：本步须按设计文档中「逻辑填充期开源接入点」小节实现并达标，见 [AkShare](../../03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-integration-akshare)、[OpenBB](../../03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-integration-openbb)。
 
 <a id="l4-step-nav"></a>
 ## 步骤导航
@@ -27,8 +28,9 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 
 任务：
 1. 实现采集任务（ingest_ohlcv、ingest_industry_revenue、ingest_news），按 03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md 规约写入 L1/L2。
-2. Dockerfile 支持采集镜像构建。
-3. 在 Makefile 中新增 ingest-test target；退出码 0 表示通过。
+2. 按设计文档「逻辑填充期开源接入点：AkShare、OpenBB」小节实现并达标（实践重点、详细需求、验收要点见该设计文档）。
+3. Dockerfile 支持采集镜像构建。
+4. 在 Makefile 中新增 ingest-test target；退出码 0 表示通过。
 ```
 
 <a id="l4-stage2-02-exit"></a>
@@ -38,4 +40,4 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 |------|----------|----------|
 | `make ingest-test` | diting-core | 退出码 0 |
 
-**准出**：采集逻辑实现；make ingest-test 可运行。**已更新 L5 [02_验收标准 对应行](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_02)**。
+**准出**：采集逻辑实现；make ingest-test 可运行；L3 逻辑填充期接入点（AkShare、OpenBB）按设计文档达标。**已更新 L5 [02_验收标准 对应行](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_02)**。

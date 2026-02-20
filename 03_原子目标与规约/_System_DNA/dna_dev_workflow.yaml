@@ -1,6 +1,6 @@
 # 开发工作流阶段与模块映射（单轨 Stage1～5）
-# 说明：L4 执行顺序来源于本文件 workflow_stages；与 01_开发生命周期与实践流程规约、01_需求与产品范围 对齐。
-# 引用：03_原子目标与规约/开发与交付/01_开发生命周期与实践流程规约.md
+# 说明：L4 执行顺序来源于本文件 workflow_stages。
+# 规约文档（AI 可读）：03_原子目标与规约/开发与交付/01_开发生命周期与实践流程规约.md、03_原子目标与规约/产品设计/01_需求与产品范围.md
 # 2026-02 重构：双轨（00_交付流程步骤 + Phase）合并为单轨 Stage1～5
 
 execution_order:
@@ -37,10 +37,10 @@ workflow_stages:
     design_doc: "03_原子目标与规约/Stage1_仓库与骨架/01_三位一体仓库设计.md"
     dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/dna_stage1_01.yaml"
     step_count: 1
-    delivery_scope: "三仓目录符合 02_三位一体；diting-core 含 Makefile（test 可为占位）；diting-infra 初始化"
+    delivery_scope: "三仓目录符合 03_原子目标与规约/_共享规约/02_三位一体仓库规约.md；diting-core 含 Makefile（test 可为占位）；diting-infra 初始化"
     env_stage: "local"
     env_minimal_full: "Minimal"
-    entry_criteria: "L3 规约与 DNA 已定稿"
+    entry_criteria: "03_原子目标与规约/ 与 03_原子目标与规约/_System_DNA/ 已定稿"
     exit_criteria: "三仓存在且目录与 global_const.trinity_repos 一致；diting-core make test 占位通过"
     test_focus: "bootstrap"
     deploy_action: "none"
@@ -60,7 +60,7 @@ workflow_stages:
       retry_max: 3
       rollback_to: "previous_stage_last_step"
     five_d_steps: ["Design", "Drive"]
-    consumes: ["L3 规约与 DNA 定稿"]
+    consumes: ["03_原子目标与规约 与 _System_DNA 定稿"]
     artifacts: ["diting-core 目录与 Makefile", "diting-infra 目录"]
 
   - stage_id: "stage1_02"
@@ -402,7 +402,7 @@ workflow_stages:
     l4_step_doc: "01_可观测性与日志指标.md"
     design_doc: "03_原子目标与规约/Stage5_优化与扩展/01_可观测性与日志指标设计.md"
     dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/dna_stage5_01.yaml"
-    delivery_scope: "日志/指标/健康检查满足 L3"
+    delivery_scope: "日志/指标/健康检查满足 03_原子目标与规约 中可观测性相关规约（见 design_doc）"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
@@ -432,7 +432,7 @@ workflow_stages:
     l4_step_doc: "03_多策略池或配置扩展.md"
     design_doc: "03_原子目标与规约/Stage5_优化与扩展/03_多策略池或配置扩展设计.md"
     dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/dna_stage5_03.yaml"
-    delivery_scope: "按 09 规约与 L1 价值查漏补缺"
+    delivery_scope: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/产品设计/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
@@ -484,14 +484,14 @@ deployable_units:
     first_docker_stage: "stage3_06"     # 热路径镜像在 stage3_06 后构建
     first_k3s_stage: "stage2_05"
 
-# Release bundle：一次发布包含的镜像列表，与 02_基础设施与部署规约一致
+# Release bundle：一次发布包含的镜像列表，与 03_原子目标与规约/开发与交付/02_基础设施与部署规约.md 一致
 release_bundle:
   description: "一次发布使用同一 tag 的全体可部署单元镜像"
   image_keys: ["ingestion", "module_a", "module_b", "module_c", "hot_path_def"]
   tag_strategy: "git_sha_or_semver"  # dev: git-sha / latest；prod: SemVer
   compatibility_ref: "global_const.deployable_units"
 
-# Module A–F 与 workflow_stages 映射（兼容只读：由 deployable_units 推导，L4 可引用；真相源为上方 deployable_units）
+# Module A–F 与 workflow_stages 映射（兼容只读：由 deployable_units 推导；04_阶段规划与实践 可引用；真相源为上方 deployable_units）
 module_to_stages:
   module_a:
     name: "Module A 语义分类器"

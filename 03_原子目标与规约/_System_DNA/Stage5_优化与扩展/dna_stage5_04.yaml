@@ -1,4 +1,4 @@
-# Stage5-04 Level1 入口与 L5 验收对齐
+# Stage5-04 Level1 入口与 05_验收标准 对齐；L5 文档（AI 可读）：05_成功标识与验证/02_验收标准.md
 stage_id: "stage5_04"
 name: "Level1 入口与 L5 验收对齐"
 design_doc: "03_原子目标与规约/Stage5_优化与扩展/04_Level1与L5验收对齐设计.md"
@@ -8,7 +8,7 @@ work_dir:
   repo_ref: "repo_i"
   description: "diting-core"
 delivery_scope: "满足三级流水线 Level 1、功能/不可能三角可追溯"
-exit_criteria: "Level 1 入口满足；L5 表补齐；Stage5 准出"
+exit_criteria: "Level 1 入口满足；05_成功标识与验证/02_验收标准.md 表补齐；Stage5 准出"
 l5_stage_anchor: "l5-func-10"
 consumes: ["Stage5-03 准出"]
 artifacts: ["Level 1 入口满足", "Stage5 准出"]

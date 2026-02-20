@@ -1,6 +1,6 @@
 # DNA：Module C MoE 议会
-# 引用：09_核心模块架构规约.md
-# L4 步骤引用：Phase2 01_ModuleC
+# 规约文档（AI 可读）：03_原子目标与规约/_共享规约/09_核心模块架构规约.md
+# L4 实践文档（AI 可读）：04_阶段规划与实践/Stage4_MoE与执行网关/01_ModuleC_MoE议会接入.md
 
 module_c_moe_council:
   purpose: "右脑 - 混合专家议会"

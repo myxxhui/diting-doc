@@ -25,6 +25,46 @@
 
 - `core_modules/dna_module_b.yaml`（strategy_pools、scanner）
 
+<a id="design-stage3-02-integration-talib"></a>
+### 逻辑填充期开源接入点：TA-Lib（Phase1 必选）
+
+- **实践重点**：Module B 与 Scanner 的**全部技术指标**（如 MACD、RSI、Bollinger、ADX、K 线形态等）统一基于 TA-Lib 计算，不在此阶段自研指标实现，以保证与 TradingView/业界口径一致，减少回测与实盘偏差。明确「策略池（趋势/反转/突破）所依赖的指标列表」与 TA-Lib 函数的一一映射，以及输入（OHLCV 序列）、输出（指标值/信号）的契约。
+- **详细需求**：
+  - **指标清单与映射**：列出 Module B 当前策略池用到的所有技术指标（含参数），每个指标对应 TA-Lib 的哪个 API、参数含义与单位；若某策略需要「指标组合」，说明组合方式（如 MACD 金叉 + RSI&lt;30）。
+  - **输入输出契约**：输入为 L1 的 OHLCV（按标的、周期）；输出为每个标的的指标值或离散信号（如 score 0–100）；与 core_modules/dna_module_b 的 strategy_pools、scanner 的 score_range 对齐。
+  - **性能与依赖**：TA-Lib 为 C 库封装，需约定 Python 绑定方式、安装与构建（Dockerfile 中）；若全市场 5000+ 标的日级扫描，需约定是否批量调用、是否有缓存（如按日缓存指标结果）。
+- **验收要点**：至少一个策略池（如趋势池）的指标 100% 来自 TA-Lib；单测用固定 OHLCV 与已知结果对比（或与参考实现对比），数值误差在约定范围内。
+
+<a id="design-stage3-02-integration-qlib"></a>
+### 逻辑填充期开源接入点：Qlib（Phase2 扩展）
+
+- **实践重点**：Module B 的**研发与回测流程**采用 Qlib 的「YAML 配置驱动」思路：训练/回测的 pipeline、数据与因子管道由配置定义，保证可追溯、可复现；数据与因子存储可借鉴 Qlib 的 NumPy 存储格式，提升大规模因子与特征工程的 I/O 性能。与 VectorBT、Alphalens 的分工：Qlib 负责「配置 + 数据/因子管道 + 回测工作流」；VectorBT 负责全市场粗筛性能；Alphalens 负责策略池上线前因子质检。
+- **详细需求**：
+  - **YAML 配置范围**：定义本阶段需由 YAML 驱动的对象：数据源、因子列表、回测起止时间、标的池、策略参数等；与 dna_module_b 的 strategy_pools、scanner 的对应关系；配置变更需可追溯（如与 Git/DVC 结合）。
+  - **数据与因子管道**：从 L1 或中间存储到「因子表」的 ETL 流程；是否采用 Qlib 的 NumPy 存储或等价二进制格式；因子计算与 TA-Lib/VectorBT 的衔接点（如先 TA-Lib 算指标，再写 Qlib 格式供回测）。
+  - **回测流程**：回测的入口命令或 API、与研产同构的约束（同一套逻辑回测/实盘）；本阶段至少支持「单策略 + 单标的池」的配置驱动回测。
+- **验收要点**：修改 YAML 后能重放回测并得到可复现结果；数据/因子管道有单测或小规模集成测；与 07_ 数据版本控制的衔接（若适用）。
+
+<a id="design-stage3-02-integration-vectorbt"></a>
+### 逻辑填充期开源接入点：VectorBT（Phase1 必选）
+
+- **实践重点**：Scanner 的**全市场粗筛**（如 5000+ 标的、技术面得分 &gt; 阈值）使用 VectorBT 的向量化回测与多参数扫描能力，在满足「全市场扫描 + 推理 &lt; 30 分钟」的前提下，把粗筛与 Module C/LLM 的「精算」分工固化下来。粗筛输出为「候选池」（标的列表 + 技术分数/机会丰度），精算只消费该候选池，不在此阶段对全市场做 LLM 调用。
+- **详细需求**：
+  - **粗筛输入输出**：输入为 L1 OHLCV、Module A 的 Domain Tag（若 Scanner 按板块过滤）；输出为每个标的的技术分数（0–100）、可选的机会丰度或排名；与 dna_module_b 的 technical_score_threshold、sector_strength_threshold 对应。
+  - **与 TA-Lib 的配合**：粗筛阶段使用的指标由 TA-Lib 统一计算；VectorBT 负责向量化与批量扫描的调度与执行，不重复实现指标逻辑。
+  - **性能约束**：全市场（如 5000 标的）日级扫描 + 后续推理总时长 &lt; 30 分钟；约定 VectorBT 的并行/分块策略（如按板块或标的批次）、以及所需资源（CPU/内存）的估算方式。
+- **验收要点**：在给定数据规模下（可先 500 或 1000 标的）跑通粗筛流程，输出候选池格式符合下游 Module C 契约；性能测试在目标规模下满足 &lt; 30 分钟（或按比例折算）。
+
+<a id="design-stage3-02-integration-alphalens"></a>
+### 逻辑填充期开源接入点：Alphalens（Phase2 扩展）
+
+- **实践重点**：每个策略池（或新因子）**上线前**必须经过 Alphalens 的固定质检步骤：对「因子 + 价格」做 IC、换手率、分层收益等分析，产出 tear sheet；用于判断是真实逻辑还是过拟合，作为不可能三角中「胜率 ≥ 85%」「只做可解释的 10%」的第二道防线。将「策略池/因子上线准入」在流程上固化：未通过 Alphalens 质检的策略池不得进入生产策略池列表。
+- **详细需求**：
+  - **质检内容**：至少包含 IC（信息系数）、分层收益（如 5 分位）、换手率；tear sheet 的产出格式（HTML/PDF/结构化 JSON）及存放位置（如 L3 冷归档或报告目录），便于审计。
+  - **触发时机**：在「策略池或因子配置变更」或「定期复检」时触发；与 Qlib 的 YAML 配置联动（如某 strategy_pool 对应一组因子，该组变更即触发 Alphalens）。
+  - **准出规则**：定义「通过」的定量条件（如 IC 均值 &gt; 某阈值、分层单调性、换手率上限）；不满足则不允许该策略池参与生产扫描。
+- **验收要点**：至少一个策略池走通「因子 → Alphalens → tear sheet → 准出判断」流程；有单测或脚本可自动跑 Alphalens 并解析结果。
+
 <a id="design-stage3-02-exit"></a>
 ## 准出
 

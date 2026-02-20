@@ -1,5 +1,5 @@
-# DNA 映射文件：03_架构设计共识与协作元规则.md
-# 说明：索引 `_System_DNA/global_const.yaml` 中架构共识与协作相关配置。
+# 规约文档（AI 可读）：03_原子目标与规约/_共享规约/03_架构设计共识与协作元规则.md
+# 说明：索引 03_原子目标与规约/_System_DNA/global_const.yaml 中 architecture_consensus 配置。
 
 architecture_consensus:
   adr_mandate:

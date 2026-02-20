@@ -8,8 +8,13 @@ work_dir:
   type: "repo_i"
   repo_ref: "repo_i"
   description: "diting-core"
-delivery_scope: "Module D 四项 100%"
-exit_criteria: "Module D 实现；判官投票+Kelly+Alpha 与 01_核心公式一致"
+# 交付范围：逻辑填充期接入点实现细节见 logic_fill_design_refs 所列设计文档小节
+delivery_scope: "Module D 四项 100%；逻辑填充期接入点 PyPortfolioOpt 按 design_doc 对应小节实现"
+exit_criteria: "Module D 实现；判官投票+Kelly+Alpha 与 03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md 一致"
+logic_fill_design_refs:
+  - "03_原子目标与规约/Stage3_模块实践/04_ModuleD设计.md#design-stage3-04-integration-pfo"
+design_integration_anchors:
+  - design-stage3-04-integration-pfo
 l5_stage_anchor: "l5-mod-D"
 consumes: ["Stage3-03 准出"]
 artifacts: ["Module D 实现"]

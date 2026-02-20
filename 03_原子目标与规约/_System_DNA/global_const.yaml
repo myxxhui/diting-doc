@@ -122,10 +122,10 @@ product_scope:
       steps:
         - step_id: "01"
           l4_doc_name: "01_三位一体仓库初始化"
-          delivery_scope: "三仓目录符合 02_三位一体；diting-core 含 Makefile（test 可为占位）；diting-infra 初始化"
+          delivery_scope: "三仓目录符合 03_原子目标与规约/_共享规约/02_三位一体仓库规约.md；diting-core 含 Makefile（test 可为占位）；diting-infra 初始化"
           exit_criteria: "三仓存在且目录与 global_const.trinity_repos 一致；diting-core make test 占位通过"
           l5_anchor: null
-          l5_acceptance_criterion: "工程：三仓目录符合 02_三位一体规约；diting-core 含 Makefile 且 make test 可运行（可为占位）"
+          l5_acceptance_criterion: "工程：三仓目录符合 03_原子目标与规约/_共享规约/02_三位一体仓库规约.md；diting-core 含 Makefile 且 make test 可运行（可为占位）"
           verification_method: "目录存在性、make test 占位"
     - id: "Phase0-DataIngestion"
       goal: "数据采集与输入层：真实数据可写入 L1/L2 且可被 Module A/B/C 消费"
@@ -182,10 +182,10 @@ product_scope:
           verification_method: "单测或占位通过、接口契约满足；由 Phase1 01_ 准出时更新本行"
         - step_id: "02"
           l4_doc_name: "02_ModuleD判官最小闭环"
-          delivery_scope: "判官投票+Kelly+Alpha 输出与 01_核心公式一致"
+          delivery_scope: "判官投票+Kelly+Alpha 输出与 03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md 一致"
           exit_criteria: "Table-Driven 单测、边界覆盖"
           l5_anchor: "l5-func-02"
-          l5_acceptance_criterion: "判官投票+Kelly+Alpha 输出与 01_核心公式一致"
+          l5_acceptance_criterion: "判官投票+Kelly+Alpha 输出与 03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md 一致"
           verification_method: "Table-Driven 单测、边界覆盖；由 Phase1 02_ 准出时更新本行"
         - step_id: "03"
           l4_doc_name: "03_ModuleE风控占位"
@@ -230,14 +230,14 @@ product_scope:
     - id: "Phase3-xxx"
       goal: "优化与扩展（多策略池、可观测性、成本治理等）"
       lifecycle_stage: "阶段 3、4"
-      modules: "按 09 规约与 L1 价值查漏补缺"
+      modules: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/产品设计/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
       steps:
         - step_id: "01"
           l4_doc_name: "01_可观测性与健康检查"
-          delivery_scope: "日志/指标/健康检查满足 L3"
+          delivery_scope: "日志/指标/健康检查满足 03_原子目标与规约 中可观测性相关规约"
           exit_criteria: "Prometheus 与健康端点验证"
           l5_anchor: "l5-func-08"
-          l5_acceptance_criterion: "日志/指标/健康检查满足 L3"
+          l5_acceptance_criterion: "日志/指标/健康检查满足 03_原子目标与规约 中可观测性相关规约"
           verification_method: "Prometheus 与健康端点验证；由 Phase3 01_ 准出时更新本行"
         - step_id: "02"
           l4_doc_name: "02_成本治理与Token熔断"
@@ -248,7 +248,7 @@ product_scope:
           verification_method: "配置读取与熔断路径验证；由 Phase3 02_ 准出时更新本行"
         - step_id: "03"
           l4_doc_name: "03_多策略与扩展"
-          delivery_scope: "按 09 规约与 L1 价值查漏补缺"
+          delivery_scope: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/产品设计/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
           exit_criteria: "按 Phase3 03_ 约定"
           l5_anchor: null
           l5_acceptance_criterion: null
@@ -256,17 +256,17 @@ product_scope:
         - step_id: "04"
           l4_doc_name: "04_Level1入口与L5表补齐"
           delivery_scope: "满足三级流水线 Level 1、功能/不可能三角可追溯"
-          exit_criteria: "入口条件核对、L5 表补齐"
+          exit_criteria: "入口条件核对、05_成功标识与验证/02_验收标准.md 表补齐"
           l5_anchor: "l5-func-10"
           l5_acceptance_criterion: "满足三级流水线 Level 1、功能/不可能三角可追溯"
-          verification_method: "入口条件核对、L5 表补齐"
+          verification_method: "入口条件核对、05_成功标识与验证/02_验收标准.md 表补齐"
   priority_rules:
     p0: "生存底线相关：风控盾（Module E）、密钥与合规、回撤与止损"
     p1: "认知边界与复利：量化信号与判官闭环（A/B/D）、MoE 议会（C）、研产同构"
-  l1_mapping_ref: "01_需求与产品范围 第四节"
+  l1_mapping_ref: "03_原子目标与规约/产品设计/01_需求与产品范围.md 第四节"
 
 # 成本治理（L2 07_成本治理维度 → L3 10_运营治理与灾备等）
-# 引用：02_战略维度/产品设计/07_成本治理维度.md；06/09/10 规约引用本子树
+# 规约文档（AI 可读）：02_战略维度/产品设计/07_成本治理维度.md；03_原子目标与规约/_共享规约/06_动态配置中心规约.md、09_核心模块架构规约.md、10_运营治理与灾备规约.md 引用本子树
 cost_governance:
   used_by_l4_stages: ["stage3_01", "stage5_02", "stage5_03"]
   token_budget:
@@ -290,7 +290,7 @@ cost_governance:
     hot_path_def: false  # 热路径 D+E+F：常驻，不缩零
 
 # 可部署单元（方案 B：多服务；与 09_ 可部署单元清单一致）
-# 引用：03_原子目标与规约/_共享规约/09_核心模块架构规约.md
+# 规约文档（AI 可读）：03_原子目标与规约/_共享规约/09_核心模块架构规约.md
 deployable_units:
   ingestion:
     name: "数据采集与存储"
@@ -329,7 +329,7 @@ deployable_units:
     workflow_stages: ["stage3_04", "stage3_05", "stage3_06"]  # 实现阶段；构建/部署可合并
 
 # 数据架构与分层存储（L2 03_数据架构与分层存储维度 → L3 07_数据版本控制等）
-# 引用：02_战略维度/产品设计/03_数据架构与分层存储维度.md
+# 规约文档（AI 可读）：02_战略维度/产品设计/03_数据架构与分层存储维度.md；03_原子目标与规约/_共享规约/07_数据版本控制规约.md
 data_architecture:
   l1_hot:
     timescaledb:

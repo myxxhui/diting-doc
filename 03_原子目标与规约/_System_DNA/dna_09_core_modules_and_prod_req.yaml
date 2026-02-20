@@ -1,7 +1,7 @@
-# DNA 映射文件：09_核心模块架构规约.md
-# 说明：核心模块配置已拆分至 `_System_DNA/core_modules/` 下各 dna_module_*.yaml；
-# L4 步骤应直接引用 core_modules/dna_module_a.yaml 等。
-# 聚合视图仍见 global_const.yaml#core_modules；production_requirements 保留在 global_const。
+# 规约文档（AI 可读）：03_原子目标与规约/_共享规约/09_核心模块架构规约.md
+# 说明：核心模块配置已拆分至 03_原子目标与规约/_System_DNA/core_modules/ 下各 dna_module_*.yaml；
+# L4 实践文档应直接引用 03_原子目标与规约/_System_DNA/core_modules/dna_module_a.yaml 等完整路径。
+# 聚合视图：03_原子目标与规约/_System_DNA/global_const.yaml#core_modules；production_requirements 保留在 global_const。
 
 core_modules:
   module_a: "core_modules/dna_module_a.yaml"

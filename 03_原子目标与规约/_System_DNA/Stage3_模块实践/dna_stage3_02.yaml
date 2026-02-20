@@ -8,8 +8,19 @@ work_dir:
   type: "repo_i"
   repo_ref: "repo_i"
   description: "diting-core"
-delivery_scope: "Module B 四项 100%"
+# 交付范围：逻辑填充期接入点实现细节见 logic_fill_design_refs 所列设计文档小节
+delivery_scope: "Module B 四项 100%；逻辑填充期接入点 TA-Lib、Qlib、VectorBT、Alphalens 按 design_doc 对应小节实现"
 exit_criteria: "Module B 实现；单测与联动验证通过"
+logic_fill_design_refs:
+  - "03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md#design-stage3-02-integration-talib"
+  - "03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md#design-stage3-02-integration-qlib"
+  - "03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md#design-stage3-02-integration-vectorbt"
+  - "03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md#design-stage3-02-integration-alphalens"
+design_integration_anchors:
+  - design-stage3-02-integration-talib
+  - design-stage3-02-integration-qlib
+  - design-stage3-02-integration-vectorbt
+  - design-stage3-02-integration-alphalens
 l5_stage_anchor: "l5-mod-B"
 consumes: ["Stage3-01 准出"]
 artifacts: ["Module B 实现"]

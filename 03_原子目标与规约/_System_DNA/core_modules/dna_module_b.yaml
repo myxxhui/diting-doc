@@ -1,6 +1,6 @@
 # DNA：Module B 量化扫描引擎
-# 引用：09_核心模块架构规约.md
-# L4 步骤引用：Phase1 按模块实践 02_ModuleB
+# 规约文档（AI 可读）：03_原子目标与规约/_共享规约/09_核心模块架构规约.md
+# L4 实践文档（AI 可读）：04_阶段规划与实践/Stage3_模块实践/02_ModuleB.md
 
 module_b_quant_engine:
   purpose: "左脑 - 量化扫描引擎：机会丰度"

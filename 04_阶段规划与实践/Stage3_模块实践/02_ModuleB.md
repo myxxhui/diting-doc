@@ -7,7 +7,8 @@
 > - **阶段**: [Phase1_按模块实践](README.md)
 
 **本步设计文档**：[02_ModuleB设计](../../03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md#design-stage3-02-exit)  
-**本步 DNA 文件**：[03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_02.yaml](../../03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_02.yaml)
+**本步 DNA 文件**：[03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_02.yaml](../../03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_02.yaml)  
+**逻辑填充期接入点**：本步须按设计文档中「逻辑填充期开源接入点」小节实现并达标：[TA-Lib](../../03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md#design-stage3-02-integration-talib)、[Qlib](../../03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md#design-stage3-02-integration-qlib)、[VectorBT](../../03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md#design-stage3-02-integration-vectorbt)、[Alphalens](../../03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md#design-stage3-02-integration-alphalens)。
 
 <a id="l4-step-nav"></a>
 ## 步骤导航
@@ -54,7 +55,7 @@
 ```
 你是在 diting-core 中实现 Module B 量化扫描引擎的开发者。必读：03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module B 小节）、03_原子目标与规约/_System_DNA/core_modules/dna_module_b.yaml、QuantSignal.proto。
 
-任务：1. 实现 QuantScanner，输出 QuantSignal；2. 策略池与阈值写 YAML；3. 单测覆盖 TREND/REVERSION/BREAKOUT；4. 用真实 OHLCV 验证（若 s0_data 已准出）。
+任务：1. 实现 QuantScanner，输出 QuantSignal；2. 按设计文档「逻辑填充期开源接入点：TA-Lib、Qlib、VectorBT、Alphalens」小节实现并达标（实践重点、详细需求、验收要点见该设计文档）；3. 策略池与阈值写 YAML；4. 单测覆盖 TREND/REVERSION/BREAKOUT；5. 用真实 OHLCV 验证（若 s0_data 已准出）。
 
 工作目录：diting-core。约束：阈值不硬编码；代码含 [Ref: 02_ModuleB]。
 ```
@@ -67,7 +68,7 @@
 <a id="l4-stage3-02-exit"></a>
 ## 本步骤准出（DoD）
 
-- 代码提交；单测全绿；L5 [l5-mod-B](../../05_成功标识与验证/02_验收标准.md#l5-mod-B)、[l5-stage-stage3_02](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_02) 已更新
+- 代码提交；单测全绿；L3 逻辑填充期接入点（TA-Lib、Qlib、VectorBT、Alphalens）按设计文档达标；L5 [l5-mod-B](../../05_成功标识与验证/02_验收标准.md#l5-mod-B)、[l5-stage-stage3_02](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_02) 已更新
 
 ## 本步骤失败时
 
