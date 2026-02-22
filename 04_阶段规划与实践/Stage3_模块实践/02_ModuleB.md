@@ -22,7 +22,7 @@
 
 ## 本步骤落实的 DNA 键
 
-- `core_modules/dna_module_b.yaml`：`module_b_quant_engine.strategy_pools`、`scanner.technical_score_threshold`、`scanner.sector_strength_threshold`
+- `core_modules/dna_module_b.yaml`：`module_b_quant_engine.strategy_pools`、`scanner.technical_score_threshold`、`scanner.sector_strength_threshold`、`integration_packages`
 
 ## 实现部分
 
@@ -32,6 +32,7 @@
 2. 接口：输入标的池、OHLCV；输出 `QuantSignal` 列表（technical_score、strategy_source、sector_strength）
 3. 三大策略池（Trend/Reversion/Breakout）阈值与条件写 **YAML 配置**
 4. 使用 L1 OHLCV 真实数据（s0_data 准出后）
+5. **依赖与构建**：在 Dockerfile/requirements 中安装 TA-Lib（含系统层 C 库）、Qlib、VectorBT、Alphalens（见设计文档「[依赖与构建](../../03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md#design-stage3-02-deps)」与 dna_module_b.integration_packages）；单测与 make test 须在镜像内可运行。
 
 ## 验证部分
 
@@ -55,7 +56,7 @@
 ```
 你是在 diting-core 中实现 Module B 量化扫描引擎的开发者。必读：03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module B 小节）、03_原子目标与规约/_System_DNA/core_modules/dna_module_b.yaml、QuantSignal.proto。
 
-任务：1. 实现 QuantScanner，输出 QuantSignal；2. 按设计文档「逻辑填充期开源接入点：TA-Lib、Qlib、VectorBT、Alphalens」小节实现并达标（实践重点、详细需求、验收要点见该设计文档）；3. 策略池与阈值写 YAML；4. 单测覆盖 TREND/REVERSION/BREAKOUT；5. 用真实 OHLCV 验证（若 s0_data 已准出）。
+任务：1. 实现 QuantScanner，输出 QuantSignal；2. 按设计文档「逻辑填充期开源接入点：TA-Lib、Qlib、VectorBT、Alphalens」小节实现并达标（实践重点、详细需求、验收要点见该设计文档）；3. 策略池与阈值写 YAML；4. 单测覆盖 TREND/REVERSION/BREAKOUT；5. 用真实 OHLCV 验证（若 s0_data 已准出）；6. 在 Dockerfile/requirements 中按 design 与 DNA 安装 TA-Lib、Qlib、VectorBT、Alphalens；镜像内 make test 及本步单测通过。
 
 工作目录：diting-core。约束：阈值不硬编码；代码含 [Ref: 02_ModuleB]。
 ```

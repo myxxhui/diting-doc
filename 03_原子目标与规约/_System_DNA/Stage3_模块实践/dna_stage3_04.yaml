@@ -19,3 +19,5 @@ l5_stage_anchor: "l5-mod-D"
 consumes: ["Stage3-03 准出"]
 artifacts: ["Module D 实现"]
 semantic_ref: "03_原子目标与规约/_System_DNA/core_modules/dna_module_d.yaml"
+# 部署配套：与 dna_module_d.integration_packages 一致
+integration_packages_ref: "core_modules/dna_module_d.yaml#integration_packages"

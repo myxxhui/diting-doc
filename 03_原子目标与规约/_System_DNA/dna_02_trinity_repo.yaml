@@ -1,5 +1,0 @@
-# 规约文档（AI 可读）：03_原子目标与规约/_共享规约/02_三位一体仓库规约.md
-# 说明：索引 `_System_DNA/global_const.yaml` 中 Trinity-Repo 相关配置。
-
-trinity_repos:
-  $ref: "global_const.yaml#trinity_repos"

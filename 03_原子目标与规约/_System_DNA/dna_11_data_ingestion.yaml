@@ -1,5 +1,0 @@
-# 规约文档（AI 可读）：03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md
-# 说明：索引 03_原子目标与规约/_System_DNA/global_const.yaml 中 data_ingestion 配置。
-
-data_ingestion:
-  $ref: "global_const.yaml#data_ingestion"

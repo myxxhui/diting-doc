@@ -22,7 +22,7 @@
 
 ## 本步骤落实的 DNA 键
 
-- `core_modules/dna_module_d.yaml`：`voting_mechanism`、`dynamic_kelly`、`cash_drag_monitor`、`defensive_mode`
+- `core_modules/dna_module_d.yaml`：`voting_mechanism`、`dynamic_kelly`、`cash_drag_monitor`、`defensive_mode`、`integration_packages`
 
 ## 实现部分
 
@@ -33,6 +33,7 @@
 3. 凯利公式、投票权重、Cash Drag 阈值写 **YAML 配置**
 4. 逻辑密集，须走 5D（Design-Drive-Decompose-Defense）
 5. **双轨分流**：根据 `ExpertOpinion.horizon`（或上游传入的轨标识）分支——当 `TimeHorizon = LONG_TERM` 时，不施加 2% 硬止损与现金拖累监控，仅施加逻辑证伪与大周期反转规则；`SHORT_TERM` 或未设置时按现有规则。见 [09_ Module D 双轨分流](../../03_原子目标与规约/_共享规约/09_核心模块架构规约.md#双轨分流timehorizon)。
+6. **依赖与构建**：requirements/Dockerfile 中含 PyPortfolioOpt（见设计文档与 dna_module_d.integration_packages）；判官相关单测在镜像内可运行。
 
 ## 验证部分
 
@@ -56,7 +57,7 @@
 ```
 你是在 diting-core 中实现 Module D 判官的开发者。必读：03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module D 小节）、03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md、03_原子目标与规约/_System_DNA/core_modules/dna_module_d.yaml、verdict.proto。
 
-任务：1. 实现投票+Kelly+Cash Drag+Defensive；2. 按设计文档「逻辑填充期开源接入点：PyPortfolioOpt」小节实现组合优化与仓位闭环并达标；3. 公式与阈值写 YAML；4. Table-Driven 单测覆盖边界；5. 5D 执行：Design 锁逻辑、Drive 锚测试、Decompose 原子、Defense 人把关。
+任务：1. 实现投票+Kelly+Cash Drag+Defensive；2. 按设计文档「逻辑填充期开源接入点：PyPortfolioOpt」小节实现组合优化与仓位闭环并达标；3. 公式与阈值写 YAML；4. Table-Driven 单测覆盖边界；5. 5D 执行：Design 锁逻辑、Drive 锚测试、Decompose 原子、Defense 人把关；6. requirements/Dockerfile 中声明并安装 PyPortfolioOpt；镜像内判官单测通过。
 
 工作目录：diting-core。代码含 [Ref: 04_ModuleD]。
 ```

@@ -22,7 +22,7 @@
 
 ## 本步骤落实的 DNA 键
 
-- `core_modules/dna_module_f.yaml`：`architecture`、`human_in_the_loop`、`order_splitting`
+- `core_modules/dna_module_f.yaml`：`architecture`、`human_in_the_loop`、`order_splitting`、`integration_packages`
 
 ## 实现部分
 
@@ -31,6 +31,7 @@
 1. 建立 `diting/execution` 或 `diting/drivers` 包
 2. Broker 抽象（05_ 规约）；占位/仿真实现
 3. 配置写 **YAML**；Human-in-the-Loop 审核状态可配置
+4. **依赖与构建**：requirements 中含 Vn.py 或 Gateway 相关包（见设计文档与 dna_module_f.integration_packages）；若实盘 CTP 等需系统库则在 Dockerfile 中说明。place_order 占位/仿真单测在镜像内可运行。
 
 ## 验证部分
 
@@ -54,7 +55,7 @@
 ```
 你是在 diting-core 中实现 Module F 执行网关的开发者。必读：03_原子目标与规约/_共享规约/09_核心模块架构规约.md（Module F 小节）、03_原子目标与规约/_共享规约/05_接口抽象层规约.md、03_原子目标与规约/_System_DNA/core_modules/dna_module_f.yaml。
 
-任务：1. 实现 Broker 抽象与占位（Gateway 式，深度参考 Vn.py）；2. 按设计文档「逻辑填充期开源接入点：Vn.py」小节实现并达标；3. 配置写 YAML；4. place_order 可调用；5. 单测覆盖。
+任务：1. 实现 Broker 抽象与占位（Gateway 式，深度参考 Vn.py）；2. 按设计文档「逻辑填充期开源接入点：Vn.py」小节实现并达标；3. 配置写 YAML；4. place_order 可调用；5. 单测覆盖；6. requirements 中声明 Vn.py 或 Gateway 相关包；镜像内 place_order 单测通过。
 
 工作目录：diting-core。代码含 [Ref: 06_ModuleF]。
 ```

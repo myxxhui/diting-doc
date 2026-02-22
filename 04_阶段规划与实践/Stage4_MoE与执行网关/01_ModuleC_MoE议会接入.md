@@ -167,7 +167,7 @@ make test
 |--------|------|
 | `product_scope.phases` Phase2-xxx | 本 Phase 范围 |
 | `core_modules.module_c`（若存在） | Router 与专家配置 |
-| `dna_01_core_formula_moe`（若存在） | Router(Experts) 与 Alpha 定义 |
+| `dna_stage4_01.semantic_refs`、`global_const.core_formula` | Router(Experts) 与 Alpha 定义（见本步 DNA） |
 
 ## 逻辑密集说明
 

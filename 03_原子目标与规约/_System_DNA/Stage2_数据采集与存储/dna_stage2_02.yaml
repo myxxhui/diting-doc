@@ -20,3 +20,7 @@ design_integration_anchors:
 l5_stage_anchor: "l5-stage-stage2_02"
 consumes: ["Stage2-01 准出"]
 artifacts: ["采集任务", "Dockerfile"]
+# 部署配套：逻辑填充期借鉴组件，须在 Dockerfile/requirements 中显式安装
+integration_packages:
+  - akshare
+  - openbb-platform  # 或项目采用的 openbb 包名

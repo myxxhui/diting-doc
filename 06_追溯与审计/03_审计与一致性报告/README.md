@@ -111,7 +111,7 @@ L2 战略维度、L3 规约、DNA 子树三者变更时，可按下述清单检�
 |------|--------|----------|
 | 1 | 每个 L2 维度（产品设计 01～08、开发与交付 01）在 [00_L2_L3_DNA_映射](../00_L2_L3_DNA_映射.md) 中有对应行 | 打开映射表，确认 9 个维度各有一行，且主责 L3、DNA 根节点/文件已填写 |
 | 2 | 每个维度的主责 L3 文档存在，且其 TRACEBACK 中含该 L2 维度的链接 | 按映射表「主责 L3 规约」列打开文档，检查文首 TRACEBACK 是否有「战略维度：…」并指向对应 L2 文档 |
-| 3 | 映射表中列出的 DNA 根节点在 `global_const.yaml` 或对应 `dna_*.yaml` 中存在 | 打开 [03_原子目标与规约/_System_DNA/global_const.yaml](../../03_原子目标与规约/_System_DNA/global_const.yaml)，确认 product_scope、cost_governance、data_architecture 等根节点存在；dna_dev_workflow 为独立文件 |
+| 3 | 映射表中列出的 DNA 根节点在 `global_const.yaml` 中存在 | 打开 [03_原子目标与规约/_System_DNA/global_const.yaml](../../03_原子目标与规约/_System_DNA/global_const.yaml)，确认 product_scope、cost_governance、data_architecture 等根节点存在；dna_dev_workflow 为独立文件 |
 | 4 | （可选）`global_const.strategic_dimensions` 中每条 dimension 的 `primary_l3_docs` 与映射表一致 | 对比 YAML 中 strategic_dimensions 与 00_L2_L3_DNA_映射 表的主责 L3 列 |
 
 ### 脚本校验（可选）

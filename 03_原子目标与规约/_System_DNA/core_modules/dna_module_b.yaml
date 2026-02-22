@@ -27,3 +27,9 @@ module_b_quant_engine:
     universe_size: 5000
     technical_score_threshold: 70
     sector_strength_threshold: 1.1
+# 部署配套：逻辑填充期借鉴组件，须在 Dockerfile/requirements 中显式安装；TA-Lib 需先安装系统层 ta-lib C 库
+integration_packages:
+  - TA-Lib
+  - qlib
+  - vectorbt
+  - alphalens

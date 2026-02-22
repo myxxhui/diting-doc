@@ -17,3 +17,6 @@ module_f_execution_gateway:
   order_splitting:
     enabled: true
     chunk_size: 10000
+# 部署配套：逻辑填充期借鉴组件（Gateway 抽象）
+integration_packages:
+  - vnpy  # 或项目采用的 vnpy 子包名

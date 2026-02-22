@@ -29,6 +29,7 @@
 
 ## 说明
 
+- **L4 依赖引用**：L4 步骤引用依赖或语义时，仅引用**步骤级 DNA**（dna_stage*、core_modules/dna_module_*）及 `global_const`；规约级配置收敛至 global_const 各子树，L2↔L3 映射以 global_const#xxx 为准，不设独立 dna_01～dna_11 文件。
 - **product_scope / roadmap**：产品设计维度 DNA 根，在 global_const 中补全后本表无需改列名。
 - **data_architecture**：数据架构维度专用 DNA 根，在 global_const 中新增后与 data_version_control 并列引用。
 - **cost_governance**：成本治理维度专用 DNA 根，在 global_const 中新增。

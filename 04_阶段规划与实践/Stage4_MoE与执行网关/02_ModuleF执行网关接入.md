@@ -22,6 +22,8 @@
 - **L3 阶段目标**：执行网关接入，策略与经纪商解耦；Module F 通过抽象接口对接 Redis Streams、OMS Lite、MiniQMT（xtquant）或 Human-in-the-Loop。
 - **本步目标**：实现执行层抽象（BrokerDriver 或等价接口）、Broker 驱动占位或仿真实现，使 E 风控通过后的信号可进入执行流水线（可为占位/仿真，不真实下单）。
 
+**依赖与构建**：执行网关镜像的依赖与 [06_ModuleF](../Stage3_模块实践/06_ModuleF.md) 及 dna_module_f.integration_packages 一致；确保占位/仿真或实盘适配器在镜像内可运行。
+
 ## 关键产出物
 
 1. Broker 抽象接口与 05_ 一致（get_cash_balance、place_order 等）
@@ -155,7 +157,7 @@ make test
 | `product_scope.phases` Phase2-xxx | 本 Phase 范围 |
 | `core_modules.module_f`（若存在） | 执行网关与 Broker 配置 |
 | `data_architecture`（若存在） | Redis Streams 等数据层约定 |
-| `dna_05_interface_abstraction`（若存在） | 接口抽象约定 |
+| `dna_stage4_02.semantic_refs`、`global_const.abstraction_layer.broker_driver` | 接口抽象约定（见本步 DNA） |
 
 ## 逻辑密集说明
 

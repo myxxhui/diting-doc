@@ -27,3 +27,6 @@ module_d_gavel:
       - "胜率阈值从 80% 提至 90%"
       - "仓位减半"
       - "锁定 25% 利润垫"
+# 部署配套：逻辑填充期借鉴组件
+integration_packages:
+  - pyportfolioopt

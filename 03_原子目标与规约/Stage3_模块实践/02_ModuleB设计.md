@@ -1,6 +1,7 @@
 # L3 · Stage3-02 Module B 设计
 
 > [!NOTE] **[TRACEBACK] 原子规约锚点**
+> - **05_ 对应项**: [01_顶层概念/05_谛听优先借鉴的十大开源选型](../../01_顶层概念/05_谛听优先借鉴的十大开源选型.md) 第 4、6、7、8 项（TA-Lib、Qlib、VectorBT、Alphalens）
 > - **战略维度**: [技术栈与架构维度](../../02_战略维度/产品设计/02_技术栈与架构维度.md)
 > - **原子规约**: [_共享规约/09_核心模块架构规约](../_共享规约/09_核心模块架构规约.md)
 > - **DNA**: [dna_stage3_02.yaml](../_System_DNA/Stage3_模块实践/dna_stage3_02.yaml)、[dna_module_b.yaml](../_System_DNA/core_modules/dna_module_b.yaml)
@@ -23,7 +24,14 @@
 <a id="design-stage3-02-dna-keys"></a>
 ## 本步落实的 _System_DNA 键
 
-- `core_modules/dna_module_b.yaml`（strategy_pools、scanner）
+- `core_modules/dna_module_b.yaml`（strategy_pools、scanner、integration_packages）
+
+<a id="design-stage3-02-deps"></a>
+### 依赖与构建（部署配套）
+
+- **逻辑填充期借鉴组件**：本步实现依赖 [01_顶层概念/05_谛听优先借鉴的十大开源选型](../../01_顶层概念/05_谛听优先借鉴的十大开源选型.md) 中 **TA-Lib**、**Qlib**、**VectorBT**、**Alphalens**。
+- **要求**：diting-core 的 Dockerfile 及 requirements 中**显式声明并安装**上述组件。TA-Lib 为 C 库封装，需约定 Python 绑定方式及在 Dockerfile 中的安装与构建（如系统层安装 ta-lib C 库后再 pip install TA-Lib）；Qlib、VectorBT、Alphalens 为 Python 包，在 requirements 中列出并在 Dockerfile 中安装。构建后 `make test` 及本步单测须在镜像内可运行。
+- **验收**：L4 本步准出时须包含「依赖已写入 Dockerfile/requirements」「镜像内 make test 与本步单测通过」的验证。
 
 <a id="design-stage3-02-integration-talib"></a>
 ### 逻辑填充期开源接入点：TA-Lib（Phase1 必选）
@@ -32,7 +40,7 @@
 - **详细需求**：
   - **指标清单与映射**：列出 Module B 当前策略池用到的所有技术指标（含参数），每个指标对应 TA-Lib 的哪个 API、参数含义与单位；若某策略需要「指标组合」，说明组合方式（如 MACD 金叉 + RSI&lt;30）。
   - **输入输出契约**：输入为 L1 的 OHLCV（按标的、周期）；输出为每个标的的指标值或离散信号（如 score 0–100）；与 core_modules/dna_module_b 的 strategy_pools、scanner 的 score_range 对齐。
-  - **性能与依赖**：TA-Lib 为 C 库封装，需约定 Python 绑定方式、安装与构建（Dockerfile 中）；若全市场 5000+ 标的日级扫描，需约定是否批量调用、是否有缓存（如按日缓存指标结果）。
+  - **性能与依赖**：TA-Lib 的安装与构建见本节「[依赖与构建](#design-stage3-02-deps)」；若全市场 5000+ 标的日级扫描，需约定是否批量调用、是否有缓存（如按日缓存指标结果）。
 - **验收要点**：至少一个策略池（如趋势池）的指标 100% 来自 TA-Lib；单测用固定 OHLCV 与已知结果对比（或与参考实现对比），数值误差在约定范围内。
 
 <a id="design-stage3-02-integration-qlib"></a>

@@ -37,7 +37,7 @@ flowchart LR
 
 ## L3 文档 ↔ DNA 子树总对照表
 
-> **步骤级执行与验收**以各 Stage 目录下 `dna_stageX_0Y.yaml` 为准（见「步骤级 DNA 与规约级 DNA 约定」）；**规约级 DNA**（下表及 global_const 子树、根下 dna_01_*～dna_11_*）为跨步/跨阶段引用。所有与实现/测试/验收相关的参数与约束，应收敛到 `_System_DNA/global_const.yaml` 对应子树或步骤级 DNA 中，L4 阶段与后续代码/脚本以步骤级 DNA 及这些键值为准。
+> **步骤级执行与验收**以各 Stage 目录下 `dna_stageX_0Y.yaml` 为准（见「步骤级 DNA 与规约级配置约定」）；规约级配置收敛至 `global_const.yaml` 各子树，_共享规约 01_～11_ 对应 `global_const#xxx` 键。所有与实现/测试/验收相关的参数与约束，应收敛到 `_System_DNA/global_const.yaml` 对应子树或步骤级 DNA 中，L4 阶段与后续代码/脚本以步骤级 DNA 及这些键值为准。
 
 下表每行设显式锚点 id（`l3-dna-01`～`l3-dna-13`），供 _共享规约 或其它文档链到本表行，如 `README.md#l3-dna-01`。
 
@@ -63,10 +63,10 @@ flowchart LR
 > 3）在 L4 阶段/步骤文档中引用这些 DNA 键，而非直接写死具体数值。  
 > **L2 维度变更时**：先更新该维度的主责 L3 文档，再同步对应 DNA 子树，最后检查 L4 引用；详见 [00_系统规则 四、强制联动规则](../00_系统规则_通用项目协议.md#四强制联动规则) 与 [00_L2_L3_DNA_映射](../06_追溯与审计/00_L2_L3_DNA_映射.md)。
 
-## 步骤级 DNA 与规约级 DNA 约定
+## 步骤级 DNA 与规约级配置约定
 
 - **步骤级 DNA**：`_System_DNA/StageX_*/dna_stageX_0Y.yaml`（如 Stage1_仓库与骨架/dna_stage1_01.yaml、Stage3_模块实践/dna_stage3_01.yaml）为**本步执行与验收**的真相源；每步的 delivery_scope、exit_criteria、work_dir、design_doc、l4_practice_doc、l5_stage_anchor 以该文件为准；dna_dev_workflow 中每步的 `design_doc`、`dna_file` 指向对应设计文档与步骤级 DNA。
-- **规约级 DNA**：`global_const.yaml` 各子树及根下 `dna_01_*`～`dna_11_*` 为**跨步/跨阶段引用**，对应 _共享规约/01_～11_ 及 L2 维度；步骤级 DNA 或设计文档可引用其键值，但不替代步骤级 DNA。根下 `dna_01_core_formula_moe.yaml`～`dna_11_data_ingestion.yaml` **保留为「规约↔DNA」映射**，_共享规约 内「对应 DNA」链接指向这些文件；不参与步骤级 1:1:1，与各 Stage 步骤级 DNA 并存。
+- **规约级配置**：`global_const.yaml` 各子树为**跨步/跨阶段引用**，对应 _共享规约/01_～11_ 及 L2 维度；_共享规约 内「对应 DNA」为 `global_const.yaml#xxx` 键；步骤级 DNA 或设计文档可引用其键值，但不替代步骤级 DNA。不设独立 dna_01～dna_11 文件。
 - **core_modules**：`_System_DNA/core_modules/dna_module_a.yaml`～`dna_module_f.yaml` 仅被 **Stage3 步骤**引用，承载 Module A～F 的语义（输入/输出/规则）；与步骤级 DNA 的对应关系见下表。
 
 ### core_modules 与 Stage3 步骤对应表
@@ -123,8 +123,7 @@ flowchart LR
 │   ├── Stage3_模块实践/                    # 步骤级 DNA（dna_stage3_01～07）
 │   ├── Stage4_MoE与执行网关/               # 步骤级 DNA（dna_stage4_01～03）
 │   ├── Stage5_优化与扩展/                  # 步骤级 DNA（dna_stage5_01～04）
-│   ├── core_modules/                       # Module A～F 语义（被 Stage3 步骤引用；dna_module_a～f）
-│   └── dna_01_*～dna_11_*（规约级）        # 规约↔DNA 映射，对应 _共享规约/01_～11_
+│   └── core_modules/                       # Module A～F 语义（被 Stage3 步骤引用；dna_module_a～f）
 ├── _共享规约/                             # 跨轴线共享的规约文档（01～11 连续序号）
 │   ├── 01_核心公式与MoE架构规约.md
 │   ├── 02_三位一体仓库规约.md

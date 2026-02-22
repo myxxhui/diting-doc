@@ -1,6 +1,7 @@
 # L3 · Stage2-02 采集逻辑与 Dockerfile 设计
 
 > [!NOTE] **[TRACEBACK] 原子规约锚点**
+> - **05_ 对应项**: [01_顶层概念/05_谛听优先借鉴的十大开源选型](../../01_顶层概念/05_谛听优先借鉴的十大开源选型.md) 第 2、3 项（AkShare、OpenBB）
 > - **原子规约**: [_共享规约/11_数据采集与输入层规约](../_共享规约/11_数据采集与输入层规约.md)
 > - **DNA**: [_System_DNA/Stage2_数据采集与存储/dna_stage2_02.yaml](../_System_DNA/Stage2_数据采集与存储/dna_stage2_02.yaml)
 > - **L4 实践**: [04_阶段规划与实践/Stage2_数据采集与存储/02_采集逻辑与Dockerfile](../../04_阶段规划与实践/Stage2_数据采集与存储/02_采集逻辑与Dockerfile.md#l4-stage2-02-exit)
@@ -17,6 +18,13 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 - **数据源**：功能深度和广度完整；前期可少存数据，结构与逻辑必须完整
 - **任务**：ingest_ohlcv、ingest_industry_revenue、ingest_news（见 11_ 与 data_ingestion DNA）
 - **写入**：L1 TimescaleDB、L2 知识库；遵循 DVC 版本化
+
+<a id="design-stage2-02-deps"></a>
+### 依赖与镜像构建（部署配套）
+
+- **逻辑填充期借鉴组件**：本步实现依赖 [01_顶层概念/05_谛听优先借鉴的十大开源选型](../../01_顶层概念/05_谛听优先借鉴的十大开源选型.md) 中 **AkShare**（国内数据）、**OpenBB**（国际/宏观/基本面）。
+- **要求**：采集镜像的 Dockerfile 及 requirements（或等价依赖文件）中**显式声明并安装**上述组件（如 `akshare`、`openbb-platform` 或项目采用的 OpenBB 包名）；构建后 `make ingest-test` 须在镜像内可运行。
+- **验收**：L4 本步准出时须包含「依赖已写入 Dockerfile/requirements」「镜像内 make ingest-test 退出码 0」的验证。
 
 <a id="design-stage2-02-integration-akshare"></a>
 ### 逻辑填充期开源接入点：AkShare（Phase1 必选）
