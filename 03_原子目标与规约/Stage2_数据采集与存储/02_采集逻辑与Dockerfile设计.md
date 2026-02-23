@@ -19,6 +19,18 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 - **任务**：ingest_ohlcv、ingest_industry_revenue、ingest_news（见 11_ 与 data_ingestion DNA）
 - **写入**：L1 TimescaleDB、L2 知识库；遵循 DVC 版本化
 
+<a id="design-stage2-02-consumes"></a>
+### 前置依赖与关键配置（设计约束）
+
+本步**消耗** Stage2-01 准出；设计层约定下游（本步）所需输入与配置来源，L4 实践中的「依赖部署步骤检查」「关键参数获取」须与本小节一致。
+
+| 类型 | 约定 | L4 对应 |
+|------|------|---------|
+| **准入条件** | Stage2-01 验证项 V1～V7 全部符合，含下游 `make verify-db-connection` 可过 | [02_采集逻辑与Dockerfile#本步依赖检查与关键参数获取](../../04_阶段规划与实践/Stage2_数据采集与存储/02_采集逻辑与Dockerfile.md#l4-stage2-02-deps-check) |
+| **关键配置项** | `TIMESCALE_DSN`（L1）、`PG_L2_DSN`（L2）、`REDIS_URL`（可选）；来源为 Sealed-Secrets 或 diting-core `.env`，占位与说明见 `.env.template` | 同上「关键参数列表与获取方式」「获取关键配置的步骤」 |
+| **表与契约** | L1 表 `ohlcv`、L2 表 `data_versions` 及知识库由 Stage2-01 的 Schema init Job 创建；本步仅 INSERT/读写，不执行 DDL | L4「数据采集逻辑细节」中 L1/L2 表结构引用 diting-infra schemas/sql |
+| **验证顺序** | 先 `make verify-db-connection` 通过，再执行 `make ingest-test`；镜像构建后在镜像内执行 `make ingest-test` 作为准出项 | L4「验证目标与验证过程」「示例与验证」 |
+
 <a id="design-stage2-02-deps"></a>
 ### 依赖与镜像构建（部署配套）
 
@@ -46,7 +58,37 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
   - **与 AkShare 的分工**：同一业务字段（如某公司营收）若国内外均有，约定以哪边为主、是否做合并或优先级规则；避免双源冲突。
 - **验收要点**：至少一条从 OpenBB 到 L2 知识库（或 Module A 可用缓存）的写入路径在逻辑填充期实现并可测；Provider 接口有单测或 Mock 实现。
 
+<a id="design-stage2-02-feature-mapping"></a>
+### 功能项与验收映射（供 L4 勾选对照）
+
+L4 实践文档中的 [功能实践项清单](../../04_阶段规划与实践/Stage2_数据采集与存储/02_采集逻辑与Dockerfile.md#l4-stage2-02-feature-checklist) 须与本表一一对应；执行者按「功能项 ID」勾选实践状态。
+
+| 功能项 ID | 功能描述 | 对应本设计文档小节 | 验收方式 |
+|-----------|----------|--------------------|----------|
+| F1 | ingest_ohlcv：AkShare A 股日线 → L1 ohlcv | [AkShare 接入点](#design-stage2-02-integration-akshare) | make ingest-test 覆盖；写入 L1 ohlcv |
+| F2 | ingest_industry_revenue：AkShare 行业/财报/营收 → L2 或约定存储 | 同上 | make ingest-test 覆盖；写入 L2 或 Module A 可用缓存 |
+| F3 | ingest_news：AkShare 国内 + OpenBB 国际 → L2 | [OpenBB 接入点](#design-stage2-02-integration-openbb) | make ingest-test 覆盖；至少一条 OpenBB→L2 路径 |
+| F4 | AkShare 接口边界与错误/限流（重试、退避） | AkShare 详细需求 | 代码中重试策略、限频或退避可查 |
+| F5 | OpenBB 至少一条到 L2 的写入路径 | OpenBB 验收要点 | 代码中 OpenBB 调用并 write_data_version |
+| F6 | Makefile 新增 ingest-test target | [依赖与镜像构建](#design-stage2-02-deps) | make ingest-test 存在且可执行 |
+| F7 | Dockerfile/requirements 显式 akshare、openbb-platform | 同上 | Dockerfile 及 requirements 中显式列出 |
+| F8 | ingest-test 目标数据约定 | L4 [2.5 确认采集到的目标数据](../../04_阶段规划与实践/Stage2_数据采集与存储/02_采集逻辑与Dockerfile.md#l4-stage2-02-target-data) | diting-core 内文档或配置约定 symbol、data_type 等 |
+
+<a id="design-stage2-02-verification"></a>
+### 验证与可执行验收（设计层定义）
+
+L4 实践中的「示例与验证」须满足下列设计层验收定义；具体执行方式与命令见 [02_采集逻辑与Dockerfile#示例与验证](../../04_阶段规划与实践/Stage2_数据采集与存储/02_采集逻辑与Dockerfile.md#l4-stage2-02-examples-verify)。L4 [验证与测试结果清单](../../04_阶段规划与实践/Stage2_数据采集与存储/02_采集逻辑与Dockerfile.md#l4-stage2-02-verify-checklist) 中的验证项 ID（V-DB、V-INGEST、V-DATA、V-IMAGE）与本表对应。
+
+| 验收维度 | 设计层定义 | 可执行证明 | L4 验证项 ID |
+|----------|------------|------------|--------------|
+| **采集逻辑符合预期** | 三个任务按 11_ 与 AkShare/OpenBB 设计写入 L1/L2 或约定缓存；接口与错误处理逻辑已实现 | `make ingest-test` 退出码 0；单测/集成测可 Mock 并断言写入结构 | V-INGEST |
+| **数据量、类型、内容符合预期** | 写入满足 L1 `ohlcv`、L2 `data_versions` 表结构与 07_ 版本化；前期可少存数据，结构完整 | psql 对 ohlcv、data_versions 的 COUNT/SELECT 样例；无主键/非空违反；与目标数据约定一致 | V-DATA |
+| **依赖链实践完整** | Stage2-01 准出 → 本步配置 → verify-db-connection → ingest-test → 镜像内 ingest-test，全链路可复现 | L4 依赖链验证顺序表 1～5 步执行通过 | V-DB、V-INGEST |
+| **镜像按预期运行并采集** | 镜像内显式安装 akshare、openbb-platform；容器内 `make ingest-test` 退出码 0 | 构建镜像 → 容器内执行 make ingest-test；可选：对比宿主机/集群内 L1/L2 数据与本地执行一致 | V-IMAGE |
+
 <a id="design-stage2-02-exit"></a>
 ## 准出
 
-采集逻辑实现；Dockerfile 可构建采集镜像；make ingest-test 或等价命令可运行。
+1. **采集逻辑实现**：ingest_ohlcv、ingest_industry_revenue、ingest_news 按 11_ 与设计文档「逻辑填充期开源接入点」实现；Dockerfile 可构建采集镜像；make ingest-test 或等价命令可运行。
+2. **前置验证**：本步执行前须已通过 `make verify-db-connection`（依赖 Stage2-01 准出与关键配置就绪）；见 [设计约束](#design-stage2-02-consumes)。
+3. **准出验证**：L4 实践文档 [验证与准出](../../04_阶段规划与实践/Stage2_数据采集与存储/02_采集逻辑与Dockerfile.md#l4-stage2-02-exit) 表中全部命令通过：`make verify-db-connection`、`make ingest-test`、**镜像内** `make ingest-test`；验收维度满足 [验证与可执行验收](#design-stage2-02-verification)。
