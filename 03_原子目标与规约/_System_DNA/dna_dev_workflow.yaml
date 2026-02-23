@@ -146,14 +146,19 @@ workflow_stages:
     env_stage: "local"
     env_minimal_full: "Minimal: 本地或轻量；Full: K3s 全栈"
     entry_criteria: "Stage1-04 准出"
-    exit_criteria: "TimescaleDB/Redis/PostgreSQL 可用；Schema init Job 成功"
+    exit_criteria: "TimescaleDB/Redis/PostgreSQL 可用；Schema init Job 成功；下游可添加连接配置并调用表数据（V1～V7 全部符合）"
     work_dir:
       type: "repo_a"
       repo_ref: "repo_a"
       description: "diting-infra"
     l5_stage_anchor: "l5-stage-stage2_01"
+    verification_commands:
+      - cmd: "V1～V7 见 dna_stage2_01.yaml verification_commands；含 Chart 缓存、DB/Redis/PostgreSQL 可用、init Job 成功、Sealed-Secrets、下游 make verify-db-connection"
+        cwd_ref: "repo_a"
+        expected_exit: 0
+        expected_outcome: "全部验证项符合预期"
     consumes: ["Stage1-04 准出"]
-    artifacts: ["基础组件 Chart", "Schema init Job 成功"]
+    artifacts: ["基础组件 Chart", "Schema init Job 成功", "下游连接配置示例与验证通过"]
 
   - stage_id: "stage2_02"
     name: "采集逻辑与Dockerfile"

@@ -12,6 +12,18 @@
 - **上一步**：[01_基础设施与依赖部署](01_基础设施与依赖部署.md#l4-stage2-01-goal)
 - **下一步**：[03_本地测试与K3s连调](03_本地测试与K3s连调.md#l4-stage2-03-goal)
 
+## 关键下游依赖（来自 Stage2-01）
+
+本步依赖 [01_基础设施与依赖部署](01_基础设施与依赖部署.md#l4-stage2-01-goal) 产出的数据库与连接方式。Stage2-01 准出时已包含**下游如何添加数据库连接配置并调用表数据**的验证；本步须与下列约定一致，并可作为 Stage2-01 的「下游引用示例」验证执行方。
+
+| 依赖项 | 说明 | 本步用法 |
+|--------|------|----------|
+| **数据库连接配置** | 由 Sealed-Secrets 或 .env 提供；占位项见 diting-core `.env.template`（如 `TIMESCALE_DSN`、`REDIS_URL`、`PG_L2_DSN`），与 diting-infra 部署的 Service/NodePort 对应 | 采集任务写入 L1 TimescaleDB、L2 知识库时使用上述 DSN；配置来源见 [01_基础设施与依赖部署#关键下游引用与验证要求](01_基础设施与依赖部署.md#l4-stage2-01-downstream) |
+| **调用表数据** | Stage2-01 的 init Job 已建表；下游通过 DSN 连接并对约定表执行 INSERT/SELECT | 本步 `make ingest-test` 会写入 L1/L2 表；Stage2-01 准出验证含「在 diting-core 执行 make verify-db-connection 或等价」以确认可调用表数据 |
+| **示例与验证** | Stage2-01 文档中「关键下游引用与验证要求」要求：在 diting-core 中提供最小验证（如 `make verify-db-connection`），连接 DB 并对 init 所建表执行 SELECT，退出码 0 | 本步实现时须提供该 make target 或等价脚本，供 Stage2-01 准出时执行；实现方式见 [01_基础设施与依赖设计](../../03_原子目标与规约/Stage2_数据采集与存储/01_基础设施与依赖设计.md#design-stage2-01-exit) 与 11_ 规约 |
+
+**验证归属**：上述「下游添加连接配置并调用表数据」的**验证执行**归属 Stage2-01 的准出检查清单（V7）；本步实现须保证该验证可被 Stage2-01 执行者复现（即本仓具备 `make verify-db-connection` 或等价）。
+
 ## 工作目录
 
 **diting-core**

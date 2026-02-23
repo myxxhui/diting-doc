@@ -8,8 +8,70 @@ work_dir:
   repo_ref: "repo_a"
   description: "diting-infra（Chart、init Job）"
 delivery_scope: "TimescaleDB/Redis/PostgreSQL + init Job + Sealed-Secrets"
-exit_criteria: "TimescaleDB/Redis/PostgreSQL 可用；Schema init Job 成功"
+exit_criteria: "TimescaleDB/Redis/PostgreSQL 可用；Schema init Job 成功；Sealed-Secrets 可用；下游可添加连接配置并调用表数据（V1～V7 全部符合）"
 env_minimal_full: "Minimal: 本地或轻量；Full: K3s 全栈"
 l5_stage_anchor: "l5-stage-stage2_01"
-consumes: ["Stage1-03 准出"]
-artifacts: ["基础组件 Chart", "Schema init Job 成功"]
+consumes: ["Stage1-04 准出"]
+artifacts: ["基础组件 Chart", "Schema init Job 成功", "下游连接配置示例与验证通过"]
+
+# 版本固定：Chart 与中间件须缓存，禁止部署时从远程拉取未固定版本
+pinned_versions:
+  charts:
+    timescaledb:
+      name: "timescaledb-single"
+      version: "0.33.2"   # Timescale helm-charts timescaledb-single（仓库无 0.21.0，采用 main 缓存）
+      path: "charts/dependencies/timescaledb"
+    redis:
+      name: "redis"
+      version: "18.0.0"   # 示例：Bitnami Redis Chart
+      path: "charts/dependencies/redis"
+    postgresql:
+      name: "postgresql"
+      version: "13.2.0"   # 示例：L2 知识库用
+      path: "charts/dependencies/postgresql"
+  middleware_images:
+    timescaledb: "timescale/timescaledb-ha:pg14.6-ts2.9.1-p1"   # 与 timescaledb-single Chart 默认一致
+    redis: "bitnami/redis:7.2.0-debian-11-r0"
+    postgresql: "bitnami/postgresql:16.0.0-debian-11-r13"
+
+# Schema init：建表脚本存放路径（diting-infra 内）
+schema_init:
+  sql_path: "schemas/sql"
+  job_name: "diting-schema-init"
+
+verification_commands:
+  - cmd: "test -d charts/dependencies/timescaledb && grep -E '^version:' charts/dependencies/timescaledb/Chart.yaml"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "Chart 已缓存且 version 与 pinned_versions.charts 一致"
+    verification_item: "V1"
+  - cmd: "kubectl get pods -n <namespace> -l app.kubernetes.io/name=timescaledb；psql $TIMESCALE_DSN -c 'SELECT 1'"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "TimescaleDB Pod Running，连接成功"
+    verification_item: "V2"
+  - cmd: "kubectl get pods -n <namespace> -l app.kubernetes.io/name=redis；redis-cli -u $REDIS_URL PING"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "Redis Pod Running，PING 成功"
+    verification_item: "V3"
+  - cmd: "kubectl get pods -n <namespace> -l app.kubernetes.io/name=postgresql；psql $PG_L2_DSN -c 'SELECT 1'"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "PostgreSQL Pod Running，连接成功"
+    verification_item: "V4"
+  - cmd: "kubectl get jobs -n <namespace>；psql $TIMESCALE_DSN -c \"\\dt\" 或对约定表 SELECT"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "Schema init Job Completed，约定表存在且可查"
+    verification_item: "V5"
+  - cmd: "kubectl get pods -n kube-system -l app.kubernetes.io/name=sealed-secrets；SealedSecret 解密为 Secret"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "Sealed-Secrets 控制器 Running，Secret 可解密"
+    verification_item: "V6"
+  - cmd: "在 diting-core 执行 make verify-db-connection（或等价：连接 DB 并对 init 所建表 SELECT）"
+    cwd_ref: "repo_i"
+    expected_exit: 0
+    expected_outcome: "下游可添加连接配置并成功调用表数据"
+    verification_item: "V7"
