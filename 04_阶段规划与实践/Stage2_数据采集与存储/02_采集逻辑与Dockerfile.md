@@ -26,10 +26,25 @@
 
 **验证归属**：上述「下游添加连接配置并调用表数据」的**验证执行**归属 Stage2-01 的准出检查清单（V7）；本步实现须保证该验证可被 Stage2-01 执行者复现（即本仓具备 `make verify-db-connection` 或等价）。
 
+<a id="l4-stage2-02-verify-routes"></a>
+## 验证路线说明（必读）
+
+本步支持两种验证路线，执行前须明确选用哪一种。
+
+| 路线 | 说明 | 适用场景 |
+|------|------|----------|
+| **默认：Docker Compose** | 在 **diting-infra** 使用 `compose/docker-compose.ingest.yaml` 启动本地 L1/L2（`make local-deps-up` → `make local-deps-init`）；在 **diting-core** 配置 `.env` 指向 localhost:15432/15433 后执行 `make verify-db-connection` → `make ingest-test`。部署与编排归属 infra，core 仅连接与验证（见 [02_三位一体仓库规约](../../03_原子目标与规约/_共享规约/02_三位一体仓库规约.md)#本地开发与部署文件）。V-IMAGE 可用 `docker run -e TIMESCALE_DSN=... -e PG_L2_DSN=...` 连宿主机 `host.docker.internal` 的 L1/L2。 | 日常开发、CI、无云凭证或无需真实集群时；**推荐作为默认验收路径**。 |
+| **可选：ECS + K3s** | 在 **diting-infra** 按 [4. 实测前自建依赖与测试后回收](#l4-stage2-02-deploy-deps-and-cleanup) 顺序 ①～⑦：先 `make deploy-dev` 起 ECS/K3s，再 Helm 部署 TimescaleDB/Redis/PostgreSQL、Secret、Schema Init Job；在 **diting-core** 用 K3s NodePort/节点 IP 填写 `.env`，执行步骤 2～5；最后在 diting-infra 执行回收。 | 需要验证与真实 K3s 集群、NodePort、Sealed-Secrets 等一致时；需 Terraform/云凭证。 |
+
+**填写约定**：在 [验证项与结果清单](#l4-stage2-02-verify-checklist)、[本步实践总结](#l4-stage2-02-summary) 的备注或「是否符合预期」中注明本次采用的路线（如「默认 Docker Compose」或「可选 ECS+K3s」），便于追溯。
+
 <a id="l4-stage2-02-deps-check"></a>
 ## 本步依赖检查与关键参数获取
 
-执行本步前，必须确认 **Stage2-01 已准出**，并完成下列检查与参数准备。
+执行本步前，须按所选验证路线准备环境，并完成下列检查与参数准备。
+
+- **默认路线（Docker Compose）**：依赖 **diting-infra** 内 `compose/docker-compose.ingest.yaml` 与 `make local-deps-up`、`make local-deps-init`；无需 Stage2-01 在 K3s 的准出，但 L1/L2 表结构须与 Stage2-01 的 schema 一致（见 diting-infra `scripts/local/init_l1_ohlcv_local.sql`、`init_l2_data_versions_local.sql`）。**diting-core** 仅配置 `.env` 并执行 `make verify-db-connection`、`make ingest-test`。
+- **可选路线（ECS + K3s）**：必须确认 **Stage2-01 已准出**（V1～V7），再在 diting-core 用 K3s 提供的 DSN 填写 `.env`。
 
 ### 1. 依赖部署步骤检查清单
 
@@ -65,6 +80,29 @@
 3. **填写 .env**：将 Stage2-01 部署得到的 `TIMESCALE_DSN`、`REDIS_URL`、`PG_L2_DSN` 填入（可从 diting-infra 的 Secret `diting-db-connection` 或部署文档中的示例/NodePort 拼接得到；本地连 K3s 时 host 为 NodePort 对应地址）。
 4. **验证连接**：在 diting-core 执行 `make verify-db-connection`，退出码 0 后再进行采集逻辑开发或 `make ingest-test`。
 
+<a id="l4-stage2-02-deploy-deps-and-cleanup"></a>
+### 4. 实测前自建依赖与测试后回收（可选路线：ECS + K3s）
+
+本小节为**可选路线（ECS + K3s）**所用。选用**默认路线（Docker Compose）**时无需执行本段 ①～⑦，直接在 diting-core 按 README「Stage2-02 本地实践」或 `make local-practice` 即可。
+
+**环境依赖**：**步骤 2～5 均依赖** L1/L2 可用（默认路线下由 **diting-infra** 的 `compose/docker-compose.ingest.yaml` 与 `make local-deps-up`、`make local-deps-init` 提供；可选路线下由 Stage2-01 在 K3s 部署）：步骤 2 需在 diting-core 连库执行 `make verify-db-connection`；步骤 3 需连库执行 `make ingest-test` 写入数据；步骤 4 需连库执行 5 条 psql 查询确认目标数据；步骤 5 需在镜像内执行 `make ingest-test`，容器同样要能连上 L1/L2。步骤 1 仅为确认上述依赖已就绪。
+
+**若选用可选路线且无现成集群与连接信息，须先按下列顺序在 diting-infra 部署测试集群与中间件，再在 diting-core 执行本步验证。**（无脚本，全部手动手顺。）
+
+**操作顺序（实测前自建依赖）**：
+
+| 顺序 | 执行位置 | 执行内容 | 说明 |
+|------|----------|----------|------|
+| ① | **diting-infra** | 若无可用集群：执行 `make deploy-dev`，等待完成；根据 deploy-engine 输出设置 **KUBECONFIG** | 需 Terraform/云凭证；与 [01_基础设施与依赖部署](01_基础设施与依赖部署.md)、[03_基础设施ECS与K3s就绪](../../Stage1_仓库与骨架/03_基础设施ECS与K3s就绪.md) 一致 |
+| ② | **diting-infra** | V1 校验：`test -d charts/dependencies/timescaledb && grep -E '^version:' charts/dependencies/timescaledb/Chart.yaml`（redis、postgresql 同理）；确认 charts/values/*.yaml 存在且镜像 tag 已固定 | 见 [01_基础设施与依赖部署 步骤 1](01_基础设施与依赖部署.md#l4-stage2-01-summary) |
+| ③ | **diting-infra** | 按 diting-infra [Stage2-01-部署与验证](../../../diting-infra/docs/Stage2-01-部署与验证.md) 部署中间件：`helm upgrade --install timescaledb ...`、`helm upgrade --install redis ...`、`helm upgrade --install postgresql-l2 ...`（-n default，密码与 values 按文档） | 对应 Pod 为 Running；NodePort 见 values（如 30432/30379/30433） |
+| ④ | **diting-infra** | 创建 Secret **diting-db-connection**（键 TIMESCALE_DSN、PG_L2_DSN）；按 [jobs/README](../../../diting-infra/jobs/README.md) 创建 ConfigMap **diting-schema-init-sql** 并 `kubectl apply -f jobs/schema-init-job.yaml`；等待 Job **diting-schema-init** 完成 | 表 ohlcv、data_versions 存在；DSN 由 NodePort + 节点 IP 拼接 |
+| ⑤ | **diting-core** | 复制 `.env.template` 为 `.env`，填入 TIMESCALE_DSN、PG_L2_DSN（及可选 REDIS_URL）；执行 `make verify-db-connection`，退出码 0 | 确认下游可连 L1/L2 |
+| ⑥ | **diting-core** | 按本步 [本步实践总结](#l4-stage2-02-summary) 步骤表执行步骤 2～5（验证项 V-DB、V-INGEST、V-DATA、V-IMAGE），并在 [验证项与结果清单](#l4-stage2-02-verify-checklist)、[目标数据约定与真实结果](#l4-stage2-02-target-data) 填写结果 | 全部完成后再做 ⑦ |
+| ⑦ | **diting-infra** | **回收**：执行 `make stage2-01-full-down`（或先 `make stage2-01-down` 再 `make down`） | **正常**：⑥ 全部完成后再执行；**异常**：若 ①～⑥ 中途失败或意外退出，也须执行本步，避免 ECS 残留与计费 |
+
+**权威引用**：①～④ 与 [01_基础设施与依赖部署](01_基础设施与依赖部署.md#l4-stage2-01-summary)、diting-infra [Stage2-01-部署与验证](../../../diting-infra/docs/Stage2-01-部署与验证.md) 一致；回收与 [清除验证环境（必做)](../../../diting-infra/docs/Stage2-01-部署与验证.md) 一致。
+
 ## 工作目录
 
 **diting-core**
@@ -74,7 +112,12 @@
 
 OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任务构建。前期可配置少存数据，code 结构与逻辑须完整。采集镜像须在 Dockerfile/requirements 中显式安装 AkShare、OpenBB（见设计文档「[依赖与镜像构建](../../03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-deps)」与 dna_stage2_02.integration_packages）。
 
-**执行指引**：为便于区分**哪些功能已实践、哪些未实践、哪些测试通过、哪些失败**，执行时请：① 先填写 [功能实践项清单](#l4-stage2-02-feature-checklist)（F1～F8 实践状态）；② 每完成一项验证后填写 [验证与测试结果清单](#l4-stage2-02-verify-checklist)（V-DB、V-INGEST、V-DATA、V-IMAGE 测试结果与备注）；③ 再按 [本步实践总结](#l4-stage2-02-summary) 步骤表执行并填「是否符合预期」与「实践结果」。**无真实数据即未实践**：须在真实或本地 L1/L2 上跑通 `make ingest-test`，并填写 [2.6 真实数据验证结果](#l4-stage2-02-real-data)（采集到的股票、类型、条数、日期范围）；仅逻辑无写入验证视为未完成。准出条件见 [本步实践总结](#l4-stage2-02-summary) 节首。
+**执行指引**（三者关系）：
+- **功能实践项清单**（F1～F8）= 本步交付项；执行时勾选「已实现 / 未实现」及代码位置。
+- **验证项与结果清单**（V-DB / V-INGEST / V-DATA / V-IMAGE）= 本步**唯一**测试结果填写处；按 [本步实践总结](#l4-stage2-02-summary) 步骤表顺序执行，每完成一步即在验证清单填写对应行，**不必在步骤表重复填写结果**。
+- **本步实践总结步骤表** = 推荐执行顺序；步骤 2～5 分别对应 V-DB、V-INGEST、V-DATA、V-IMAGE。
+
+**无真实数据即未实践**：须在真实或本地 L1/L2 上跑通 `make ingest-test`，并在 [目标数据约定与真实结果](#l4-stage2-02-target-data) 中填写真实数据验证结果。准出条件见 [验证项与结果清单](#l4-stage2-02-verify-checklist) 与 [本步实践总结](#l4-stage2-02-summary)。
 
 <a id="l4-stage2-02-ingest-detail"></a>
 ## 数据采集逻辑细节
@@ -94,19 +137,26 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 
 - **国内数据**：以 **AkShare** 为统一 Python 接口；`ingest_ohlcv`（A 股）、`ingest_industry_revenue`、`ingest_news`（国内部分）必须走 AkShare，接口边界、错误与限流、写入契约见设计文档 [逻辑填充期开源接入点：AkShare](../../03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-integration-akshare)。
 - **国际/宏观/基本面**：**OpenBB** 覆盖宏观、大宗、财报等；与 AkShare 分工、Provider 抽象见 [逻辑填充期开源接入点：OpenBB](../../03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-integration-openbb)。
+
+**说明**：AkShare、OpenBB 的**接口实现**（调用方式、错误与限流、写入 L1/L2 的契约）按上述设计文档「逻辑填充期开源接入点」实现，**不按**下述「依赖组件」；「依赖组件」仅指本步所依赖的**存储与中间件**（由 Stage2-01 部署），接口实现无需依其部署方式。
+
 - **依赖组件部署与配置**：TimescaleDB、Redis、PostgreSQL（L2）由 **Stage2-01** 在 diting-infra 中部署；本步仅在 **diting-core** 内通过 `.env`（或运行时从 Sealed-Secrets 注入）提供 `TIMESCALE_DSN`、`REDIS_URL`、`PG_L2_DSN`，不在此步部署中间件。
 - **获取关键配置的步骤**：见上文 [本步依赖检查与关键参数获取](#l4-stage2-02-deps-check)：复制 `.env.template` → `.env`，填写上述 DSN，执行 `make verify-db-connection` 通过后再执行 `make ingest-test`。
+- **验证项与执行顺序**：本步全部验证项（命令、期望结果、结果填写）见 [验证项与结果清单](#l4-stage2-02-verify-checklist)；推荐执行顺序见 [本步实践总结](#l4-stage2-02-summary) 步骤表。
 
-### 3. 验证目标与验证过程
+### 3. 与系统数据需求（含双轨）的对应
 
-| 验证目标 | 验证方式 | 预期结果 |
-|----------|----------|----------|
-| 数据库可连接、表可读写 | `make verify-db-connection` | 退出码 0；能连接 TimescaleDB 并对 init 所建表执行查询 |
-| 采集任务可运行且写入 L1/L2 | `make ingest-test` | 退出码 0；至少覆盖 ingest_ohlcv、ingest_industry_revenue 及为 Module A/L2 的至少一条路径 |
-| 逻辑填充期接入点达标 | 代码与单测/集成测 | AkShare/OpenBB 按设计文档接口与错误处理实现；单测可 Mock 返回值 |
-| 镜像内可运行采集 | 在构建后的采集镜像内执行 `make ingest-test` | 退出码 0，证明 Dockerfile/requirements 依赖正确 |
+按 [11_ 数据采集与输入层规约](../../03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md) 与 [03_双轨制与VC-Agent](../../01_顶层概念/03_双轨制与VC-Agent.md)，本步 F1～F8 覆盖系统（含 A/B 双轨）所需数据采集能力：
 
-**验证过程建议顺序**：① 本步依赖检查与关键参数获取（含 `make verify-db-connection`）→ ② 实现采集任务与 `make ingest-test` → ③ 本地 `make ingest-test` 通过 → ④ 构建镜像并在镜像内执行 `make ingest-test` 通过 → 准出。
+| 系统需求 | 本步对应 | 说明 |
+|----------|----------|------|
+| **A 轨**：OHLCV 供 Module B 扫描、技术面信号 | F1 `ingest_ohlcv` | 写入 L1 ohlcv；03 步 MarketDataFeed 读 L1 |
+| **双轨共用**：申万行业、营收占比供 Module A 打 Tag | F2 `ingest_industry_revenue` | 行业/财报/营收 → 约定表或 Redis；Module A 输入 |
+| **B 轨**：基本面（财报、营收增速、研发占比）供 VC-Agent、逻辑证伪 | F2（AkShare 财报/营收）+ F5（OpenBB 宏观/基本面） | 11_ 与 L1 约定 VC-Agent 接入基本面；F2 含「财报、营收」，OpenBB 路径含营收增速、研发占比等 |
+| **双轨共用**：新闻/知识库供 Module C 专家与 B 轨推理 | F3、F5 `ingest_news` | 国内 AkShare、国际 OpenBB → L2 data_versions / 知识库 |
+| **数据量与范围** | F8、`docs/ingest-test-target.md` | 逻辑填充期与约定一致即可；生产扩展时须满足全市场扫描所需标的与历史深度（见 [Stage2 README#数据采集规划与实践步骤对照](README.md#stage2-data-plan-vs-steps)） |
+
+**结论**：完成本步 F1～F8 并通过 V-DB/V-INGEST/V-DATA/V-IMAGE，即可保证采集层产出满足系统与双轨目标判断所需数据类型；数据量在逻辑填充期以 ingest-test-target 为准，生产扩展时在目标约定或 L5 中明确标的数/历史深度。
 
 ## 核心指令
 
@@ -120,116 +170,99 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 4. 在 Makefile 中新增 ingest-test target；退出码 0 表示通过。
 ```
 
+<a id="l4-stage2-02-verify-checklist"></a>
+<a id="l4-stage2-02-exit"></a>
 <a id="l4-stage2-02-examples-verify"></a>
-## 示例与验证（证明采集逻辑与依赖链、镜像符合预期）
+## 验证项与结果清单（本步唯一测试结果填写处）
 
-### 1. 采集逻辑符合预期的证明
+下表为本步**全部验证项**：命令、工作目录、期望结果与**结果填写**合一。执行顺序按 [本步实践总结](#l4-stage2-02-summary) 步骤表；每完成一步即在对应行填写「测试结果」与「实际输出或备注」，**不必在步骤表重复填写**。与 DNA `verification_commands`、设计文档验收一致。
 
-- **最小证明**：在 diting-core 执行 `make ingest-test`，退出码 0 表示采集任务已按 11_ 规约写入 L1/L2（或约定缓存），且逻辑填充期接入点（AkShare、OpenBB）按设计文档实现并可被该 target 触发。
-- **可选增强**：单测或集成测中 Mock AkShare/OpenBB 返回值，断言写入 L1 的 `ohlcv` 行与 L2 的 `data_versions`（或知识库）条目的数据类型与必填字段存在；接口与错误处理逻辑有覆盖。
+| 验证项 ID | 验证内容 | 命令/方式 | 工作目录 | 期望结果 | 测试结果 | 实际输出或备注 |
+|-----------|----------|-----------|----------|----------|----------|----------------|
+| V-DB | 数据库可连接、表可读写 | `make verify-db-connection` | diting-core | 退出码 0；能连接 L1/L2 并对 init 所建表查询 | 通过 | 默认路线：L1/L2 由 diting-infra compose 提供，core 仅连与验证 |
+| V-INGEST | 采集任务可运行且写入 L1/L2 | `make ingest-test` | diting-core | 退出码 0；至少覆盖 ingest_ohlcv、ingest_industry_revenue、ingest_news | 通过 | 默认路线：退出码 0；write_ohlcv_batch 30 rows；write_data_version industry_revenue/news |
+| V-DATA | 确认目标数据（哪些股票、哪些数据） | 执行 [目标数据约定与真实结果](#l4-stage2-02-target-data) 中 5 条 psql 验证查询 | diting-core / psql | 与 docs/ingest-test-target.md 约定一致（symbol、period、L2 data_type） | 通过 | 见下方「真实数据验证结果」表及 5 条原始输出 |
+| V-IMAGE | 镜像内可运行采集 | 构建镜像后，在**容器内**执行 `make ingest-test` | — | 退出码 0；证明 Dockerfile/依赖链在镜像内完整 | 通过 | 默认路线：docker run -e TIMESCALE_DSN=... -e PG_L2_DSN=... diting-ingest:test make ingest-test 退出码 0（host.docker.internal 连宿主机 L1/L2） |
 
-### 2. 数据量、数据类型与内容符合预期
+**准出**：① F1～F8 均为「✅ 已实现」；② 上表四行测试结果均为「通过」；③ [目标数据约定与真实结果](#l4-stage2-02-target-data) 中真实数据表已填写。满足后更新 L5 [02_验收标准 对应行](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_02)。
 
-- **L1 ohlcv**：写入行需满足表结构 `(symbol, period, datetime, open, high, low, close, volume)`，主键 `(symbol, period, datetime)` 唯一；`datetime` 为 TIMESTAMPTZ，数值为 DOUBLE PRECISION/BIGINT。验证方式示例（在具备 TIMESCALE_DSN 且 init 已建表的前提下）：
-  - `psql $TIMESCALE_DSN -c "SELECT count(*) FROM ohlcv;"`
-  - `psql $TIMESCALE_DSN -c "SELECT symbol, period, datetime, open, close FROM ohlcv LIMIT 3;"`
-- **L2 data_versions**：写入需满足 `data_versions` 表结构与 07_ 版本化规则。验证方式示例：
-  - `psql $PG_L2_DSN -c "SELECT count(*) FROM data_versions;"`
-  - `psql $PG_L2_DSN -c "SELECT data_type, version_id, timestamp FROM data_versions LIMIT 3;"`
-- **评判**：数据类型与表结构一致、无违反主键/非空约束即视为内容符合预期；前期可少存数据（如少量 symbol 或单日），但结构与逻辑须完整。
+**说明**：采集逻辑与表结构符合 11_、设计文档；依赖链顺序见本步实践总结步骤表；Dockerfile 构建与镜像内验证见 V-IMAGE。可选单测/集成测 Mock AkShare/OpenBB 覆盖接口与错误处理。
 
 <a id="l4-stage2-02-target-data"></a>
-### 2.5 确认采集到的目标数据（哪些股票、哪些数据）
-
-仅「退出码 0」无法证明采集到了**目标数据**。验收时须能明确回答：**本次采集到了哪些股票的哪些数据**（及 L2/行业侧写了哪些类型、多少条）。实现方须在 diting-core 约定「ingest-test 目标数据」并在验证时对照。
-
-**（1）目标数据的约定方式**
-
-- **L1 OHLCV**：在 diting-core 的文档或配置中约定「`make ingest-test` 会采集的目标」至少包含：
-  - **股票范围**：具体 symbol 列表（如 `000001.SZ`、`600000.SH`）或数量规则（如「至少 N 只 A 股」）；
-  - **周期与时间**：`period`（如 `daily`）、日期范围（如最近 1 个交易日、或指定起止日）；
-- **L2 / 行业**：约定 `ingest-test` 会写入的 `data_type` 或行业/营收条目类型（如 `ohlcv`、`industry_revenue`、`news` 等），以及至少条数或样例标识。
-- 上述约定可写在 diting-core 的 `docs/ingest-test-target.md`、README 或 `make ingest-test` 的注释/脚本内，便于执行者与验收方对照。
-
-**（2）必须执行的验证查询（可确认「采集到了目标数据」）**
-
-执行 `make ingest-test` 后，**必须**执行下列查询并保留结果，用于确认「写入了哪些股票、哪些数据」：
-
-| 验证项 | 命令示例 | 用途 |
-|--------|----------|------|
-| L1 有哪些股票 | `psql $TIMESCALE_DSN -c "SELECT DISTINCT symbol, period FROM ohlcv ORDER BY symbol, period;"` | 列出本次采集涉及的**股票代码与周期** |
-| L1 日期范围与条数 | `psql $TIMESCALE_DSN -c "SELECT min(datetime) AS from_ts, max(datetime) AS to_ts, count(*) AS rows FROM ohlcv;"` | 确认**时间范围与总行数** |
-| L1 每只股票条数 | `psql $TIMESCALE_DSN -c "SELECT symbol, period, count(*) AS cnt FROM ohlcv GROUP BY symbol, period ORDER BY symbol, period;"` | 确认**每只股票、每个 period 的条数**是否与约定一致 |
-| L2 有哪些数据类型 | `psql $PG_L2_DSN -c "SELECT data_type, count(*) AS cnt FROM data_versions GROUP BY data_type ORDER BY data_type;"` | 列出本次写入的 **data_type 及条数** |
-| L2 样例条目 | `psql $PG_L2_DSN -c "SELECT data_type, version_id, timestamp FROM data_versions ORDER BY timestamp DESC LIMIT 5;"` | 确认**具体版本/条目**存在且可读 |
-
-**（3）评判标准**
-
-- **通过**：上述查询结果与 diting-core 约定的「ingest-test 目标数据」一致——例如至少包含约定的 symbol 列表（或数量）、约定的 period、约定日期范围内有数据；L2 至少包含约定的 data_type 及预期条数。
-- **不通过**：无法列出具体股票/数据类型、或与约定目标不一致（如约定 3 只股实际为 0 只、约定日线实际无数据）——则不能视为「通过采集逻辑采集到了目标数据」，需修复后重验。
-
 <a id="l4-stage2-02-real-data"></a>
-### 2.6 真实数据验证结果（必填：采集到了哪些类型、哪些股票、哪些数据）
+## 目标数据约定与真实结果
 
-执行 `make ingest-test` 后，**必须**执行 [2.5](#l4-stage2-02-target-data) 中 5 条验证查询，并将**真实查询结果**粘贴或归纳到下表，用于证明「有真实数据写入、不是空跑逻辑」。
+仅「退出码 0」无法证明采集到了**目标数据**。须在 diting-core 约定「ingest-test 目标数据」（如 `docs/ingest-test-target.md`），执行 `make ingest-test` 后做下列验证并**在本节下表填写真实结果**。
 
-| 验证项 | 真实执行结果（示例） |
-|--------|----------------------|
-| **L1 有哪些股票与周期** | `000001.SZ \| daily`、`600000.SH \| daily` |
-| **L1 日期范围与总行数** | from_ts=2026-01-26 00:00:00+00，to_ts=2026-02-13 00:00:00+00，rows=**30** |
-| **L1 每只股票每周期条数** | 000001.SZ daily **15** 条；600000.SH daily **15** 条 |
-| **L2 有哪些 data_type 及条数** | industry_revenue **2** 条；news **3** 条 |
-| **L2 样例条目** | news_openbb_20260223101820、news_akshare_20260223101820、industry_revenue_000001_20260223101820 等 |
+**约定内容**：L1 至少约定 symbol 列表（或数量）、period（如 daily）、日期范围；L2 至少约定 data_type（如 industry_revenue、news）及预期条数。
 
-**本次实践真实结果**（本地 L1/L2 容器 + 镜像内 make ingest-test 执行后）：
+**必做 5 条验证查询**（执行后保留结果并填入下表）：
 
-- **采集到的股票**：000001.SZ（平安银行）、600000.SH（浦发银行）。
-- **周期**：daily（日线）。
-- **L1 日期范围**：2026-01-26 ～ 2026-02-13（UTC）；**总行数 30**（每只 15 条）。
-- **L2 数据类型与条数**：industry_revenue 2 条，news 3 条（含国内 AkShare 与国际 OpenBB 路径）。
-- **与 docs/ingest-test-target.md 约定**：一致（至少 2 只 A 股、daily、industry_revenue 与 news 均有写入）。
+| 查询用途 | 命令示例 |
+|----------|----------|
+| L1 有哪些股票与周期 | `psql $TIMESCALE_DSN -c "SELECT DISTINCT symbol, period FROM ohlcv ORDER BY symbol, period;"` |
+| L1 日期范围与总行数 | `psql $TIMESCALE_DSN -c "SELECT min(datetime) AS from_ts, max(datetime) AS to_ts, count(*) AS rows FROM ohlcv;"` |
+| L1 每只股票每周期条数 | `psql $TIMESCALE_DSN -c "SELECT symbol, period, count(*) AS cnt FROM ohlcv GROUP BY symbol, period ORDER BY symbol, period;"` |
+| L2 有哪些 data_type 及条数 | `psql $PG_L2_DSN -c "SELECT data_type, count(*) AS cnt FROM data_versions GROUP BY data_type ORDER BY data_type;"` |
+| L2 样例条目 | `psql $PG_L2_DSN -c "SELECT data_type, version_id, timestamp FROM data_versions ORDER BY timestamp DESC LIMIT 5;"` |
 
-无上述真实数据记录则不能视为「采集逻辑已实践并验证」；仅逻辑实现而无真实写入验证视为未完成本步。
+**关于 L2 的 timestamp**：`data_versions.timestamp` 表示**该版本记录的写入时间**（即执行 `make ingest-test` 的时刻），不是新闻/财报等源数据的发布日期。每次重新执行 `make ingest-test` 会写入新版本，时间戳为当次运行时间；文档下表与下方「5 条原始输出」为**某次实践运行的快照**，读者若自行再跑一遍会得到新的时间戳。
 
-### 3. 依赖链实践完整性与验证顺序
+**评判**：查询结果与约定一致（symbol、period、日期范围、L2 data_type 及条数）为通过；否则需修复后重验。无真实数据记录视为未完成本步。
 
-| 顺序 | 步骤 | 验证方式 | 说明 |
-|------|------|----------|------|
-| 1 | Stage2-01 准出 | V1～V7 全部符合，含 diting-core `make verify-db-connection` | 本步前置条件 |
-| 2 | 本步配置就绪 | diting-core `.env` 已填 TIMESCALE_DSN、PG_L2_DSN（及可选 REDIS_URL） | 见 [本步依赖检查与关键参数获取](#l4-stage2-02-deps-check) |
-| 3 | 连接与表可读写 | `make verify-db-connection` 退出码 0 | 复现 Stage2-01 V7，证明下游可调用表数据 |
-| 4 | 采集逻辑运行 | `make ingest-test` 退出码 0 | 证明采集任务可写 L1/L2 |
-| 5 | 镜像内采集运行 | 见下节 | 证明 Dockerfile 与依赖链在镜像内完整 |
+**真实数据验证结果（必填）**：
 
-上述 1～4 可证明「依赖链实践完整」：从 Stage2-01 建表 → 本步配置 → 连接验证 → 采集写入，全链路可复现。
+| 验证项 | 真实执行结果 |
+|--------|----------------|
+| L1 有哪些股票与周期 | 000001.SZ daily、600000.SH daily |
+| L1 日期范围与总行数 | from_ts=2026-01-26 00:00:00+00 to_ts=2026-02-13 00:00:00+00 rows=30 |
+| L1 每只股票每周期条数 | 000001.SZ daily 15 条；600000.SH daily 15 条 |
+| L2 有哪些 data_type 及条数 | industry_revenue 1 条；news 2 条 |
+| L2 样例条目 | news news_openbb_20260223205006 2026-02-23 20:50:06；news news_akshare_20260223205006 2026-02-23 20:50:06；industry_revenue industry_revenue_000001_20260223205006 2026-02-23 20:50:06 |
 
-### 4. Dockerfile 打包镜像并按预期运行、按预期采集数据
+**5 条验证查询的原始输出（执行结果）**  
 
-- **构建**：在 diting-core 使用本步提供的 Dockerfile 构建采集镜像（镜像内须显式安装 akshare、openbb-platform 或等价包，见 dna_stage2_02.integration_packages）。
-- **运行与验证**：
-  1. 使用构建好的镜像运行容器（运行时注入或挂载 `.env`，或传入 `TIMESCALE_DSN`、`PG_L2_DSN` 等），或使用与 Stage2-01 一致的连接方式。
-  2. 在**容器内**执行：`make ingest-test`。
-  3. **预期**：退出码 0，表示镜像内依赖正确、采集逻辑可按预期采集并写入 L1/L2。
-- **可选**：容器内执行后，在宿主机或集群内用 `psql $TIMESCALE_DSN` / `psql $PG_L2_DSN` 再次查询 `ohlcv`、`data_versions` 行数与样例，确认与「本地执行 make ingest-test」一致，即证明镜像按预期采集数据。
+以下为按上述 5 条命令执行后的**完整终端输出**，便于核对实际落库数据。L2 中的 `timestamp` 为**当次 make ingest-test 的写入时间**，非源数据发布日期；表中时间为**该次实践运行时刻**的快照，重新执行实践会得到新的时间戳。（本次实践采用**默认路线 Docker Compose**，执行时间 2026-02-23。）
 
-**结论**：示例与验证能证明——① 采集逻辑符合 11_ 与设计文档预期；② 数据量、数据类型与内容满足表结构与规约；③ **能确认通过采集逻辑采集到了目标数据**（具体到哪些股票、哪些 period、哪些日期、L2 哪些 data_type，见 [2.5 确认采集到的目标数据](#l4-stage2-02-target-data)）；④ 依赖链从 Stage2-01 到本步配置、连接、采集完整可验证；⑤ Dockerfile 打包的镜像可按预期运行且按预期采集数据。
+（1）L1 有哪些股票与周期
 
-<a id="l4-stage2-02-exit"></a>
-## 验证与准出
+```
+ 000001.SZ | daily
+ 600000.SH | daily
+```
 
-| 命令 | 工作目录 | 期望结果 | 对应说明 |
-|------|----------|----------|----------|
-| `make verify-db-connection` | diting-core | 退出码 0 | 本步前置：依赖检查与关键参数就绪；详见 [本步依赖检查与关键参数获取](#l4-stage2-02-deps-check) |
-| `make ingest-test` | diting-core | 退出码 0 | 采集逻辑与数据量/类型/内容符合预期；详见 [数据采集逻辑细节](#l4-stage2-02-ingest-detail)、[示例与验证](#l4-stage2-02-examples-verify) |
-| 确认目标数据（哪些股票、哪些数据） | diting-core / psql | 与约定一致 | 执行 [2.5](#l4-stage2-02-target-data) 中验证查询，能列出 symbol、period、日期范围、L2 data_type，并与 ingest-test 目标约定一致 |
-| 在采集镜像内执行 `make ingest-test` | — | 退出码 0 | Dockerfile 与依赖链在镜像内完整；详见 [示例与验证 §4](#l4-stage2-02-examples-verify) |
+（2）L1 日期范围与总行数
 
-**准出**：采集逻辑实现；make ingest-test 可运行；L3 逻辑填充期接入点（AkShare、OpenBB）按设计文档达标；依赖已写入 Dockerfile/requirements，镜像内 make ingest-test 通过。**已更新 L5 [02_验收标准 对应行](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_02)**。
+```
+ 2026-01-26 00:00:00+00 | 2026-02-13 00:00:00+00 |   30
+```
+
+（3）L1 每只股票每周期条数
+
+```
+ 000001.SZ | daily  |  15
+ 600000.SH | daily  |  15
+```
+
+（4）L2 有哪些 data_type 及条数
+
+```
+ industry_revenue |   1
+ news             |   2
+```
+
+（5）L2 样例条目
+
+```
+ news             | news_openbb_20260223205006             | 2026-02-23 20:50:06.265787
+ news             | news_akshare_20260223205006            | 2026-02-23 20:50:06.265787
+ industry_revenue | industry_revenue_000001_20260223205006 | 2026-02-23 20:50:06.236795
+```
 
 <a id="l4-stage2-02-feature-checklist"></a>
 ## 功能实践项清单（执行时勾选）
 
-下表列出本步**全部功能/交付项**；执行者须逐项标注「实践状态」与「说明」，便于一眼区分**已实践 / 未实践**。与设计文档 [功能项与验收映射](../../03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-feature-mapping)、DNA `feature_items` 一致。
+下表列出本步**全部功能/交付项**；执行者须逐项标注「实践状态」与「说明」，便于区分**已实践 / 未实践**。与设计文档 [功能项与验收映射](../../03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-feature-mapping)、DNA `feature_items` 一致。
 
 | 功能项 ID | 功能描述 | 对应设计/DNA | 实践状态 | 说明/代码位置 |
 |-----------|----------|--------------|----------|----------------|
@@ -240,39 +273,25 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 | F5 | OpenBB 至少一条到 L2 的写入路径 | 设计-OpenBB 验收要点 | ✅ 已实现 | news.py 中 obb.economy.gdp.nominal/real → write_data_version |
 | F6 | Makefile 新增 `ingest-test` target | artifacts、verification_commands | ✅ 已实现 | diting-core/Makefile 中 ingest-test |
 | F7 | Dockerfile/requirements 显式 akshare、openbb-platform | dna_stage2_02.integration_packages | ✅ 已实现 | Dockerfile.ingest、requirements-ingest.txt（openbb 包名；镜像内已安装 make、psql） |
-| F8 | ingest-test 目标数据约定（哪些股票、哪些 data_type） | [2.5 确认采集到的目标数据](#l4-stage2-02-target-data) | ✅ 已实现 | diting-core/docs/ingest-test-target.md |
+| F8 | ingest-test 目标数据约定（哪些股票、哪些 data_type） | [目标数据约定与真实结果](#l4-stage2-02-target-data) | ✅ 已实现 | diting-core/docs/ingest-test-target.md |
 
-**填写约定**：实践状态只能三选一；说明/代码位置填写仓库内路径或简短结论。准出时 F1～F8 须均为「✅ 已实现」。
-
-<a id="l4-stage2-02-verify-checklist"></a>
-## 验证与测试结果清单（执行时勾选）
-
-下表列出本步**全部验证/测试项**；执行者须逐项执行并填写「测试结果」与「实际输出或备注」，便于一眼区分**通过 / 失败 / 未执行**。与 DNA `verification_commands` 及 [验证与准出](#l4-stage2-02-exit) 表一致。
-
-| 验证项 ID | 验证内容 | 命令/方式 | 预期结果 | 测试结果 | 实际输出或备注 |
-|-----------|----------|-----------|----------|----------|----------------|
-| V-DB | 数据库可连接、表可读写 | `make verify-db-connection`（工作目录 diting-core） | 退出码 0；能连接 TimescaleDB 并对 init 所建表查询 | 通过 | 本次用本地 L1（TimescaleDB）/L2（PostgreSQL）容器 + .env 配置；make verify-db-connection 退出码 0。 |
-| V-INGEST | 采集任务可运行且写入 L1/L2 | `make ingest-test`（工作目录 diting-core） | 退出码 0；至少覆盖 ingest_ohlcv、ingest_industry_revenue、ingest_news | 通过 | 镜像内带 DSN 执行，退出码 0。L1 写入 30 行（000001.SZ、600000.SH 各 15 条日线）；L2 写入 industry_revenue、news（AkShare + OpenBB）。 |
-| V-DATA | 确认目标数据（哪些股票、哪些数据） | 执行 [2.5](#l4-stage2-02-target-data) 中 psql 验证查询 | 与 docs/ingest-test-target.md 约定一致（symbol、period、L2 data_type） | 通过 | 见 [2.6 真实数据验证结果](#l4-stage2-02-real-data)：2 只股票、daily、日期 2026-01-26～02-13、L2 industry_revenue 与 news 均有条数。 |
-| V-IMAGE | 镜像内可运行采集 | 构建镜像后，在**容器内**执行 `make ingest-test` | 退出码 0；证明 Dockerfile/依赖链在镜像内完整 | 通过 | 镜像 diting-ingest:test；`docker run --network host -e TIMESCALE_DSN=... -e PG_L2_DSN=...` 执行 make ingest-test 退出码 0，真实写入 L1/L2。 |
-
-**填写约定**：测试结果三选一；实际输出或备注记录真实执行结果（退出码、报错、查询结果摘要）。准出时 V-DB、V-INGEST、V-DATA、V-IMAGE 须均为「通过」。
+**填写约定**：实践状态三选一；说明/代码位置填仓库路径或简短结论。准出时 F1～F8 须均为「✅ 已实现」。
 
 ---
 
 <a id="l4-stage2-02-summary"></a>
 ## 本步实践总结
 
-执行本步时**优先填写**上文 [功能实践项清单](#l4-stage2-02-feature-checklist) 与 [验证与测试结果清单](#l4-stage2-02-verify-checklist)，以明确**哪些功能已实践、哪些未实践、哪些测试通过、哪些失败**。再按下列步骤表逐项执行并填写「是否符合预期」与「实践结果」。
+按下列步骤表顺序执行；**步骤 2～5 分别对应验证项 V-DB、V-INGEST、V-DATA、V-IMAGE**。每完成一步请在 [验证项与结果清单](#l4-stage2-02-verify-checklist) 填写对应行，**本表只填「是否符合预期」**，不必重复填写实践结果。
 
-**准出条件**：① 功能实践项清单 F1～F8 均为「✅ 已实现」；② 验证与测试结果清单 V-DB、V-INGEST、V-DATA、V-IMAGE 均为「通过」；③ 下表步骤 2、3、4、5 均为「是」。
+**准出条件**：见 [验证项与结果清单](#l4-stage2-02-verify-checklist) 节末（F1～F8 已实现、四验证项通过、目标数据真实结果已填）。
 
-| 步骤 | 执行内容 | 预期结果 | 是否符合预期 | 实践结果（真实执行数据情况） |
-|------|----------|----------|----------------|------------------------------|
-| 1 | 确认 Stage2-01 已准出（V1～V7），并核对 [本步依赖检查与关键参数获取](#l4-stage2-02-deps-check) 检查清单 | 依赖部署与关键参数来源清晰 | 是 | 本次用本地 L1/L2 容器模拟（TimescaleDB + PostgreSQL），建表后配置 .env 作为下游。 |
-| 2 | 在 diting-core 复制 .env.template 为 .env，填写 TIMESCALE_DSN、PG_L2_DSN（及可选 REDIS_URL）；执行 `make verify-db-connection` | 退出码 0；能连接并查询 init 所建表 | 是 | .env 已配置；make verify-db-connection 退出码 0（或通过镜像内执行等价验证）。 |
-| 3 | 实现 ingest_ohlcv、ingest_industry_revenue、ingest_news，按 [数据采集逻辑细节](#l4-stage2-02-ingest-detail) 与设计文档接入 AkShare/OpenBB；Makefile 新增 `ingest-test` | 代码结构与逻辑完整；`make ingest-test` 退出码 0 | 是 | 镜像内带 DSN 执行 make ingest-test 退出码 0；L1 写入 30 行，L2 写入 industry_revenue、news。 |
-| 4 | **确认目标数据**：按 [2.5 确认采集到的目标数据](#l4-stage2-02-target-data) 执行验证查询，列出「哪些股票、哪些 period、日期范围、L2 哪些 data_type」；与 diting-core 约定的 ingest-test 目标一致 | 能明确回答本次采集到了哪些股票/哪些数据，且与约定一致 | 是 | 见 [2.6 真实数据验证结果](#l4-stage2-02-real-data)：000001.SZ、600000.SH、daily、2026-01-26～02-13、30 行；L2 industry_revenue 2 条、news 3 条。与 docs/ingest-test-target.md 一致。 |
-| 5 | Dockerfile/requirements 显式加入 akshare、openbb-platform；构建采集镜像，在**镜像内**执行 `make ingest-test` | 退出码 0，证明镜像按预期运行并采集 | 是 | 镜像 diting-ingest:test；docker run --network host -e TIMESCALE_DSN -e PG_L2_DSN 执行 make ingest-test 退出码 0，真实写入 L1/L2。 |
+| 步骤 | 执行内容 | 预期结果 | 对应验证项 | 是否符合预期 |
+|------|----------|----------|------------|----------------|
+| 1 | 确认 Stage2-01 已准出（V1～V7），或**默认路线**下已在 diting-infra 执行 `make local-deps-up`、`make local-deps-init`，并核对 [本步依赖检查与关键参数获取](#l4-stage2-02-deps-check) | 依赖与关键参数来源清晰 | — | 是（**默认路线**：diting-infra compose 提供 L1/L2） |
+| 2 | 在 diting-core 复制 .env.template 为 .env，填写 TIMESCALE_DSN、PG_L2_DSN（及可选 REDIS_URL）；执行 `make verify-db-connection` | 退出码 0；能连接并查询 init 所建表 | V-DB | 是 |
+| 3 | 实现 ingest_ohlcv、ingest_industry_revenue、ingest_news，按 [数据采集逻辑细节](#l4-stage2-02-ingest-detail) 与设计文档接入 AkShare/OpenBB；Makefile 新增 `ingest-test`；执行 `make ingest-test` | 退出码 0；采集写入 L1/L2 | V-INGEST | 是 |
+| 4 | 按 [目标数据约定与真实结果](#l4-stage2-02-target-data) 执行 5 条 psql 查询，并填写该节「真实数据验证结果」表 | 能列出 symbol、period、日期范围、L2 data_type，与约定一致 | V-DATA | 是 |
+| 5 | Dockerfile/requirements 显式加入 akshare、openbb-platform；构建采集镜像，在**镜像内**执行 `make ingest-test` | 退出码 0；镜像内依赖与采集正常 | V-IMAGE | 是 |
 
-**说明**：步骤 1～2 依赖 Stage2-01 已部署的集群与连接信息；若仅做仓内代码与 Dockerfile 产出，可先完成步骤 3，待环境就绪后补做 1、2、4、5。准出时须步骤 2、3、4、5 均为「是」（其中步骤 4 确保能确认「采集到了哪些股票、哪些数据」）。
+**说明**：步骤 2～5 均依赖 L1/L2 可用。**默认路线**：在 **diting-infra** 执行 `make local-deps-up`、`make local-deps-init` 后，在 **diting-core** 配置 `.env` 并执行步骤 2～5（编排与建表归属 infra，见 [02_三位一体仓库规约](../../03_原子目标与规约/_共享规约/02_三位一体仓库规约.md)）。**可选路线**为 ECS + K3s，须先按 [4. 实测前自建依赖与测试后回收](#l4-stage2-02-deploy-deps-and-cleanup) ①～⑦ 部署；**回收**：默认路线在 diting-infra 执行 `make local-deps-down`；可选路线等所有步骤验证完成后再在 diting-infra 执行 `make stage2-01-full-down`；若中途失败或意外退出，也须执行回收以免 ECS 残留。

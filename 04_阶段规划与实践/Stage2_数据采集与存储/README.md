@@ -24,6 +24,22 @@
 **设计**：[03_/Stage2_数据采集与存储/](../../03_原子目标与规约/Stage2_数据采集与存储/)  
 **DNA**：_System_DNA/Stage2_数据采集与存储/、global_const.deployable_units.ingestion
 
+<a id="stage2-data-plan-vs-steps"></a>
+### 数据采集规划与实践步骤对照（确保按步骤开发即可满足系统数据需求）
+
+以下对照表将 [11_数据采集与输入层规约](../../03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md) 与双轨目标所需数据类型、量及验收，映射到本阶段各实践步骤。**按当前 01～05 步骤开发并准出，即可完成系统（含 A/B 双轨）所需的数据采集能力**；生产扩展时的数据量与调度见本小节末。
+
+| 数据类型 / 需求 | 用途（支撑目标） | 对应采集任务 | 实践步骤中的体现 | 验收方式 |
+|-----------------|------------------|--------------|------------------|----------|
+| **OHLCV** | Module B 量化扫描、A 轨技术面信号 | `ingest_ohlcv` | 02 步 F1、[数据采集逻辑细节](02_采集逻辑与Dockerfile.md#l4-stage2-02-ingest-detail)；01 步 L1 表 ohlcv | V-INGEST、V-DATA、5 条 psql 验证；03 步 MarketDataFeed 读 L1 |
+| **申万行业、营收占比** | Module A 语义分类（Domain Tag）、双轨共用 | `ingest_industry_revenue` | 02 步 F2、同上；写入约定表或 Redis | V-INGEST、V-DATA；L2 data_type industry_revenue |
+| **基本面（财报、营收增速、研发占比等）** | B 轨 VC-Agent、逻辑证伪；与 A 轨技术面区分 | 同上 + OpenBB 路径 | 02 步 F2（行业/财报/营收）、F3/F5（OpenBB 国际/宏观/基本面）；11_ 与 [03_双轨制与VC-Agent](../../01_顶层概念/03_双轨制与VC-Agent.md) | F2/F5 实现并写入 L2 或约定存储；Stage3 Module A / VC-Agent 可消费 |
+| **新闻/公告/研报** | Module C 专家推理、知识库（Agri/Tech/Macro-KG） | `ingest_news` | 02 步 F3、F5；国内 AkShare、国际 OpenBB | V-INGEST、V-DATA；L2 data_type news |
+| **调度与超时** | 日级/小时级与 11_、DNA 一致 | 三个任务 | 逻辑填充期以 `make ingest-test` 可跑通为准；**生产部署**时须在 05 步配置 cron/调度与超时（见 [05_采集模块部署与验收](05_采集模块部署与验收.md)） | Stage2-05 准出时确认调度配置；DNA `data_ingestion` schedule/timeout |
+| **数据量与范围** | 全市场扫描（5000+ 标的）、Module A 覆盖标的 | 可配置 | 02 步 F8、`docs/ingest-test-target.md`；**逻辑填充期**可与约定一致（少存）；**生产/扩展**须达到全市场扫描所需标的数与历史深度 | V-DATA 与目标数据约定一致；生产扩展时在 ingest-test-target 或 L5 约定标的数/历史深度 |
+
+**结论**：按 01（基础设施与表）→ 02（三任务 + AkShare/OpenBB + DVC 写入）→ 03（连调、MarketDataFeed 读 L1）→ 04（镜像）→ 05（部署与验收）顺序执行并准出，即可完成系统所需的数据采集需求；双轨所需 OHLCV、行业/营收、基本面、新闻均落在 F1～F3/F5 与 11_ 写入契约内。**生产扩展**：在 05 步或部署侧配置调度与超时与 DNA 一致，并约定/扩展 ingest-test-target 至全市场标的与历史深度即可。
+
 ### 开发期连调
 
 **开发期连调**：本地编译运行（本阶段为采集服务或部分任务），连接**远程 K3s** 的 TimescaleDB/Redis/其它已部署组件，使用**线上或类生产数据**进行联调，不脱离生产节奏。准入：远程 K3s 可用、基础组件（Stage2-01）已部署；验证：本地 `make ingest-test` 或等价命令可写/读远程 L1，或按 [03_ 工作流详细规划](../../03_原子目标与规约/开发与交付/03_项目全功能开发测试实践工作流详细规划.md) 约定验证。
