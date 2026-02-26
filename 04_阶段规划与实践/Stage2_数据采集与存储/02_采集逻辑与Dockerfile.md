@@ -36,7 +36,7 @@
 | **默认：Docker Compose** | 在 **diting-infra** 使用 `compose/docker-compose.ingest.yaml` 启动本地 L1/L2（`make local-deps-up` → `make local-deps-init`）；在 **diting-core** 配置 `.env` 指向 localhost:15432/15433 后执行 `make verify-db-connection` → `make ingest-test`。部署与编排归属 infra，core 仅连接与验证（见 [02_三位一体仓库规约](../../03_原子目标与规约/_共享规约/02_三位一体仓库规约.md)#本地开发与部署文件）。V-IMAGE 可用 `docker run -e TIMESCALE_DSN=... -e PG_L2_DSN=...` 连宿主机 `host.docker.internal` 的 L1/L2。 | 日常开发、CI、无云凭证或无需真实集群时；**推荐作为默认验收路径**。 |
 | **可选：ECS + K3s** | 在 **diting-infra** 按 [4. 实测前自建依赖与测试后回收](#l4-stage2-02-deploy-deps-and-cleanup) 顺序 ①～⑦：先 `make deploy-dev` 起 ECS/K3s，再 Helm 部署 TimescaleDB/Redis/PostgreSQL、Secret、Schema Init Job；在 **diting-core** 用 K3s NodePort/节点 IP 填写 `.env`，执行步骤 2～5；最后在 diting-infra 执行回收。 | 需要验证与真实 K3s 集群、NodePort、Sealed-Secrets 等一致时；需 Terraform/云凭证。 |
 
-**填写约定**：在 [验证项与结果清单](#l4-stage2-02-verify-checklist)、[本步实践总结](#l4-stage2-02-summary) 的备注或「是否符合预期」中注明本次采用的路线（如「默认 Docker Compose」或「可选 ECS+K3s」），便于追溯。
+**填写约定**：在 [验证项与结果清单](#l4-stage2-02-verify-checklist)、[本步实践总结](#l4-stage2-02-summary) 的备注或「是否符合预期」中注明本次采用的路线（如「默认 Docker Compose」或「可选 ECS+K3s」），便于追溯。**外网不可达时**：可设置 `DITING_INGEST_MOCK=1` 后执行 `make ingest-test`（及镜像内同命令），采集逻辑会写入 mock 数据至 L1/L2，仍可完成 V-INGEST、V-DATA、V-IMAGE 验证。
 
 <a id="l4-stage2-02-deps-check"></a>
 ## 本步依赖检查与关键参数获取
@@ -110,12 +110,12 @@
 <a id="l4-stage2-02-goal"></a>
 ## 本步目标
 
-OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任务构建。前期可配置少存数据，code 结构与逻辑须完整。采集镜像须在 Dockerfile/requirements 中显式安装 AkShare、OpenBB（见设计文档「[依赖与镜像构建](../../03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-deps)」与 dna_stage2_02.integration_packages）。
+OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任务构建。前期可配置少存数据，code 结构与逻辑须完整。采集镜像须在 Dockerfile/requirements 中显式安装 AkShare、OpenBB（见设计文档「[依赖与镜像构建](../../03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-deps)」与 dna_stage2_02.integration_packages）。**本步须提供一键构建本阶段所涉全部镜像的能力**：Makefile 提供单一 target（如 `make build-images`），一次执行即可构建本阶段全部镜像（当前为采集镜像 Dockerfile.ingest），便于 CI 与本地复现。
 
 **执行指引**（三者关系）：
-- **功能实践项清单**（F1～F8）= 本步交付项；执行时勾选「已实现 / 未实现」及代码位置。
-- **验证项与结果清单**（V-DB / V-INGEST / V-DATA / V-IMAGE）= 本步**唯一**测试结果填写处；按 [本步实践总结](#l4-stage2-02-summary) 步骤表顺序执行，每完成一步即在验证清单填写对应行，**不必在步骤表重复填写结果**。
-- **本步实践总结步骤表** = 推荐执行顺序；步骤 2～5 分别对应 V-DB、V-INGEST、V-DATA、V-IMAGE。
+- **功能实践项清单**（F1～F9）= 本步交付项；执行时勾选「已实现 / 未实现」及代码位置。
+- **验证项与结果清单**（V-DB / V-INGEST / V-DATA / V-IMAGE / V-BUILD-ALL）= 本步**唯一**测试结果填写处；按 [本步实践总结](#l4-stage2-02-summary) 步骤表顺序执行，每完成一步即在验证清单填写对应行，**不必在步骤表重复填写结果**。
+- **本步实践总结步骤表** = 推荐执行顺序；步骤 2～6 分别对应 V-DB、V-INGEST、V-DATA、V-IMAGE、V-BUILD-ALL。
 
 **无真实数据即未实践**：须在真实或本地 L1/L2 上跑通 `make ingest-test`，并在 [目标数据约定与真实结果](#l4-stage2-02-target-data) 中填写真实数据验证结果。准出条件见 [验证项与结果清单](#l4-stage2-02-verify-checklist) 与 [本步实践总结](#l4-stage2-02-summary)。
 
@@ -168,6 +168,7 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 2. 按设计文档「逻辑填充期开源接入点：AkShare、OpenBB」小节实现并达标（实践重点、详细需求、验收要点见该设计文档）。
 3. Dockerfile 支持采集镜像构建；在 Dockerfile 及 requirements 中显式加入 akshare、openbb-platform（或等价包）；构建后须在**镜像内**执行 make ingest-test 且退出码 0。
 4. 在 Makefile 中新增 ingest-test target；退出码 0 表示通过。
+5. 在 Makefile 中新增一键构建所有镜像的 target（如 `make build-images`）；一次执行构建本阶段所涉全部镜像（当前为采集镜像），退出码 0 表示全部构建成功。
 ```
 
 <a id="l4-stage2-02-verify-checklist"></a>
@@ -180,11 +181,12 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 | 验证项 ID | 验证内容 | 命令/方式 | 工作目录 | 期望结果 | 测试结果 | 实际输出或备注 |
 |-----------|----------|-----------|----------|----------|----------|----------------|
 | V-DB | 数据库可连接、表可读写 | `make verify-db-connection` | diting-core | 退出码 0；能连接 L1/L2 并对 init 所建表查询 | 通过 | 默认路线：L1/L2 由 diting-infra compose 提供，core 仅连与验证 |
-| V-INGEST | 采集任务可运行且写入 L1/L2 | `make ingest-test` | diting-core | 退出码 0；至少覆盖 ingest_ohlcv、ingest_industry_revenue、ingest_news | 通过 | 默认路线：退出码 0；write_ohlcv_batch 30 rows；write_data_version industry_revenue/news |
-| V-DATA | 确认目标数据（哪些股票、哪些数据） | 执行 [目标数据约定与真实结果](#l4-stage2-02-target-data) 中 5 条 psql 验证查询 | diting-core / psql | 与 docs/ingest-test-target.md 约定一致（symbol、period、L2 data_type） | 通过 | 见下方「真实数据验证结果」表及 5 条原始输出 |
-| V-IMAGE | 镜像内可运行采集 | 构建镜像后，在**容器内**执行 `make ingest-test` | — | 退出码 0；证明 Dockerfile/依赖链在镜像内完整 | 通过 | 默认路线：docker run -e TIMESCALE_DSN=... -e PG_L2_DSN=... diting-ingest:test make ingest-test 退出码 0（host.docker.internal 连宿主机 L1/L2） |
+| V-INGEST | 采集任务可运行且写入 L1/L2 | `make ingest-test` | diting-core | 退出码 0；至少覆盖 ingest_ohlcv、ingest_industry_revenue、ingest_news | 通过 | 默认路线；本次环境外网不可达，使用 DITING_INGEST_MOCK=1 在容器内执行，30 rows L1 + industry_revenue/news L2 |
+| V-DATA | 确认目标数据（哪些股票、哪些数据） | 执行 [目标数据约定与真实结果](#l4-stage2-02-target-data) 中 5 条 psql 验证查询 | diting-core / psql | 与 docs/ingest-test-target.md 约定一致（symbol、period、L2 data_type） | 通过 | 本次为 mock 数据：000001.SZ/600000.SH daily、30 行；L2 industry_revenue 1、news 2；见下方 5 条原始输出 |
+| V-IMAGE | 镜像内可运行采集 | 构建镜像后，在**容器内**执行 `make ingest-test` | — | 退出码 0；证明 Dockerfile/依赖链在镜像内完整 | 通过 | 默认路线：docker run --network host -e TIMESCALE_DSN=... -e PG_L2_DSN=... [-e DITING_INGEST_MOCK=1] diting-ingest:test make ingest-test 退出码 0 |
+| V-BUILD-ALL | 一键构建所有镜像 | `make build-images`（或项目约定名） | diting-core | 退出码 0；本阶段所涉全部镜像（当前为采集镜像）均成功构建；可辅以 `docker images` 或 Make 内自检 | 通过 | diting-ingest:test 构建成功；build-images OK |
 
-**准出**：① F1～F8 均为「✅ 已实现」；② 上表四行测试结果均为「通过」；③ [目标数据约定与真实结果](#l4-stage2-02-target-data) 中真实数据表已填写。满足后更新 L5 [02_验收标准 对应行](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_02)。
+**准出**：① F1～F9 均为「✅ 已实现」；② 上表五行测试结果均为「通过」；③ [目标数据约定与真实结果](#l4-stage2-02-target-data) 中真实数据表已填写。满足后更新 L5 [02_验收标准 对应行](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_02)。
 
 **说明**：采集逻辑与表结构符合 11_、设计文档；依赖链顺序见本步实践总结步骤表；Dockerfile 构建与镜像内验证见 V-IMAGE。可选单测/集成测 Mock AkShare/OpenBB 覆盖接口与错误处理。
 
@@ -274,8 +276,9 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 | F6 | Makefile 新增 `ingest-test` target | artifacts、verification_commands | ✅ 已实现 | diting-core/Makefile 中 ingest-test |
 | F7 | Dockerfile/requirements 显式 akshare、openbb-platform | dna_stage2_02.integration_packages | ✅ 已实现 | Dockerfile.ingest、requirements-ingest.txt（openbb 包名；镜像内已安装 make、psql） |
 | F8 | ingest-test 目标数据约定（哪些股票、哪些 data_type） | [目标数据约定与真实结果](#l4-stage2-02-target-data) | ✅ 已实现 | diting-core/docs/ingest-test-target.md |
+| F9 | 一键构建所有镜像：Makefile 提供单一 target（如 `make build-images`），一次构建本阶段所涉全部镜像 | [设计-依赖与镜像构建](../../03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-deps) | ✅ 已实现 | diting-core/Makefile 中 build-images |
 
-**填写约定**：实践状态三选一；说明/代码位置填仓库路径或简短结论。准出时 F1～F8 须均为「✅ 已实现」。
+**填写约定**：实践状态三选一；说明/代码位置填仓库路径或简短结论。准出时 F1～F9 须均为「✅ 已实现」。
 
 ---
 
@@ -293,5 +296,6 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 | 3 | 实现 ingest_ohlcv、ingest_industry_revenue、ingest_news，按 [数据采集逻辑细节](#l4-stage2-02-ingest-detail) 与设计文档接入 AkShare/OpenBB；Makefile 新增 `ingest-test`；执行 `make ingest-test` | 退出码 0；采集写入 L1/L2 | V-INGEST | 是 |
 | 4 | 按 [目标数据约定与真实结果](#l4-stage2-02-target-data) 执行 5 条 psql 查询，并填写该节「真实数据验证结果」表 | 能列出 symbol、period、日期范围、L2 data_type，与约定一致 | V-DATA | 是 |
 | 5 | Dockerfile/requirements 显式加入 akshare、openbb-platform；构建采集镜像，在**镜像内**执行 `make ingest-test` | 退出码 0；镜像内依赖与采集正常 | V-IMAGE | 是 |
+| 6 | 在 Makefile 中新增一键构建 target（如 `make build-images`）；在 diting-core 执行该命令 | 退出码 0；本阶段所涉全部镜像（当前为采集镜像）均成功构建；可辅以 `docker images` 或 Make 内自检 | V-BUILD-ALL | 是 |
 
-**说明**：步骤 2～5 均依赖 L1/L2 可用。**默认路线**：在 **diting-infra** 执行 `make local-deps-up`、`make local-deps-init` 后，在 **diting-core** 配置 `.env` 并执行步骤 2～5（编排与建表归属 infra，见 [02_三位一体仓库规约](../../03_原子目标与规约/_共享规约/02_三位一体仓库规约.md)）。**可选路线**为 ECS + K3s，须先按 [4. 实测前自建依赖与测试后回收](#l4-stage2-02-deploy-deps-and-cleanup) ①～⑦ 部署；**回收**：默认路线在 diting-infra 执行 `make local-deps-down`；可选路线等所有步骤验证完成后再在 diting-infra 执行 `make stage2-01-full-down`；若中途失败或意外退出，也须执行回收以免 ECS 残留。
+**说明**：步骤 2～6 均依赖 L1/L2 可用（步骤 6 仅依赖 Docker 与 Makefile，无需 L1/L2 运行）。**默认路线**：在 **diting-infra** 执行 `make local-deps-up`、`make local-deps-init` 后，在 **diting-core** 配置 `.env` 并执行步骤 2～6（编排与建表归属 infra，见 [02_三位一体仓库规约](../../03_原子目标与规约/_共享规约/02_三位一体仓库规约.md)）。**可选路线**为 ECS + K3s，须先按 [4. 实测前自建依赖与测试后回收](#l4-stage2-02-deploy-deps-and-cleanup) ①～⑦ 部署；**回收**：默认路线在 diting-infra 执行 `make local-deps-down`；可选路线等所有步骤验证完成后再在 diting-infra 执行 `make stage2-01-full-down`；若中途失败或意外退出，也须执行回收以免 ECS 残留。

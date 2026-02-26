@@ -36,7 +36,8 @@ OHLCV/新闻/行业 全数据结构与逻辑完整；Dockerfile 支持采集任�
 
 - **逻辑填充期借鉴组件**：本步实现依赖 [01_顶层概念/05_谛听优先借鉴的十大开源选型](../../01_顶层概念/05_谛听优先借鉴的十大开源选型.md) 中 **AkShare**（国内数据）、**OpenBB**（国际/宏观/基本面）。
 - **要求**：采集镜像的 Dockerfile 及 requirements（或等价依赖文件）中**显式声明并安装**上述组件（如 `akshare`、`openbb-platform` 或项目采用的 OpenBB 包名）；构建后 `make ingest-test` 须在镜像内可运行。
-- **验收**：L4 本步准出时须包含「依赖已写入 Dockerfile/requirements」「镜像内 make ingest-test 退出码 0」的验证。
+- **一键构建**：Makefile 须提供单一 target（如 `make build-images`），一次执行即可构建本阶段所涉全部镜像（当前为采集镜像），便于 CI 与本地复现；L4 验证项 V-BUILD-ALL 对应此验收。
+- **验收**：L4 本步准出时须包含「依赖已写入 Dockerfile/requirements」「镜像内 make ingest-test 退出码 0」「make build-images 退出码 0、全部镜像构建成功」的验证。
 
 <a id="design-stage2-02-integration-akshare"></a>
 ### 逻辑填充期开源接入点：AkShare（Phase1 必选）
@@ -73,6 +74,7 @@ L4 实践文档中的 [功能实践项清单](../../04_阶段规划与实践/Sta
 | F6 | Makefile 新增 ingest-test target | [依赖与镜像构建](#design-stage2-02-deps) | make ingest-test 存在且可执行 |
 | F7 | Dockerfile/requirements 显式 akshare、openbb-platform | 同上 | Dockerfile 及 requirements 中显式列出 |
 | F8 | ingest-test 目标数据约定 | L4 [2.5 确认采集到的目标数据](../../04_阶段规划与实践/Stage2_数据采集与存储/02_采集逻辑与Dockerfile.md#l4-stage2-02-target-data) | diting-core 内文档或配置约定 symbol、data_type 等 |
+| F9 | 一键构建所有镜像 | [依赖与镜像构建](#design-stage2-02-deps) | make build-images（或约定名）存在且可执行；退出码 0 表示全部镜像构建成功 |
 
 <a id="design-stage2-02-verification"></a>
 ### 验证与可执行验收（设计层定义）
@@ -85,6 +87,7 @@ L4 实践中的「示例与验证」须满足下列设计层验收定义；具�
 | **数据量、类型、内容符合预期** | 写入满足 L1 `ohlcv`、L2 `data_versions` 表结构与 07_ 版本化；前期可少存数据，结构完整 | psql 对 ohlcv、data_versions 的 COUNT/SELECT 样例；无主键/非空违反；与目标数据约定一致 | V-DATA |
 | **依赖链实践完整** | Stage2-01 准出 → 本步配置 → verify-db-connection → ingest-test → 镜像内 ingest-test，全链路可复现 | L4 依赖链验证顺序表 1～5 步执行通过 | V-DB、V-INGEST |
 | **镜像按预期运行并采集** | 镜像内显式安装 akshare、openbb-platform；容器内 `make ingest-test` 退出码 0 | 构建镜像 → 容器内执行 make ingest-test；可选：对比宿主机/集群内 L1/L2 数据与本地执行一致 | V-IMAGE |
+| **一键构建所有镜像** | Makefile 提供 build-images（或约定名）；一次执行构建本阶段所涉全部镜像 | make build-images 退出码 0；可辅以 docker images 或 Make 内自检 | V-BUILD-ALL |
 
 <a id="design-stage2-02-exit"></a>
 ## 准出

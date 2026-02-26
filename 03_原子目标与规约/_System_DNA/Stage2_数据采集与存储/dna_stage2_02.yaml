@@ -9,7 +9,7 @@ work_dir:
   description: "diting-core"
 # 交付范围：逻辑填充期接入点实现细节见 logic_fill_design_refs 所列设计文档小节（实践重点、详细需求、验收要点）
 delivery_scope: "OHLCV/新闻/行业 全结构；Dockerfile；前期可少存数据；逻辑填充期接入点 AkShare、OpenBB 按 design_doc 对应小节实现"
-exit_criteria: "采集逻辑实现；make ingest-test 可运行；依赖已写入 Dockerfile/requirements；镜像内 make ingest-test 通过；前置 make verify-db-connection 已通过"
+exit_criteria: "采集逻辑实现；make ingest-test 可运行；依赖已写入 Dockerfile/requirements；镜像内 make ingest-test 通过；make build-images 一键构建全部镜像通过；前置 make verify-db-connection 已通过"
 # AI 可读：实现「该怎么做」须读取下列完整路径#锚点对应小节（实践重点、详细需求、验收要点）
 logic_fill_design_refs:
   - "03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md#design-stage2-02-integration-akshare"
@@ -27,7 +27,7 @@ required_config:
   - TIMESCALE_DSN   # L1 TimescaleDB 连接串
   - PG_L2_DSN      # L2 知识库 PostgreSQL 连接串
   - REDIS_URL      # 可选，Redis 连接串
-artifacts: ["采集任务", "Dockerfile", "Makefile ingest-test target"]
+artifacts: ["采集任务", "Dockerfile", "Makefile ingest-test target", "Makefile build-images（或约定名）一键构建所有镜像"]
 # 部署配套：逻辑填充期借鉴组件，须在 Dockerfile/requirements 中显式安装
 integration_packages:
   - akshare
@@ -50,6 +50,11 @@ verification_commands:
     expected_exit: 0
     expected_outcome: "Dockerfile/requirements 依赖正确；镜像按预期运行并采集数据"
     phase: "image"
+  - cmd: "make build-images"
+    cwd_ref: "repo_i"
+    expected_exit: 0
+    expected_outcome: "本阶段所涉全部镜像（当前为采集镜像）均成功构建"
+    phase: "build"
 
 # L4 实践文档锚点：依赖检查、采集逻辑细节、示例与验证（便于工具链跳转）
 l4_anchors:
@@ -80,6 +85,8 @@ feature_items:
     description: "Dockerfile/requirements 显式 akshare、openbb-platform"
   - id: "F8"
     description: "ingest-test 目标数据约定（哪些股票、哪些 data_type）"
+  - id: "F9"
+    description: "一键构建所有镜像：Makefile 提供单一 target（如 make build-images），一次构建本阶段所涉全部镜像"
 
 # 验证与测试项（与 L4 验证与测试结果清单表一致；执行者填测试结果）
 verification_items:
@@ -95,3 +102,7 @@ verification_items:
   - id: "V-IMAGE"
     description: "镜像内可运行采集"
     cmd: "在采集镜像内执行 make ingest-test"
+  - id: "V-BUILD-ALL"
+    description: "一键构建所有镜像"
+    cmd: "make build-images（或项目约定名）"
+
