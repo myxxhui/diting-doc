@@ -1,6 +1,6 @@
 # DNA：Module A 语义分类器
 # 规约文档（AI 可读）：03_原子目标与规约/_共享规约/09_核心模块架构规约.md
-# L4 实践文档（AI 可读）：04_阶段规划与实践/Stage3_模块实践/01_ModuleA.md
+# L4 实践文档（AI 可读）：04_阶段规划与实践/Stage3_模块实践/01_语义分类器_实践.md
 
 module_a_semantic_classifier:
   purpose: "语义分类器：不做预测，只做分类"

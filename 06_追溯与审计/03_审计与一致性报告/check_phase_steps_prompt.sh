@@ -17,9 +17,9 @@ STAGE_STEPS=(
   "Stage1_仓库与骨架/01_三位一体仓库初始化.md"
   "Stage1_仓库与骨架/02_核心接口与Proto占位.md"
   "Stage1_仓库与骨架/03_密钥与配置模板就绪.md"
-  "Stage2_数据采集与存储/01_基础设施与依赖部署.md"
-  "Stage2_数据采集与存储/02_采集逻辑与Dockerfile.md"
-  "Stage3_模块实践/01_ModuleA.md"
+  "Stage2_数据采集与存储/01_基础设施与依赖实践.md"
+  "Stage2_数据采集与存储/02_采集逻辑与Dockerfile实践.md"
+  "Stage3_模块实践/01_语义分类器_实践.md"
   "Stage4_MoE与执行网关/01_ModuleC_MoE议会接入.md"
   "Stage5_优化与扩展/01_可观测性与日志指标.md"
 )

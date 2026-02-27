@@ -1,6 +1,6 @@
 # secrets 加密流程与案例（实践文档模板）
 
-> **放置约定**：本内容须放置于 **diting-infra** 仓库的 `secrets/README.md` 或 `secrets/01_加密流程与案例.md`，供本地与 CI 加密时参考。设计规约见 [04_密钥与配置模板设计](../../../03_原子目标与规约/Stage1_仓库与骨架/04_密钥与配置模板设计.md)。
+> **放置约定**：本内容须放置于 **diting-infra** 仓库的 `secrets/README.md` 或 `secrets/01_加密流程与案例.md`，供本地与 CI 加密时参考。设计规约见 [04_密钥与配置模板设计](../../../03_原子目标与规约/Stage1_仓库与骨架/04_密钥与配置模板_设计.md)。
 >
 > **Chart 约定**：Sealed-Secrets Chart 须下载到本地（如 `charts/dependencies/sealed-secrets`），不引用远程 Helm 仓库；部署与验证均使用本地路径。
 
@@ -57,7 +57,7 @@
 | 数据源 API Key（Stage2 采集） | diting-akshare-secrets | AkShare/OpenBB 等 API Key |
 | Module F Broker 凭证 | diting-broker-secrets | CTP/券商 API 密钥 |
 
-Secret 命名与 Key 与 [04_密钥与配置模板设计](../../../03_原子目标与规约/Stage1_仓库与骨架/04_密钥与配置模板设计.md)「组件引用契约」及 .env.template 占位符一致。
+Secret 命名与 Key 与 [04_密钥与配置模板设计](../../../03_原子目标与规约/Stage1_仓库与骨架/04_密钥与配置模板_设计.md)「组件引用契约」及 .env.template 占位符一致。
 
 ---
 

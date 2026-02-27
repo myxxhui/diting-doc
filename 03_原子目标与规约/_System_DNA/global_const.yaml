@@ -326,7 +326,7 @@ deployable_units:
     dockerfile_path: "diting-core/docker/hot_path"  # 单镜像单进程
     chart_path: "diting-infra/charts/hot_path"
     scale_to_zero: false
-    workflow_stages: ["stage3_04", "stage3_05", "stage3_06"]  # 实现阶段；构建/部署可合并
+    workflow_stages: ["stage3_04"]  # 热路径 D+E+F 一步完成，同镜像
 
 # 数据架构与分层存储（L2 03_数据架构与分层存储维度 → L3 07_数据版本控制等）
 # 规约文档（AI 可读）：02_战略维度/产品设计/03_数据架构与分层存储维度.md；03_原子目标与规约/_共享规约/07_数据版本控制规约.md

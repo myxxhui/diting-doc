@@ -1,6 +1,6 @@
 # DNA：Module F 执行网关
 # 规约文档（AI 可读）：03_原子目标与规约/_共享规约/09_核心模块架构规约.md
-# L4 实践文档（AI 可读）：04_阶段规划与实践/Stage4_MoE与执行网关/02_ModuleF执行网关接入.md
+# L4 实践文档（AI 可读）：04_阶段规划与实践/Stage4_MoE与执行网关/02_ModuleF执行网关接入_实践.md
 
 module_f_execution_gateway:
   purpose: "执行网关：Redis Streams -> OMS Lite -> MiniQMT"

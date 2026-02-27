@@ -1,0 +1,60 @@
+# Stage1-04 密钥与配置模板就绪
+stage_id: "stage1_04"
+name: "密钥与配置模板就绪"
+design_doc: "03_原子目标与规约/Stage1_仓库与骨架/04_密钥与配置模板_设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage1_仓库与骨架/04_密钥与配置模板_实践.md"
+work_dir:
+  type: "repo_a"
+  repo_ref: "repo_a"
+  description: "diting-infra 代码仓"
+delivery_scope: "Sealed-Secrets 模板或说明；.env.template 双仓占位；config 单一 YAML 模板可用"
+exit_criteria: "secrets/ 含 Sealed-Secrets 模板或说明；config 模板可用；三项验证通过"
+
+# 版本与公钥（方案 A：公钥进 Git）；Chart 下载到本地，不引用远程库
+sealed_secrets:
+  chart_version: "2.x"
+  kubeseal_cli_version: "v0.24.x"
+  public_key_path: "secrets/certs/sealed-secrets-public.pem"
+  chart_storage: "local"
+  chart_path: "charts/dependencies/sealed-secrets"
+
+# 1:1:1 落地：实践文档模板与 L1 验证脚本须在 L4 可执行
+practice_doc_template: "04_阶段规划与实践/Stage1_仓库与骨架/附件_secrets_加密流程与案例.md"
+verify_script: "scripts/verify_stage1_04.sh"
+
+verification_commands:
+  - cmd: "test -d secrets && test -f config/environments/dev/deploy.yaml 或等价"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "目录与 YAML 模板存在"
+  - cmd: "test -f secrets/certs/sealed-secrets-public.pem 或 test -f secrets/certs/sealed-secrets-public-dev.pem"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "公钥文件存在"
+  - cmd: "helm template sealed-secrets <chart_path> -f <values> 检查渲染含关键参数"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "模板参数生效"
+  - cmd: "deploy-engine 或等价工具解析 config 路径，退出码 0"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "符合 DeploymentConfig"
+  - cmd: "git submodule status 或 test -d deploy-engine；diting-infra 引用 deploy-engine"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "Git 引用存在"
+  - cmd: "L2 集群内（04 步内）：kubectl get pods -n kube-system -l app.kubernetes.io/name=sealed-secrets"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "Sealed-Secrets 控制器 Running"
+  - cmd: "L3 端到端（04 步内）：部署示例 SealedSecret 与测试 Pod，kubectl exec <pod> -- env 检查密钥可读"
+    cwd_ref: "repo_a"
+    expected_outcome: "应用可读取非占位符"
+  - cmd: "L1 可执行：从文档仓 INFRA_DIR=<repo_a> ./scripts/verify_stage1_04.sh"
+    cwd_ref: "doc_repo"
+    expected_exit: 0
+    expected_outcome: "L1 验证通过"
+
+l5_stage_anchor: "l5-stage-stage1_04"
+consumes: ["Stage1-03 准出"]
+artifacts: ["Sealed-Secrets 模板", "config 模板", ".env.template 双仓"]

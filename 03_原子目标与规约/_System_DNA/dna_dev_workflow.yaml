@@ -18,8 +18,6 @@ execution_order:
   - stage3_03
   - stage3_04
   - stage3_05
-  - stage3_06
-  - stage3_07
   - stage4_01
   - stage4_02
   - stage4_03
@@ -33,9 +31,9 @@ workflow_stages:
   - stage_id: "stage1_01"
     name: "三位一体仓库初始化"
     l4_stage_dir: "Stage1_仓库与骨架"
-    l4_step_doc: "01_三位一体仓库初始化.md"
-    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/01_三位一体仓库设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/dna_stage1_01.yaml"
+    l4_step_doc: "01_三位一体仓库_实践.md"
+    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/01_三位一体仓库_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/01_dna_三位一体仓库.yaml"
     step_count: 1
     delivery_scope: "三仓目录符合 03_原子目标与规约/_共享规约/02_三位一体仓库规约.md；diting-core 含 Makefile（test 可为占位）；diting-infra 初始化"
     env_stage: "local"
@@ -66,9 +64,9 @@ workflow_stages:
   - stage_id: "stage1_02"
     name: "核心接口与Proto占位"
     l4_stage_dir: "Stage1_仓库与骨架"
-    l4_step_doc: "02_核心接口与Proto占位.md"
-    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/02_核心接口与Proto设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/dna_stage1_02.yaml"
+    l4_step_doc: "02_核心接口与Proto_实践.md"
+    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/02_核心接口与Proto_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/02_dna_核心接口与Proto.yaml"
     delivery_scope: "核心接口、Proto 占位与目录占位实现"
     env_stage: "local"
     entry_criteria: "Stage1-01 准出"
@@ -90,9 +88,9 @@ workflow_stages:
   - stage_id: "stage1_03"
     name: "基础设施 ECS 与 K3s 就绪"
     l4_stage_dir: "Stage1_仓库与骨架"
-    l4_step_doc: "03_基础设施ECS与K3s就绪.md"
-    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/03_基础设施ECS与K3s设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/dna_stage1_03.yaml"
+    l4_step_doc: "03_基础设施ECS与K3s_实践.md"
+    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/03_基础设施ECS与K3s_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/03_dna_基础设施ECS与K3s.yaml"
     delivery_scope: "deploy-engine 引用与单一 YAML config 就绪；Up 产出 ECS+K3s；验证后 Down 回收"
     env_stage: "local"
     entry_criteria: "Stage1-02 准出"
@@ -120,9 +118,9 @@ workflow_stages:
   - stage_id: "stage1_04"
     name: "密钥与配置模板就绪"
     l4_stage_dir: "Stage1_仓库与骨架"
-    l4_step_doc: "04_密钥与配置模板就绪.md"
-    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/04_密钥与配置模板设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/dna_stage1_04.yaml"
+    l4_step_doc: "04_密钥与配置模板_实践.md"
+    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/04_密钥与配置模板_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/04_dna_密钥与配置模板.yaml"
     delivery_scope: "Sealed-Secrets 模板或说明；.env.template 双仓占位；config 单一 YAML 模板可用"
     env_stage: "local"
     entry_criteria: "Stage1-03 准出"
@@ -139,9 +137,9 @@ workflow_stages:
   - stage_id: "stage2_01"
     name: "基础设施与依赖部署"
     l4_stage_dir: "Stage2_数据采集与存储"
-    l4_step_doc: "01_基础设施与依赖部署.md"
-    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/01_基础设施与依赖设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/dna_stage2_01.yaml"
+    l4_step_doc: "01_基础设施与依赖_实践.md"
+    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/01_基础设施与依赖_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/01_dna_基础设施与依赖.yaml"
     delivery_scope: "TimescaleDB/Redis/PostgreSQL + init Job + Sealed-Secrets"
     env_stage: "local"
     env_minimal_full: "Minimal: 本地或轻量；Full: K3s 全栈"
@@ -153,7 +151,7 @@ workflow_stages:
       description: "diting-infra"
     l5_stage_anchor: "l5-stage-stage2_01"
     verification_commands:
-      - cmd: "V1～V7 见 dna_stage2_01.yaml verification_commands；含 Chart 缓存、DB/Redis/PostgreSQL 可用、init Job 成功、Sealed-Secrets、下游 make verify-db-connection"
+      - cmd: "V1～V7 见 01_dna_基础设施与依赖.yaml verification_commands；含 Chart 缓存、DB/Redis/PostgreSQL 可用、init Job 成功、Sealed-Secrets、下游 make verify-db-connection"
         cwd_ref: "repo_a"
         expected_exit: 0
         expected_outcome: "全部验证项符合预期"
@@ -163,9 +161,9 @@ workflow_stages:
   - stage_id: "stage2_02"
     name: "采集逻辑与Dockerfile"
     l4_stage_dir: "Stage2_数据采集与存储"
-    l4_step_doc: "02_采集逻辑与Dockerfile.md"
-    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/dna_stage2_02.yaml"
+    l4_step_doc: "02_采集逻辑与Dockerfile_实践.md"
+    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/02_dna_采集逻辑与Dockerfile.yaml"
     delivery_scope: "OHLCV/新闻/行业 全结构；Dockerfile；前期可少存数据"
     entry_criteria: "Stage2-01 准出"
     exit_criteria: "采集逻辑实现；make ingest-test 或等价可运行"
@@ -184,12 +182,12 @@ workflow_stages:
   - stage_id: "stage2_03"
     name: "本地测试与K3s连调"
     l4_stage_dir: "Stage2_数据采集与存储"
-    l4_step_doc: "03_本地测试与K3s连调.md"
-    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/03_本地测试与K3s连调设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/dna_stage2_03.yaml"
+    l4_step_doc: "03_本地测试与K3s连调_实践.md"
+    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/03_本地测试与K3s连调_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/03_dna_本地测试与K3s连调.yaml"
     delivery_scope: "本地测试 + K3s 连调；本地进程连 K3s DB（NodePort）"
     entry_criteria: "Stage2-02 准出"
-    exit_criteria: "本地采集可写 L1；MarketDataFeed 可读取"
+    exit_criteria: "本地采集可写 L1；MarketDataFeed 可读取（或单测+记录待补验）；五条 psql 验证与约定一致；回收环境（步骤 6、7、8 必做）"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
@@ -205,9 +203,9 @@ workflow_stages:
   - stage_id: "stage2_04"
     name: "镜像打包与ACR推送"
     l4_stage_dir: "Stage2_数据采集与存储"
-    l4_step_doc: "04_镜像打包与ACR推送.md"
-    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/04_镜像打包与ACR推送设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/dna_stage2_04.yaml"
+    l4_step_doc: "04_镜像打包与ACR推送_实践.md"
+    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/04_镜像打包与ACR推送_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/04_dna_镜像打包与ACR推送.yaml"
     delivery_scope: "镜像 tag = 时间+分支+版本号；DoD 含 git SHA、镜像 digest"
     entry_criteria: "Stage2-03 准出"
     exit_criteria: "make build 成功；镜像可推送"
@@ -226,9 +224,9 @@ workflow_stages:
   - stage_id: "stage2_05"
     name: "采集模块部署与验收"
     l4_stage_dir: "Stage2_数据采集与存储"
-    l4_step_doc: "05_采集模块部署与验收.md"
-    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/05_采集模块部署与验收设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/dna_stage2_05.yaml"
+    l4_step_doc: "05_采集模块部署与验收_实践.md"
+    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/05_采集模块部署与验收_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/05_dna_采集模块部署与验收.yaml"
     delivery_scope: "采集模块部署；真实数据可写入 L1/L2 且可被 Module A/B/C 消费"
     entry_criteria: "Stage2-04 准出"
     exit_criteria: "make ingest-test 或 DNA 约定命令退出码 0；写入与读取验证通过"
@@ -244,13 +242,13 @@ workflow_stages:
     consumes: ["Stage2-04 准出"]
     artifacts: ["采集模块部署成功", "Stage2 准出"]
 
-  # ----- Stage3 模块实践 -----
+  # ----- Stage3 模块实践（5 步：语义分类器、量化扫描、MoE议会、热路径、全链路验证） -----
   - stage_id: "stage3_01"
-    name: "Module A 语义分类器"
+    name: "语义分类器"
     l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "01_ModuleA.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/01_ModuleA设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_01.yaml"
+    l4_step_doc: "01_语义分类器_实践.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/01_语义分类器_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/01_dna_语义分类器.yaml"
     delivery_scope: "Module A 四项 100%，单模块+联动+全链路验证"
     work_dir:
       type: "repo_i"
@@ -258,14 +256,14 @@ workflow_stages:
       description: "diting-core"
     l5_stage_anchor: "l5-mod-A"
     consumes: ["Stage2-05 准出"]
-    artifacts: ["Module A 实现"]
+    artifacts: ["语义分类器实现"]
 
   - stage_id: "stage3_02"
-    name: "Module B 量化扫描引擎"
+    name: "量化扫描引擎"
     l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "02_ModuleB.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/02_ModuleB设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_02.yaml"
+    l4_step_doc: "02_量化扫描引擎_实践.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/02_量化扫描引擎_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/02_dna_量化扫描引擎.yaml"
     delivery_scope: "Module B 四项 100%"
     work_dir:
       type: "repo_i"
@@ -273,14 +271,14 @@ workflow_stages:
       description: "diting-core"
     l5_stage_anchor: "l5-mod-B"
     consumes: ["Stage3-01 准出"]
-    artifacts: ["Module B 实现"]
+    artifacts: ["量化扫描引擎实现"]
 
   - stage_id: "stage3_03"
-    name: "Module C MoE 议会"
+    name: "MoE 议会"
     l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "03_ModuleC.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/03_ModuleC设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_03.yaml"
+    l4_step_doc: "03_MoE议会_实践.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/03_MoE议会_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/03_dna_MoE议会.yaml"
     delivery_scope: "Module C 四项 100%"
     work_dir:
       type: "repo_i"
@@ -288,59 +286,29 @@ workflow_stages:
       description: "diting-core"
     l5_stage_anchor: "l5-mod-C"
     consumes: ["Stage3-02 准出"]
-    artifacts: ["Module C 实现"]
+    artifacts: ["MoE 议会实现"]
 
   - stage_id: "stage3_04"
-    name: "Module D 判官"
+    name: "热路径判官风控与执行"
     l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "04_ModuleD.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/04_ModuleD设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_04.yaml"
-    delivery_scope: "Module D 四项 100%"
+    l4_step_doc: "04_热路径判官风控与执行_实践.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/04_热路径判官风控与执行_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/04_dna_热路径判官风控与执行.yaml"
+    delivery_scope: "热路径 D+E+F 四项 100%；全链路 A→F 验证"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
       description: "diting-core"
-    l5_stage_anchor: "l5-mod-D"
+    l5_stage_anchor: "l5-stage-stage3_04"
     consumes: ["Stage3-03 准出"]
-    artifacts: ["Module D 实现"]
+    artifacts: ["热路径 D+E+F 实现", "全链路 A→F 验证通过"]
 
   - stage_id: "stage3_05"
-    name: "Module E 风控盾"
-    l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "05_ModuleE.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/05_ModuleE设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_05.yaml"
-    delivery_scope: "Module E 四项 100%"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-mod-E"
-    consumes: ["Stage3-04 准出"]
-    artifacts: ["Module E 实现"]
-
-  - stage_id: "stage3_06"
-    name: "Module F 执行网关"
-    l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "06_ModuleF.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/06_ModuleF设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_06.yaml"
-    delivery_scope: "Module F 四项 100%；全链路 A→F 验证"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-mod-F"
-    consumes: ["Stage3-05 准出"]
-    artifacts: ["Module F 实现"]
-
-  - stage_id: "stage3_07"
     name: "全链路验证"
     l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "07_全链路验证.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/07_全链路验证设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/dna_stage3_07.yaml"
+    l4_step_doc: "05_全链路验证_实践.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/05_全链路验证_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/05_dna_全链路验证.yaml"
     delivery_scope: "A→F 全链路可运行；Mock/Table-Driven 验证通过"
     work_dir:
       type: "repo_i"
@@ -350,32 +318,32 @@ workflow_stages:
       - cmd: "make test"
         cwd_ref: "repo_i"
         expected_exit: 0
-    l5_stage_anchor: "l5-stage-stage3_07"
-    consumes: ["Stage3-06 准出"]
+    l5_stage_anchor: "l5-stage-stage3_05"
+    consumes: ["Stage3-04 准出"]
     artifacts: ["全链路验证通过", "Stage3 准出"]
 
   # ----- Stage4 MoE 与执行网关 -----
   - stage_id: "stage4_01"
     name: "Module C MoE 议会接入"
     l4_stage_dir: "Stage4_MoE与执行网关"
-    l4_step_doc: "01_ModuleC_MoE议会接入.md"
-    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/01_ModuleC_MoE议会接入设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_01.yaml"
+    l4_step_doc: "01_ModuleC_MoE议会接入_实践.md"
+    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/01_ModuleC_MoE议会接入_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/01_dna_ModuleC_MoE议会接入.yaml"
     delivery_scope: "Router 按 Tag 分发，专家意见与 D 对接"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
       description: "diting-core"
     l5_stage_anchor: "l5-func-05"
-    consumes: ["Stage3-07 准出"]
+    consumes: ["Stage3-05 准出"]
     artifacts: ["MoE 议会接入"]
 
   - stage_id: "stage4_02"
     name: "Module F 执行网关接入"
     l4_stage_dir: "Stage4_MoE与执行网关"
-    l4_step_doc: "02_ModuleF执行网关接入.md"
-    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/02_ModuleF执行网关接入设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_02.yaml"
+    l4_step_doc: "02_ModuleF执行网关接入_实践.md"
+    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/02_ModuleF执行网关接入_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/02_dna_ModuleF执行网关接入.yaml"
     delivery_scope: "Broker 抽象与占位/仿真实现，E→F 衔接"
     work_dir:
       type: "repo_i"
@@ -388,9 +356,9 @@ workflow_stages:
   - stage_id: "stage4_03"
     name: "回测或仿真验证"
     l4_stage_dir: "Stage4_MoE与执行网关"
-    l4_step_doc: "03_回测或仿真验证.md"
-    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/03_回测或仿真验证设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_03.yaml"
+    l4_step_doc: "03_回测或仿真验证_实践.md"
+    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/03_回测或仿真验证_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/03_dna_回测或仿真验证.yaml"
     delivery_scope: "Docker/K3s 下回测或仿真路径跑通"
     work_dir:
       type: "repo_i"
@@ -404,9 +372,9 @@ workflow_stages:
   - stage_id: "stage5_01"
     name: "可观测性与日志指标"
     l4_stage_dir: "Stage5_优化与扩展"
-    l4_step_doc: "01_可观测性与日志指标.md"
-    design_doc: "03_原子目标与规约/Stage5_优化与扩展/01_可观测性与日志指标设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/dna_stage5_01.yaml"
+    l4_step_doc: "01_可观测性与日志指标_实践.md"
+    design_doc: "03_原子目标与规约/Stage5_优化与扩展/01_可观测性与日志指标_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/01_dna_可观测性与日志指标.yaml"
     delivery_scope: "日志/指标/健康检查满足 03_原子目标与规约 中可观测性相关规约（见 design_doc）"
     work_dir:
       type: "repo_i"
@@ -419,9 +387,9 @@ workflow_stages:
   - stage_id: "stage5_02"
     name: "成本治理与Token熔断"
     l4_stage_dir: "Stage5_优化与扩展"
-    l4_step_doc: "02_成本治理与Token熔断.md"
-    design_doc: "03_原子目标与规约/Stage5_优化与扩展/02_成本治理与Token熔断设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/dna_stage5_02.yaml"
+    l4_step_doc: "02_成本治理与Token熔断_实践.md"
+    design_doc: "03_原子目标与规约/Stage5_优化与扩展/02_成本治理与Token熔断_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/02_dna_成本治理与Token熔断.yaml"
     delivery_scope: "Token 预算与熔断逻辑可生效"
     work_dir:
       type: "repo_i"
@@ -434,9 +402,9 @@ workflow_stages:
   - stage_id: "stage5_03"
     name: "多策略池或配置扩展"
     l4_stage_dir: "Stage5_优化与扩展"
-    l4_step_doc: "03_多策略池或配置扩展.md"
-    design_doc: "03_原子目标与规约/Stage5_优化与扩展/03_多策略池或配置扩展设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/dna_stage5_03.yaml"
+    l4_step_doc: "03_多策略池或配置扩展_实践.md"
+    design_doc: "03_原子目标与规约/Stage5_优化与扩展/03_多策略池或配置扩展_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/03_dna_多策略池或配置扩展.yaml"
     delivery_scope: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/产品设计/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
     work_dir:
       type: "repo_i"
@@ -448,9 +416,9 @@ workflow_stages:
   - stage_id: "stage5_04"
     name: "Level1 入口与 L5 验收对齐"
     l4_stage_dir: "Stage5_优化与扩展"
-    l4_step_doc: "04_Level1与L5验收对齐.md"
-    design_doc: "03_原子目标与规约/Stage5_优化与扩展/04_Level1与L5验收对齐设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/dna_stage5_04.yaml"
+    l4_step_doc: "04_Level1与L5验收对齐_实践.md"
+    design_doc: "03_原子目标与规约/Stage5_优化与扩展/04_Level1与L5验收对齐_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/04_dna_Level1与L5验收对齐.yaml"
     delivery_scope: "满足三级流水线 Level 1、功能/不可能三角可追溯"
     work_dir:
       type: "repo_i"
@@ -485,8 +453,8 @@ deployable_units:
     first_k3s_stage: "stage2_05"
   hot_path_def:
     name: "热路径 D+E+F"
-    first_delivery_stage: "stage3_04"  # D/E/F 实现合并为 stage3_04～06，同一镜像
-    first_docker_stage: "stage3_06"     # 热路径镜像在 stage3_06 后构建
+    first_delivery_stage: "stage3_04"  # 热路径 D+E+F 一步完成，同一镜像
+    first_docker_stage: "stage3_04"     # 热路径镜像在本步构建
     first_k3s_stage: "stage2_05"
 
 # Release bundle：一次发布包含的镜像列表，与 03_原子目标与规约/开发与交付/02_基础设施与部署规约.md 一致
@@ -514,17 +482,17 @@ module_to_stages:
     first_docker_stage: "stage2_04"
     first_k3s_stage: "stage2_05"
   module_d:
-    name: "Module D 判官"
+    name: "Module D 判官（热路径）"
     first_delivery_stage: "stage3_04"
-    first_docker_stage: "stage2_04"
+    first_docker_stage: "stage3_04"
     first_k3s_stage: "stage2_05"
   module_e:
-    name: "Module E 风控盾"
-    first_delivery_stage: "stage3_05"
-    first_docker_stage: "stage2_04"
+    name: "Module E 风控盾（热路径）"
+    first_delivery_stage: "stage3_04"
+    first_docker_stage: "stage3_04"
     first_k3s_stage: "stage2_05"
   module_f:
-    name: "Module F 执行网关"
-    first_delivery_stage: "stage3_06"
-    first_docker_stage: "stage2_04"
+    name: "Module F 执行网关（热路径）"
+    first_delivery_stage: "stage3_04"
+    first_docker_stage: "stage3_04"
     first_k3s_stage: "stage2_05"

@@ -1,0 +1,24 @@
+# Stage4-02 Module F 执行网关接入
+stage_id: "stage4_02"
+name: "Module F 执行网关接入"
+design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/02_ModuleF执行网关接入_设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage4_MoE与执行网关/02_ModuleF执行网关接入_实践.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+# 交付范围：逻辑填充期接入点实现细节见 logic_fill_design_refs 所列设计文档小节
+delivery_scope: "Broker 抽象与占位/仿真实现，E→F 衔接；Vn.py 对接要点按 design_doc 对应小节实现"
+exit_criteria: "执行网关接入；E→F 衔接可验证"
+logic_fill_design_refs:
+  - "03_原子目标与规约/Stage4_MoE与执行网关/02_ModuleF执行网关接入设计.md#design-stage4-02-vnpy"
+design_integration_anchors:
+  - design-stage4-02-vnpy
+l5_stage_anchor: "l5-func-06"
+consumes: ["Stage4-01 准出"]
+artifacts: ["执行网关接入"]
+# 依赖与 Stage3-06 一致，见 dna_module_f.integration_packages
+integration_packages_ref: "core_modules/dna_module_f.yaml#integration_packages"
+# 接口抽象约定见 global_const.abstraction_layer.broker_driver，不引用规约级 dna_05
+semantic_refs:
+  broker_driver: "global_const.yaml#abstraction_layer.broker_driver"

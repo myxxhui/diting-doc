@@ -1,0 +1,14 @@
+# Stage5-03 多策略池或配置扩展
+stage_id: "stage5_03"
+name: "多策略池或配置扩展"
+design_doc: "03_原子目标与规约/Stage5_优化与扩展/03_多策略池或配置扩展_设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage5_优化与扩展/03_多策略池或配置扩展_实践.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/产品设计/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
+exit_criteria: "多策略扩展就绪"
+l5_stage_anchor: "l5-stage-stage5_03"
+consumes: ["Stage5-02 准出"]
+artifacts: ["多策略扩展"]

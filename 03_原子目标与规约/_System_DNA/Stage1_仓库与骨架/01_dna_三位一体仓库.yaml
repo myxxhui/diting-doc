@@ -1,0 +1,19 @@
+# Stage1-01 三位一体仓库初始化
+stage_id: "stage1_01"
+name: "三位一体仓库初始化"
+design_doc: "03_原子目标与规约/Stage1_仓库与骨架/01_三位一体仓库_设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage1_仓库与骨架/01_三位一体仓库_实践.md"
+work_dir:
+  type: "parent_path"
+  repo_ref: null
+  description: "新建仓库的父路径（global_const.trinity_repos.parent_path_default）"
+delivery_scope: "三仓目录符合 03_原子目标与规约/_共享规约/02_三位一体仓库规约.md；diting-core 含 Makefile（test 可为占位）；diting-infra 初始化"
+exit_criteria: "三仓存在且目录与 global_const.trinity_repos 一致；diting-core make test 占位通过"
+verification_commands:
+  - cmd: "make -C diting-core test"
+    cwd_ref: "parent_path"
+    expected_exit: 0
+    expected_outcome: "退出码 0（占位通过）"
+l5_stage_anchor: "l5-stage-stage1_01"
+consumes: ["03_原子目标与规约 与 03_原子目标与规约/_System_DNA 定稿"]
+artifacts: ["diting-core 目录与 Makefile", "diting-infra 目录"]

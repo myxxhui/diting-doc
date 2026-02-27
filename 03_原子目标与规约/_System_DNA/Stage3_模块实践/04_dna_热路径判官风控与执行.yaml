@@ -1,0 +1,20 @@
+# Stage3-04 热路径（判官+风控+执行）
+# 可部署单元：同进程同镜像，见 global_const.deployable_units.hot_path_def
+# 语义详见 core_modules/dna_module_d.yaml、dna_module_e.yaml、dna_module_f.yaml
+stage_id: "stage3_04"
+name: "热路径判官风控与执行"
+design_doc: "03_原子目标与规约/Stage3_模块实践/04_热路径判官风控与执行_设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage3_模块实践/04_热路径判官风控与执行_实践.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "Module D+E+F 四项 100%；PyPortfolioOpt 与 Vn.py 逻辑填充期接入点达标；全链路 A→F 验证"
+exit_criteria: "判官+风控+执行实现；同镜像内单测与全链路验证通过"
+logic_fill_design_refs:
+  - "03_原子目标与规约/Stage3_模块实践/04_热路径判官风控与执行_设计.md#design-stage3-04-integration-pfo"
+  - "03_原子目标与规约/Stage3_模块实践/04_热路径判官风控与执行_设计.md#design-stage3-04-integration-vnpy"
+l5_stage_anchor: "l5-stage-stage3_04"
+consumes: ["Stage3-03 准出"]
+artifacts: ["热路径 D+E+F 实现", "全链路 A→F 验证通过"]
+semantic_ref: "03_原子目标与规约/_System_DNA/core_modules/dna_module_d.yaml;dna_module_e.yaml;dna_module_f.yaml"

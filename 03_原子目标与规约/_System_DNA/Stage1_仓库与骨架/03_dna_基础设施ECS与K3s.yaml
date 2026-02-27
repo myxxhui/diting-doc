@@ -1,0 +1,26 @@
+# Stage1-03 基础设施 ECS 与 K3s 就绪
+stage_id: "stage1_03"
+name: "基础设施 ECS 与 K3s 就绪"
+design_doc: "03_原子目标与规约/Stage1_仓库与骨架/03_基础设施ECS与K3s_设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage1_仓库与骨架/03_基础设施ECS与K3s_实践.md"
+work_dir:
+  type: "repo_a"
+  repo_ref: "repo_a"
+  description: "diting-infra 代码仓"
+delivery_scope: "deploy-engine 引用与单一 YAML config 就绪；Up 产出 ECS+K3s；验证后 Down 回收"
+exit_criteria: "Up 成功、KubeConfig 可用、验证通过；准出前已执行 Down 回收"
+verification_commands:
+  - cmd: "deploy-engine Up（或 make deploy）；KUBECONFIG 指向产出；kubectl get nodes 成功"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "集群可用"
+  - cmd: "deploy-engine Down（或 make down）；确认资源释放"
+    cwd_ref: "repo_a"
+    expected_exit: 0
+    expected_outcome: "竞价 ECS 等资源已回收"
+l5_stage_anchor: "l5-stage-stage1_03"
+consumes: ["Stage1-02 准出"]
+artifacts: ["K3s 集群可用（验证后已回收）"]
+on_failure:
+  retry_max: 3
+  rollback_to: "执行 Down 回收后回退到上一阶段最后一步"

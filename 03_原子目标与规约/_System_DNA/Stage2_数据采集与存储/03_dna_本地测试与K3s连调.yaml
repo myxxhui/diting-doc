@@ -1,0 +1,18 @@
+# Stage2-03 本地测试与 K3s 连调
+stage_id: "stage2_03"
+name: "本地测试与K3s连调"
+design_doc: "03_原子目标与规约/Stage2_数据采集与存储/03_本地测试与K3s连调_设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage2_数据采集与存储/03_本地测试与K3s连调_实践.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "本地测试 + K3s 连调；本地进程连 K3s DB（NodePort）"
+exit_criteria: "本地采集可写 L1；MarketDataFeed 可读取（或单测+记录待补验）；五条 psql 验证与约定一致；回收环境（本地 Compose 步骤 8 必做）"
+verification_commands:
+  - cmd: "make ingest-test"
+    cwd_ref: "repo_i"
+    expected_exit: 0
+l5_stage_anchor: "l5-stage-stage2_03"
+consumes: ["Stage2-02 准出"]
+artifacts: ["连调路径跑通"]

@@ -5,21 +5,21 @@
 **准入**：Stage1-03 准出。
 
 **步骤**：
-- [01_基础设施与依赖部署](./01_基础设施与依赖部署.md)
-- [02_采集逻辑与Dockerfile](./02_采集逻辑与Dockerfile.md)
-- [03_本地测试与K3s连调](./03_本地测试与K3s连调.md)
-- [04_镜像打包与ACR推送](./04_镜像打包与ACR推送.md)
-- [05_采集模块部署与验收](./05_采集模块部署与验收.md)
+- [01_基础设施与依赖_实践](./01_基础设施与依赖_实践.md)
+- [02_采集逻辑与Dockerfile_实践](./02_采集逻辑与Dockerfile_实践.md)
+- [03_本地测试与K3s连调_实践](./03_本地测试与K3s连调_实践.md)
+- [04_镜像打包与ACR推送_实践](./04_镜像打包与ACR推送_实践.md)
+- [05_采集模块部署与验收_实践](./05_采集模块部署与验收_实践.md)
 
 ### 本阶段步骤索引
 
 | 步骤 | 标题 | 链接（本步目标） |
 |------|------|------------------|
-| 01 | 基础设施与依赖部署 | [01_基础设施与依赖部署](01_基础设施与依赖部署.md#l4-stage2-01-goal) |
-| 02 | 采集逻辑与Dockerfile | [02_采集逻辑与Dockerfile](02_采集逻辑与Dockerfile.md#l4-stage2-02-goal) |
-| 03 | 本地测试与K3s连调 | [03_本地测试与K3s连调](03_本地测试与K3s连调.md#l4-stage2-03-goal) |
-| 04 | 镜像打包与ACR推送 | [04_镜像打包与ACR推送](04_镜像打包与ACR推送.md#l4-stage2-04-goal) |
-| 05 | 采集模块部署与验收 | [05_采集模块部署与验收](05_采集模块部署与验收.md#l4-stage2-05-goal) |
+| 01 | 基础设施与依赖 | [01_基础设施与依赖_实践](01_基础设施与依赖_实践.md#l4-stage2-01-goal) |
+| 02 | 采集逻辑与Dockerfile | [02_采集逻辑与Dockerfile_实践](02_采集逻辑与Dockerfile_实践.md#l4-stage2-02-goal) |
+| 03 | 本地测试与K3s连调 | [03_本地测试与K3s连调_实践](03_本地测试与K3s连调_实践.md#l4-stage2-03-goal) |
+| 04 | 镜像打包与ACR推送 | [04_镜像打包与ACR推送_实践](04_镜像打包与ACR推送_实践.md#l4-stage2-04-goal) |
+| 05 | 采集模块部署与验收 | [05_采集模块部署与验收_实践](05_采集模块部署与验收_实践.md#l4-stage2-05-goal) |
 
 **设计**：[03_/Stage2_数据采集与存储/](../../03_原子目标与规约/Stage2_数据采集与存储/)  
 **DNA**：_System_DNA/Stage2_数据采集与存储/、global_const.deployable_units.ingestion
@@ -31,11 +31,11 @@
 
 | 数据类型 / 需求 | 用途（支撑目标） | 对应采集任务 | 实践步骤中的体现 | 验收方式 |
 |-----------------|------------------|--------------|------------------|----------|
-| **OHLCV** | Module B 量化扫描、A 轨技术面信号 | `ingest_ohlcv` | 02 步 F1、[数据采集逻辑细节](02_采集逻辑与Dockerfile.md#l4-stage2-02-ingest-detail)；01 步 L1 表 ohlcv | V-INGEST、V-DATA、5 条 psql 验证；03 步 MarketDataFeed 读 L1 |
+| **OHLCV** | Module B 量化扫描、A 轨技术面信号 | `ingest_ohlcv` | 02 步 F1、[数据采集逻辑细节](02_采集逻辑与Dockerfile_实践.md#l4-stage2-02-ingest-detail)；01 步 L1 表 ohlcv | V-INGEST、V-DATA、5 条 psql 验证；03 步 MarketDataFeed 读 L1 |
 | **申万行业、营收占比** | Module A 语义分类（Domain Tag）、双轨共用 | `ingest_industry_revenue` | 02 步 F2、同上；写入约定表或 Redis | V-INGEST、V-DATA；L2 data_type industry_revenue |
 | **基本面（财报、营收增速、研发占比等）** | B 轨 VC-Agent、逻辑证伪；与 A 轨技术面区分 | 同上 + OpenBB 路径 | 02 步 F2（行业/财报/营收）、F3/F5（OpenBB 国际/宏观/基本面）；11_ 与 [03_双轨制与VC-Agent](../../01_顶层概念/03_双轨制与VC-Agent.md) | F2/F5 实现并写入 L2 或约定存储；Stage3 Module A / VC-Agent 可消费 |
 | **新闻/公告/研报** | Module C 专家推理、知识库（Agri/Tech/Macro-KG） | `ingest_news` | 02 步 F3、F5；国内 AkShare、国际 OpenBB | V-INGEST、V-DATA；L2 data_type news |
-| **调度与超时** | 日级/小时级与 11_、DNA 一致 | 三个任务 | 逻辑填充期以 `make ingest-test` 可跑通为准；**生产部署**时须在 05 步配置 cron/调度与超时（见 [05_采集模块部署与验收](05_采集模块部署与验收.md)） | Stage2-05 准出时确认调度配置；DNA `data_ingestion` schedule/timeout |
+| **调度与超时** | 日级/小时级与 11_、DNA 一致 | 三个任务 | 逻辑填充期以 `make ingest-test` 可跑通为准；**生产部署**时须在 05 步配置 cron/调度与超时（见 [05_采集模块部署与验收](05_采集模块部署与验收_实践.md)） | Stage2-05 准出时确认调度配置；DNA `data_ingestion` schedule/timeout |
 | **数据量与范围** | 全市场扫描（5000+ 标的）、Module A 覆盖标的 | 可配置 | 02 步 F8、`docs/ingest-test-target.md`；**逻辑填充期**可与约定一致（少存）；**生产/扩展**须达到全市场扫描所需标的数与历史深度 | V-DATA 与目标数据约定一致；生产扩展时在 ingest-test-target 或 L5 约定标的数/历史深度 |
 
 **结论**：按 01（基础设施与表）→ 02（三任务 + AkShare/OpenBB + DVC 写入）→ 03（连调、MarketDataFeed 读 L1）→ 04（镜像）→ 05（部署与验收）顺序执行并准出，即可完成系统所需的数据采集需求；双轨所需 OHLCV、行业/营收、基本面、新闻均落在 F1～F3/F5 与 11_ 写入契约内。**生产扩展**：在 05 步或部署侧配置调度与超时与 DNA 一致，并约定/扩展 ingest-test-target 至全市场标的与历史深度即可。
