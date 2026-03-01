@@ -101,6 +101,9 @@ cp deploy-engine/config/examples/default-dev.yaml.example config/diting-dev.yaml
 
 **准出**：Up 成功且验证通过；**已执行 Down 回收**；**已更新 L5 [02_验收标准 对应行](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage1_03)**。
 
+> [!NOTE] **本步 make down 与「生产数据环境」区别**  
+> 本步的 `make down` 为**全量回收**（含 ECS、K3s、EIP 及本步创建的其他资源）。若需**仅回收 ECS/K3s/EIP 且保留数据盘**（供再次 Up 挂载同盘、实现数据继承），请使用 Stage2-06 的 **`make down diting prod`**，详见 [06_生产级数据要求_实践](../../04_阶段规划与实践/Stage2_数据采集与存储/06_生产级数据要求_实践.md)。
+
 ### 准出后自检（执行方完成，无需读者再执行）
 
 | 自检项 | 说明 |

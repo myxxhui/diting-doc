@@ -361,7 +361,12 @@ data_architecture:
 # 数据采集与输入层（L3 11_数据采集与输入层规约）
 # 引用：03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md
 data_ingestion:
-  used_by_l4_stages: ["stage2_01", "stage2_02", "stage2_03", "stage2_04", "stage2_05"]
+  used_by_l4_stages: ["stage2_01", "stage2_02", "stage2_03", "stage2_04", "stage2_05", "stage2_06"]
+  # 生产级参数与 06_ 设计/06_dna 一致；详见 Stage2 步骤 06_生产级数据要求
+  production:
+    history_depth_years: 5
+    adjustment: "与回测、实盘一致"
+    coverage: "与运维/告警一致"
   data_sources:
     ohlcv:
       purpose: "Module B 量化扫描"

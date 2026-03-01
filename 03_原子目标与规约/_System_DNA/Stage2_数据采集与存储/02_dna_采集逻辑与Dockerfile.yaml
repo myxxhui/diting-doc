@@ -8,7 +8,7 @@ work_dir:
   repo_ref: "repo_i"
   description: "diting-core"
 # 交付范围：逻辑填充期接入点实现细节见 logic_fill_design_refs 所列设计文档小节（实践重点、详细需求、验收要点）
-delivery_scope: "OHLCV/新闻/行业 全结构；Dockerfile；前期可少存数据；逻辑填充期接入点 AkShare、OpenBB 按 design_doc 对应小节实现"
+delivery_scope: "OHLCV/新闻/行业 全结构；Dockerfile；数据量按生产级（单标日线≥5年、标的=universe、复权一致）；universe 表+更新 Job 必做；逻辑填充期接入点 AkShare、OpenBB 按 design_doc 对应小节实现"
 exit_criteria: "采集逻辑实现；make ingest-test 可运行；依赖已写入 Dockerfile/requirements；镜像内 make ingest-test 通过；make build-images 一键构建全部镜像通过；前置 make verify-db-connection 已通过"
 # AI 可读：实现「该怎么做」须读取下列完整路径#锚点对应小节（实践重点、详细需求、验收要点）
 logic_fill_design_refs:
@@ -84,9 +84,11 @@ feature_items:
   - id: "F7"
     description: "Dockerfile/requirements 显式 akshare、openbb-platform"
   - id: "F8"
-    description: "ingest-test 目标数据约定（哪些股票、哪些 data_type）"
+    description: "ingest-test 目标数据约定（生产级：单标日线≥5年、标的=universe、复权一致）"
   - id: "F9"
     description: "一键构建所有镜像：Makefile 提供单一 target（如 make build-images），一次构建本阶段所涉全部镜像"
+  - id: "F10"
+    description: "全 A 股标的池（universe）表 + 更新 Job；get_current_a_share_universe() 可读"
 
 # 验证与测试项（与 L4 验证与测试结果清单表一致；执行者填测试结果）
 verification_items:

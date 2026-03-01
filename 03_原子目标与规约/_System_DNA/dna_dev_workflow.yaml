@@ -13,6 +13,7 @@ execution_order:
   - stage2_03
   - stage2_04
   - stage2_05
+  - stage2_06
   - stage3_01
   - stage3_02
   - stage3_03
@@ -241,6 +242,30 @@ workflow_stages:
     l5_stage_anchor: "l5-stage-stage2_05"
     consumes: ["Stage2-04 准出"]
     artifacts: ["采集模块部署成功", "Stage2 准出"]
+
+  - stage_id: "stage2_06"
+    name: "生产级数据要求"
+    l4_stage_dir: "Stage2_数据采集与存储"
+    l4_step_doc: "06_生产级数据要求_实践.md"
+    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/06_生产级数据要求_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/06_dna_生产级数据要求.yaml"
+    delivery_scope: "生产级数据要求规约与验收就绪；11_ 与 06_ 设计/实践一致"
+    entry_criteria: "Stage2-05 准出"
+    exit_criteria: "06 设计/DNA/实践 1:1:1；11_ 已链 06；L5 stage2_06 已更新；可执行验证（若有）可跑"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    verification_commands:
+      - cmd: "grep -q '生产级数据要求' 03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md"
+        cwd_ref: "doc_root"
+        description: "检查 11_ 中生产级数据要求小节存在"
+      - cmd: "test -f 03_原子目标与规约/Stage2_数据采集与存储/06_生产级数据要求_设计.md && test -f 04_阶段规划与实践/Stage2_数据采集与存储/06_生产级数据要求_实践.md"
+        cwd_ref: "doc_root"
+        description: "检查 06_ 设计与实践文档存在"
+    l5_stage_anchor: "l5-stage-stage2_06"
+    consumes: ["Stage2-05 准出"]
+    artifacts: ["生产级数据要求验收就绪"]
 
   # ----- Stage3 模块实践（5 步：语义分类器、量化扫描、MoE议会、热路径、全链路验证） -----
   - stage_id: "stage3_01"

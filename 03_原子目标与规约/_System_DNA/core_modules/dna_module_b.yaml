@@ -24,7 +24,7 @@ module_b_quant_engine:
         - "成交量 > 2x 均量"
       score_range: [0, 100]
   scanner:
-    universe_size: 5000
+    # 标的池以运行时 get_current_a_share_universe() 返回为准，不写死数量；见 11_ 全 A 股标的池（universe）
     technical_score_threshold: 70
     sector_strength_threshold: 1.1
 # 部署配套：逻辑填充期借鉴组件，须在 Dockerfile/requirements 中显式安装；TA-Lib 需先安装系统层 ta-lib C 库

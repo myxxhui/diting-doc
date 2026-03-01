@@ -1,0 +1,51 @@
+# Stage2-06 生产级数据要求
+stage_id: "stage2_06"
+name: "生产级数据要求"
+design_doc: "03_原子目标与规约/Stage2_数据采集与存储/06_生产级数据要求_设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage2_数据采集与存储/06_生产级数据要求_实践.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "生产级数据要求规约与验收就绪；11_ 与 06_ 设计/实践一致"
+exit_criteria: "06 设计/DNA/实践 1:1:1；11_ 已链 06；L5 stage2_06 已更新；可执行验证（若有）可跑"
+verification_commands:
+  - cmd: "test -f 03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md && grep -q '生产级数据要求' 03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md"
+    cwd_ref: "doc_root"
+    description: "检查 11_ 中生产级数据要求小节存在"
+  - cmd: "test -f 03_原子目标与规约/Stage2_数据采集与存储/06_生产级数据要求_设计.md && test -f 04_阶段规划与实践/Stage2_数据采集与存储/06_生产级数据要求_实践.md"
+    cwd_ref: "doc_root"
+    description: "检查 06_ 设计与实践文档存在"
+l5_stage_anchor: "l5-stage-stage2_06"
+consumes: ["Stage2-05 准出"]
+artifacts: ["生产级数据要求验收就绪"]
+
+# 生产级参数（与 06_ 设计、11_ 一致）
+production:
+  history_depth_years: 5
+  adjustment: "与回测、实盘一致"
+  coverage: "与运维/告警一致"
+
+# 生产数据环境（diting-infra 实现；C1/C2/C3 见 06_ 设计）
+production_data_env:
+  make_up: "make deploy diting prod"
+  make_down: "make down diting prod"
+  conn_file: "prod.conn"
+  down_keeps_disk: true
+  disk_id_convention: "diting-infra"  # 数据盘 ID 持久化方式由 diting-infra 约定（state 或 prod.disk_id 等）
+
+# 两段实现与核心验证（与 06_ 设计/实践前半·后半一致）
+two_phase:
+  phase1:
+    name: "env_and_data_inheritance"
+    core_verification:
+      - "Up 后环境可用、连接信息正确，verify-db-connection 通过"
+      - "Down 后数据盘未删除"
+      - "再次 Up 后数据可访问与 Down 前一致"
+  phase2:
+    name: "ingestion_then_full_flow"
+    ingest_trigger: "up_script_calls_ingest"  # Up 脚本内调 make ingest-test（或约定命令）
+    core_verification:
+      - "采集逻辑生产级验证通过（make verify-data-production 或 02_ 目标数据约定）"
+      - "首次 Up+ingest 后库内具备生产级数据"
+      - "Down+再次 Up 后数据仍在且验证通过"
