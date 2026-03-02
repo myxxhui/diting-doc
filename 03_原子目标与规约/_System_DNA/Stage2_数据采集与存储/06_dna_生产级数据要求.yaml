@@ -34,6 +34,18 @@ production_data_env:
   down_keeps_disk: true
   disk_id_convention: "diting-infra"  # 数据盘 ID 持久化方式由 diting-infra 约定（state 或 prod.disk_id 等）
 
+# 采集镜像与 ACR/Chart 配置（与 06_ 设计「采集镜像与 ACR/Chart 配置」、06_ 实践一致）
+ingest_image:
+  acr_registry_prefix: "crpi-7vifw4ok9jkcxr60.cn-hongkong.personal.cr.aliyuncs.com/titan-core/"
+  image_full: "crpi-7vifw4ok9jkcxr60.cn-hongkong.personal.cr.aliyuncs.com/titan-core/diting-ingest:latest"
+  chart_uses_tag: "latest"
+  pull_policy: "Always"
+  push_command: "make push-images"  # diting-core；需 DITING_ACR_PASSWORD 或 docker login
+  config_key: "stack.ingest.image"  # diting-infra config/diting-prod.yaml
+  acr_pull_secret_manifest: "charts/diting-stack/manifests/acr-pull-secret.yaml"  # 归属 chart，禁止放 config/
+  image_pull_secrets_name: "acr-titan"
+  apply_secret_target: "make apply-acr-pull-secret"  # diting-infra
+
 # 两段实现与核心验证（与 06_ 设计/实践前半·后半一致）
 two_phase:
   phase1:
@@ -44,7 +56,11 @@ two_phase:
       - "再次 Up 后数据可访问与 Down 前一致"
   phase2:
     name: "ingestion_then_full_flow"
-    ingest_trigger: "up_script_calls_ingest"  # Up 脚本内调 make ingest-test（或约定命令）
+    # 每次部署时 K3s Job 执行 make ingest-deploy（检查 L1 后自动全量或增量）；Chart：diting-stack templates/ingest/
+    ingest_trigger: "on_deploy_k8s_job_ingest_deploy"
+    ingest_deploy_command: "make ingest-deploy"
+    ingest_deploy_script: "scripts/run_ingest_deploy.py"
+    full_days_threshold: 7  # 超过 N 天未更新则全量，否则增量
     core_verification:
       - "采集逻辑生产级验证通过（make verify-data-production 或 02_ 目标数据约定）"
       - "首次 Up+ingest 后库内具备生产级数据"

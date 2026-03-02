@@ -30,7 +30,8 @@
 任务：
 1. make build 成功；镜像可推送至 Registry（ACR 或等价）。
 2. Makefile 中 tag 规则：时间+分支+版本号。
-3. DoD 含版本/可复现信息（git SHA、镜像 digest）。
+3. 项目约定：采集镜像推送到项目 ACR，执行 make push-images（构建+打 ACR tag+推送）；diting-infra config 中 stack.ingest.image 已配置为 ACR 且 tag: latest，部署即使用本次推送的镜像。详见 [06_生产级数据要求_实践#镜像仓库（ACR）与本地构建推送](06_生产级数据要求_实践.md#l4-stage2-06-acr-and-push)。
+4. DoD 含版本/可复现信息（git SHA、镜像 digest）。
 ```
 
 <a id="l4-stage2-04-exit"></a>
@@ -39,5 +40,6 @@
 | 命令 | 期望结果 |
 |------|----------|
 | `make build` | 退出码 0 |
+| `make push-images`（可选） | 退出码 0；镜像已推送到项目 ACR，供 Stage2-05/06 在 K3s 使用 |
 
-**准出**：make build 成功；镜像可推送。**已更新 L5 [02_验收标准 对应行](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_04)**。
+**准出**：make build 成功；镜像可推送（执行 **make push-images** 则已推送至 ACR latest，与 06_ 设计/实践一致）。**已更新 L5 [02_验收标准 对应行](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_04)**。

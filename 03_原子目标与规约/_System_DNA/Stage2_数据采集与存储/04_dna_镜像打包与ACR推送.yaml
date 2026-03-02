@@ -7,12 +7,13 @@ work_dir:
   type: "repo_i"
   repo_ref: "repo_i"
   description: "diting-core"
-delivery_scope: "镜像 tag = 时间+分支+版本号；DoD 含 git SHA、镜像 digest"
-exit_criteria: "make build 成功；镜像可推送"
+delivery_scope: "镜像 tag = 时间+分支+版本号；DoD 含 git SHA、镜像 digest；可选 make push-images 推送到项目 ACR"
+exit_criteria: "make build 成功；镜像可推送（make push-images 可推送到 ACR，Chart 使用 latest）"
 verification_commands:
   - cmd: "make build"
     cwd_ref: "repo_i"
     expected_exit: 0
+# 可选：make push-images 推送到项目 ACR，供 diting-infra Chart 使用 latest；ACR 与 Chart 配置见 06_dna_生产级数据要求.yaml#ingest_image
 l5_stage_anchor: "l5-stage-stage2_04"
 consumes: ["Stage2-03 准出"]
-artifacts: ["镜像可推送"]
+artifacts: ["镜像可推送；可选已推送至 ACR latest"]
