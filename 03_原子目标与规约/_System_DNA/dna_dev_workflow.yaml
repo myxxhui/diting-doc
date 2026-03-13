@@ -19,6 +19,7 @@ execution_order:
   - stage3_03
   - stage3_04
   - stage3_05
+  - stage3_06
   - stage4_01
   - stage4_02
   - stage4_03
@@ -267,7 +268,7 @@ workflow_stages:
     consumes: ["Stage2-05 准出"]
     artifacts: ["生产级数据要求验收就绪"]
 
-  # ----- Stage3 模块实践（5 步：语义分类器、量化扫描、MoE议会、热路径、全链路验证） -----
+  # ----- Stage3 模块实践（6 步：语义分类器、B模块策略、量化扫描引擎、MoE议会、热路径、全链路验证） -----
   - stage_id: "stage3_01"
     name: "语义分类器"
     l4_stage_dir: "Stage3_模块实践"
@@ -284,56 +285,71 @@ workflow_stages:
     artifacts: ["语义分类器实现"]
 
   - stage_id: "stage3_02"
+    name: "B模块策略设计/实践/验证/优化"
+    l4_stage_dir: "Stage3_模块实践"
+    l4_step_doc: "02_B模块策略_实践.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/02_B模块策略_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/02_dna_B模块策略.yaml"
+    delivery_scope: "策略规约、scanner_rules schema、Alphalens/Qlib 验证（或占位）"
+    work_dir:
+      type: "repo_i"
+      repo_ref: "repo_i"
+      description: "diting-core"
+    l5_stage_anchor: "l5-stage-stage3_02"
+    consumes: ["Stage3-01 准出"]
+    artifacts: ["策略实现规约", "scanner_rules.yaml 及 schema"]
+
+  - stage_id: "stage3_03"
     name: "量化扫描引擎"
     l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "02_量化扫描引擎_实践.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/02_量化扫描引擎_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/02_dna_量化扫描引擎.yaml"
+    l4_step_doc: "03_量化扫描引擎_实践.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/03_量化扫描引擎_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/03_dna_量化扫描引擎.yaml"
     delivery_scope: "Module B 四项 100%"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
       description: "diting-core"
     l5_stage_anchor: "l5-mod-B"
-    consumes: ["Stage3-01 准出"]
+    consumes: ["Stage3-02 准出"]
     artifacts: ["量化扫描引擎实现"]
 
-  - stage_id: "stage3_03"
+  - stage_id: "stage3_04"
     name: "MoE 议会"
     l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "03_MoE议会_实践.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/03_MoE议会_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/03_dna_MoE议会.yaml"
+    l4_step_doc: "04_MoE议会_实践.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/04_MoE议会_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/04_dna_MoE议会.yaml"
     delivery_scope: "Module C 四项 100%"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
       description: "diting-core"
     l5_stage_anchor: "l5-mod-C"
-    consumes: ["Stage3-02 准出"]
+    consumes: ["Stage3-03 准出"]
     artifacts: ["MoE 议会实现"]
 
-  - stage_id: "stage3_04"
+  - stage_id: "stage3_05"
     name: "热路径判官风控与执行"
     l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "04_热路径判官风控与执行_实践.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/04_热路径判官风控与执行_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/04_dna_热路径判官风控与执行.yaml"
+    l4_step_doc: "05_热路径判官风控与执行_实践.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/05_热路径判官风控与执行_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/05_dna_热路径判官风控与执行.yaml"
     delivery_scope: "热路径 D+E+F 四项 100%；全链路 A→F 验证"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
       description: "diting-core"
-    l5_stage_anchor: "l5-stage-stage3_04"
-    consumes: ["Stage3-03 准出"]
+    l5_stage_anchor: "l5-stage-stage3_05"
+    consumes: ["Stage3-04 准出"]
     artifacts: ["热路径 D+E+F 实现", "全链路 A→F 验证通过"]
 
-  - stage_id: "stage3_05"
+  - stage_id: "stage3_06"
     name: "全链路验证"
     l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "05_全链路验证_实践.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/05_全链路验证_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/05_dna_全链路验证.yaml"
+    l4_step_doc: "06_全链路验证_实践.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/06_全链路验证_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/06_dna_全链路验证.yaml"
     delivery_scope: "A→F 全链路可运行；Mock/Table-Driven 验证通过"
     work_dir:
       type: "repo_i"
@@ -343,8 +359,8 @@ workflow_stages:
       - cmd: "make test"
         cwd_ref: "repo_i"
         expected_exit: 0
-    l5_stage_anchor: "l5-stage-stage3_05"
-    consumes: ["Stage3-04 准出"]
+    l5_stage_anchor: "l5-stage-stage3_06"
+    consumes: ["Stage3-06 准出"]
     artifacts: ["全链路验证通过", "Stage3 准出"]
 
   # ----- Stage4 MoE 与执行网关 -----
@@ -360,7 +376,7 @@ workflow_stages:
       repo_ref: "repo_i"
       description: "diting-core"
     l5_stage_anchor: "l5-func-05"
-    consumes: ["Stage3-05 准出"]
+    consumes: ["Stage3-06 准出"]
     artifacts: ["MoE 议会接入"]
 
   - stage_id: "stage4_02"
@@ -468,18 +484,18 @@ deployable_units:
     first_k3s_stage: "stage2_05"    # 或本单元 deploy stage
   module_b:
     name: "Module B 量化扫描引擎"
-    first_delivery_stage: "stage3_02"
-    first_docker_stage: "stage3_02"
-    first_k3s_stage: "stage2_05"
-  module_c:
-    name: "Module C MoE 议会"
     first_delivery_stage: "stage3_03"
     first_docker_stage: "stage3_03"
     first_k3s_stage: "stage2_05"
+  module_c:
+    name: "Module C MoE 议会"
+    first_delivery_stage: "stage3_04"
+    first_docker_stage: "stage3_04"
+    first_k3s_stage: "stage2_05"
   hot_path_def:
     name: "热路径 D+E+F"
-    first_delivery_stage: "stage3_04"  # 热路径 D+E+F 一步完成，同一镜像
-    first_docker_stage: "stage3_04"     # 热路径镜像在本步构建
+    first_delivery_stage: "stage3_05"  # 热路径 D+E+F 一步完成，同一镜像
+    first_docker_stage: "stage3_05"     # 热路径镜像在本步构建
     first_k3s_stage: "stage2_05"
 
 # Release bundle：一次发布包含的镜像列表，与 03_原子目标与规约/开发与交付/02_基础设施与部署规约.md 一致
@@ -498,26 +514,26 @@ module_to_stages:
     first_k3s_stage: "stage2_05"
   module_b:
     name: "Module B 量化扫描引擎"
-    first_delivery_stage: "stage3_02"
+    first_delivery_stage: "stage3_03"
     first_docker_stage: "stage2_04"
     first_k3s_stage: "stage2_05"
   module_c:
     name: "Module C MoE 议会"
-    first_delivery_stage: "stage3_03"
+    first_delivery_stage: "stage3_04"
     first_docker_stage: "stage2_04"
     first_k3s_stage: "stage2_05"
   module_d:
     name: "Module D 判官（热路径）"
-    first_delivery_stage: "stage3_04"
-    first_docker_stage: "stage3_04"
+    first_delivery_stage: "stage3_05"
+    first_docker_stage: "stage3_05"
     first_k3s_stage: "stage2_05"
   module_e:
     name: "Module E 风控盾（热路径）"
-    first_delivery_stage: "stage3_04"
-    first_docker_stage: "stage3_04"
+    first_delivery_stage: "stage3_05"
+    first_docker_stage: "stage3_05"
     first_k3s_stage: "stage2_05"
   module_f:
     name: "Module F 执行网关（热路径）"
-    first_delivery_stage: "stage3_04"
-    first_docker_stage: "stage3_04"
+    first_delivery_stage: "stage3_05"
+    first_docker_stage: "stage3_05"
     first_k3s_stage: "stage2_05"

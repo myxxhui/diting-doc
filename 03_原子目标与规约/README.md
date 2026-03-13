@@ -73,13 +73,12 @@ flowchart LR
 
 | 步骤级 DNA | core_modules 文件 | 说明 |
 |------------|-------------------|------|
-| dna_stage3_01.yaml | dna_module_a.yaml | Module A 语义分类器 |
-| dna_stage3_02.yaml | dna_module_b.yaml | Module B 量化扫描引擎 |
-| dna_stage3_03.yaml | dna_module_c.yaml | Module C MoE 议会 |
-| dna_stage3_04.yaml | dna_module_d.yaml | Module D 判官 |
-| dna_stage3_05.yaml | dna_module_e.yaml | Module E 风控盾 |
-| dna_stage3_06.yaml | dna_module_f.yaml | Module F 执行网关 |
-| dna_stage3_07.yaml | — | 全链路验证（无 core_modules 对应） |
+| 01_dna_语义分类器.yaml | dna_module_a.yaml | Module A 语义分类器 |
+| 02_dna_B模块策略.yaml | dna_module_b（策略语义） | B 模块策略设计/实践/验证/优化 |
+| 03_dna_量化扫描引擎.yaml | dna_module_b.yaml | Module B 量化扫描引擎（执行层） |
+| 04_dna_MoE议会.yaml | dna_module_c.yaml | Module C MoE 议会 |
+| 05_dna_热路径判官风控与执行.yaml | dna_module_d/e/f.yaml | 热路径 D+E+F |
+| 06_dna_全链路验证.yaml | — | 全链路验证（无 core_modules 对应） |
 
 ## 设计–DNA–实践–L5 索引表
 
@@ -98,10 +97,11 @@ flowchart LR
 | stage2_05 | [05_采集模块部署与验收_设计](Stage2_数据采集与存储/05_采集模块部署与验收_设计.md#design-stage2-05-exit) | [05_dna_采集模块部署与验收](_System_DNA/Stage2_数据采集与存储/05_dna_采集模块部署与验收.yaml) | [05_采集模块部署与验收_实践](../04_阶段规划与实践/Stage2_数据采集与存储/05_采集模块部署与验收_实践.md#l4-stage2-05-exit) | [l5-stage-stage2_05](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_05) |
 | stage2_06 | [06_生产级数据要求_设计](Stage2_数据采集与存储/06_生产级数据要求_设计.md#design-stage2-06-exit) | [06_dna_生产级数据要求](_System_DNA/Stage2_数据采集与存储/06_dna_生产级数据要求.yaml) | [06_生产级数据要求_实践](../04_阶段规划与实践/Stage2_数据采集与存储/06_生产级数据要求_实践.md#l4-stage2-06-exit) | [l5-stage-stage2_06](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_06) |
 | stage3_01 | [01_语义分类器_设计](Stage3_模块实践/01_语义分类器_设计.md#design-stage3-01-exit) | [01_dna_语义分类器](_System_DNA/Stage3_模块实践/01_dna_语义分类器.yaml) | [01_语义分类器_实践](../04_阶段规划与实践/Stage3_模块实践/01_语义分类器_实践.md#l4-stage3-01-exit) | [l5-stage-stage3_01](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_01) |
-| stage3_02 | [02_量化扫描引擎_设计](Stage3_模块实践/02_量化扫描引擎_设计.md#design-stage3-02-exit) | [02_dna_量化扫描引擎](_System_DNA/Stage3_模块实践/02_dna_量化扫描引擎.yaml) | [02_量化扫描引擎_实践](../04_阶段规划与实践/Stage3_模块实践/02_量化扫描引擎_实践.md#l4-stage3-02-exit) | [l5-stage-stage3_02](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_02) |
-| stage3_03 | [03_MoE议会_设计](Stage3_模块实践/03_MoE议会_设计.md#design-stage3-03-exit) | [03_dna_MoE议会](_System_DNA/Stage3_模块实践/03_dna_MoE议会.yaml) | [03_MoE议会_实践](../04_阶段规划与实践/Stage3_模块实践/03_MoE议会_实践.md#l4-stage3-03-exit) | [l5-stage-stage3_03](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_03) |
-| stage3_04 | [04_热路径判官风控与执行_设计](Stage3_模块实践/04_热路径判官风控与执行_设计.md#design-stage3-04-exit) | [04_dna_热路径判官风控与执行](_System_DNA/Stage3_模块实践/04_dna_热路径判官风控与执行.yaml) | [04_热路径判官风控与执行_实践](../04_阶段规划与实践/Stage3_模块实践/04_热路径判官风控与执行_实践.md#l4-stage3-04-exit) | [l5-stage-stage3_04](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_04) |
-| stage3_05 | [05_全链路验证_设计](Stage3_模块实践/05_全链路验证_设计.md#design-stage3-05-exit) | [05_dna_全链路验证](_System_DNA/Stage3_模块实践/05_dna_全链路验证.yaml) | [05_全链路验证_实践](../04_阶段规划与实践/Stage3_模块实践/05_全链路验证_实践.md#l4-stage3-05-exit) | [l5-stage-stage3_05](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_05) |
+| stage3_02 | [02_B模块策略_设计](Stage3_模块实践/02_B模块策略_设计.md#design-stage3-02-exit) | [02_dna_B模块策略](_System_DNA/Stage3_模块实践/02_dna_B模块策略.yaml) | [02_B模块策略_实践](../04_阶段规划与实践/Stage3_模块实践/02_B模块策略_实践.md#l4-stage3-02-exit) | [l5-stage-stage3_02](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_02) |
+| stage3_03 | [03_量化扫描引擎_设计](Stage3_模块实践/03_量化扫描引擎_设计.md#design-stage3-03-exit) | [03_dna_量化扫描引擎](_System_DNA/Stage3_模块实践/03_dna_量化扫描引擎.yaml) | [03_量化扫描引擎_实践](../04_阶段规划与实践/Stage3_模块实践/03_量化扫描引擎_实践.md#l4-stage3-03-exit) | [l5-stage-stage3_03](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_03) |
+| stage3_04 | [04_MoE议会_设计](Stage3_模块实践/04_MoE议会_设计.md#design-stage3-04-exit) | [04_dna_MoE议会](_System_DNA/Stage3_模块实践/04_dna_MoE议会.yaml) | [04_MoE议会_实践](../04_阶段规划与实践/Stage3_模块实践/04_MoE议会_实践.md#l4-stage3-04-exit) | [l5-stage-stage3_04](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_04) |
+| stage3_05 | [05_热路径判官风控与执行_设计](Stage3_模块实践/05_热路径判官风控与执行_设计.md#design-stage3-05-exit) | [05_dna_热路径判官风控与执行](_System_DNA/Stage3_模块实践/05_dna_热路径判官风控与执行.yaml) | [05_热路径判官风控与执行_实践](../04_阶段规划与实践/Stage3_模块实践/05_热路径判官风控与执行_实践.md#l4-stage3-05-exit) | [l5-stage-stage3_05](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_05) |
+| stage3_06 | [06_全链路验证_设计](Stage3_模块实践/06_全链路验证_设计.md#design-stage3-06-exit) | [06_dna_全链路验证](_System_DNA/Stage3_模块实践/06_dna_全链路验证.yaml) | [06_全链路验证_实践](../04_阶段规划与实践/Stage3_模块实践/06_全链路验证_实践.md#l4-stage3-06-exit) | [l5-stage-stage3_06](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_06) |
 | stage4_01 | [01_ModuleC_MoE议会接入_设计](Stage4_MoE与执行网关/01_ModuleC_MoE议会接入_设计.md#design-stage4-01-exit) | [01_dna_ModuleC_MoE议会接入](_System_DNA/Stage4_MoE与执行网关/01_dna_ModuleC_MoE议会接入.yaml) | [01_ModuleC_MoE议会接入_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/01_ModuleC_MoE议会接入_实践.md#l4-stage4-01-exit) | [l5-stage-stage4_01](../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_01) |
 | stage4_02 | [02_ModuleF执行网关接入_设计](Stage4_MoE与执行网关/02_ModuleF执行网关接入_设计.md#design-stage4-02-exit) | [02_dna_ModuleF执行网关接入](_System_DNA/Stage4_MoE与执行网关/02_dna_ModuleF执行网关接入.yaml) | [02_ModuleF执行网关接入_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/02_ModuleF执行网关接入_实践.md#l4-stage4-02-exit) | [l5-stage-stage4_02](../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_02) |
 | stage4_03 | [03_回测或仿真验证_设计](Stage4_MoE与执行网关/03_回测或仿真验证_设计.md#design-stage4-03-exit) | [03_dna_回测或仿真验证](_System_DNA/Stage4_MoE与执行网关/03_dna_回测或仿真验证.yaml) | [03_回测或仿真验证_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/03_回测或仿真验证_实践.md#l4-stage4-03-exit) | [l5-stage-stage4_03](../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_03) |

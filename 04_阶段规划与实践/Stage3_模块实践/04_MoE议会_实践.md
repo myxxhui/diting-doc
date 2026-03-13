@@ -1,23 +1,23 @@
-# Stage3-03 Module C MoE 议会
+# Stage3-04 Module C MoE 议会
 
 > [!NOTE] **[TRACEBACK] 战略追溯锚点**
 > - **顶层概念**: [一句话定义与核心价值](../../01_顶层概念/01_一句话定义与核心价值.md)
 > - **战略维度**: [01_产品设计维度](../../02_战略维度/产品设计/01_产品设计维度.md)
 > - **原子能力**: [09_核心模块架构规约](../../03_原子目标与规约/_共享规约/09_核心模块架构规约.md)（Module C）、[Expert Protocol](../../03_原子目标与规约/_共享规约/04_全链路通信协议矩阵.md)
-> - **DNA stage_id**: `stage3_03`
-> - **本步设计文档**: [03_MoE议会_设计](../../03_原子目标与规约/Stage3_模块实践/03_MoE议会_设计.md#design-stage3-03-exit)
-> - **本步 DNA 文件**: [03_dna_MoE议会](../../03_原子目标与规约/_System_DNA/Stage3_模块实践/03_dna_MoE议会.yaml)、[dna_module_c.yaml](../../03_原子目标与规约/_System_DNA/core_modules/dna_module_c.yaml)
+> - **DNA stage_id**: `stage3_04`
+> - **本步设计文档**: [04_MoE议会_设计](../../03_原子目标与规约/Stage3_模块实践/04_MoE议会_设计.md#design-stage3-04-exit)
+> - **本步 DNA 文件**: [04_dna_MoE议会](../../03_原子目标与规约/_System_DNA/Stage3_模块实践/04_dna_MoE议会.yaml)、[dna_module_c.yaml](../../03_原子目标与规约/_System_DNA/core_modules/dna_module_c.yaml)
 > - **阶段**: [Stage3_模块实践](README.md)
 
 <a id="l4-step-nav"></a>
 ## 步骤导航
-- **上一步**：[02_量化扫描引擎_实践](02_量化扫描引擎_实践.md#l4-stage3-02-goal)
-- **下一步**：[04_热路径判官风控与执行_实践](04_热路径判官风控与执行_实践.md#l4-stage3-04-goal)
+- **上一步**：[03_量化扫描引擎_实践](03_量化扫描引擎_实践.md#l4-stage3-03-goal)
+- **下一步**：[05_热路径判官风控与执行_实践](05_热路径判官风控与执行_实践.md#l4-stage3-05-goal)
 
 > [!IMPORTANT] **实践测试方式约定**
 > 本步以**本地 Docker Compose**（或等价本地环境）为**主要（默认）**实践测试方式，可选 K3s/实盘；无云凭证或无需真实集群时**优先**使用本地 Compose 完成验收。见 [00_系统规则_通用项目协议](../../00_系统规则_通用项目协议.md)、[02_三位一体仓库规约](../../03_原子目标与规约/_共享规约/02_三位一体仓库规约.md)#本地开发与部署文件。
 
-<a id="l4-stage3-03-goal"></a>
+<a id="l4-stage3-04-goal"></a>
 ## 步骤目标
 
 实现 Module C MoE 议会，Router 按 Domain Tag 分发、专家输出 ExpertOpinion；完成 **四项 100% 验证**。
