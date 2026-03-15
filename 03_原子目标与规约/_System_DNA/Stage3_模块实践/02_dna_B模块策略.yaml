@@ -1,6 +1,6 @@
 # Stage3-02 Module B 策略设计/实践/验证/优化
 # 策略层：产出策略规约与配置，供 Stage3-03 量化扫描引擎消费
-# 语义详见 _System_DNA/core_modules/dna_module_b.yaml（strategy_pools、scanner 语义）
+# 语义详见 _System_DNA/core_modules/dna_module_b.yaml（strategy_pools、scanner、scoring、optimization、filters）
 stage_id: "stage3_02"
 name: "B模块策略设计/实践/验证/优化"
 design_doc: "03_原子目标与规约/Stage3_模块实践/02_B模块策略_设计.md"
@@ -9,8 +9,8 @@ work_dir:
   type: "repo_i"
   repo_ref: "repo_i"
   description: "diting-core"
-delivery_scope: "策略池定义、打分策略、策略实现规约、scanner_rules.yaml schema 与加载、Alphalens/Qlib 验证（或占位）"
-exit_criteria: "策略规约与配置就绪；配置可被 Stage3-03 加载；验证通过或占位约定达成"
+delivery_scope: "策略池定义（含可选第四池动量）、连续打分（每条件0-50、两条件cap100）、多池共振与共振二档、基础优化（趋势/突破确认根数、反转止跌）、可选优化（趋势强度、急跌阴跌、突破3日确认、动量池）、filters（sector_strength、liquidity、volatility_regime）、策略实现规约、scanner_rules.yaml schema（scoring、optimization、filters）与加载、输出 second_pool_id/score与 pool_scores、Alphalens/Qlib 验证（或占位）"
+exit_criteria: "策略规约与配置就绪（含 scoring、optimization、filters）；配置可被 Stage3-03 加载；验证通过或占位约定达成"
 logic_fill_design_refs:
   - "03_原子目标与规约/Stage3_模块实践/02_B模块策略_设计.md#design-stage3-02-alphalens"
   - "03_原子目标与规约/Stage3_模块实践/02_B模块策略_设计.md#design-stage3-02-qlib"
@@ -19,5 +19,10 @@ design_integration_anchors:
   - design-stage3-02-qlib
 l5_stage_anchor: "l5-stage-stage3_02"
 consumes: ["Stage3-01 准出"]
-artifacts: ["策略实现规约", "scanner_rules.yaml 及 schema", "验证报告或占位"]
+artifacts:
+  [
+    "策略实现规约",
+    "scanner_rules.yaml 及 schema（strategy_pools、scanner、scoring、optimization、filters）",
+    "验证报告或占位",
+  ]
 semantic_ref: "03_原子目标与规约/_System_DNA/core_modules/dna_module_b.yaml"

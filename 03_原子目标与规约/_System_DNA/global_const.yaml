@@ -711,6 +711,20 @@ core_modules:
           - "成交量 > 2x 均量"
         score_range: [0, 100]
     
+    scoring:
+      trend:
+        macd_hist_scale_ratio: 0.01
+      reversion:
+        rsi_oversold: 20
+      breakout:
+        price_scale_ratio: 0.02
+        volume_cap_multiple: 5.0
+    optimization:
+      trend_confirm_bars: 3
+      breakout_confirm_bars: 2
+      reversion_require_above_ma5: true
+      multi_pool_min_score: 40
+      multi_pool_bonus: 10
     scanner:
       universe_size: 5000  # 扫描标的数量
       technical_score_threshold: 70  # 技术面得分阈值

@@ -1,5 +1,5 @@
 # DNA：Module A 语义分类器
-# 规约文档（AI 可读）：03_原子目标与规约/_共享规约/09_核心模块架构规约.md
+# 规约文档（AI 可读）：03_原子目标与规约/_共享规约/09_核心模块架构规约.md、12_右脑数据支撑与Segment规约.md
 # L4 实践文档（AI 可读）：04_阶段规划与实践/Stage3_模块实践/01_语义分类器_实践.md
 
 module_a_semantic_classifier:
@@ -8,9 +8,11 @@ module_a_semantic_classifier:
     - "标的代码"
     - "申万行业分类"
     - "营收占比数据"
+    - "L2 标的主营构成表（可选，见 12_）"
   output:
     - "Domain Tag (AGRI/TECH/GEO/UNKNOWN)"
     - "置信度分数 (0.0-1.0)"
+    - "主营占比列表 segment_shares: repeated { 细分标识、营收占比、是否主营 }（与标的主营构成表一致，见 12_、04_ Proto 扩展）"
   classification_rules:
     agri: "申万行业=农林牧渔 或 营收占比>50%"
     tech: "申万行业=电子/计算机/通信 或 研发投入>10%"

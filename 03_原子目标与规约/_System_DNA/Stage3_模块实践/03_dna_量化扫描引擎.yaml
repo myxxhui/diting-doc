@@ -8,8 +8,8 @@ work_dir:
   type: "repo_i"
   repo_ref: "repo_i"
   description: "diting-core"
-delivery_scope: "Module B 执行层四项 100%；按 02 策略规约加载配置并执行扫描；TA-Lib、VectorBT；单独运行、Dockerfile、镜像与版本、一键构建/部署与 deployable_units.module_b 一致"
-exit_criteria: "Module B 实现；单测与联动验证通过；单独运行与一键构建/部署与 deployable_units.module_b 一致"
+delivery_scope: "Module B 执行层四项 100%；按 02 策略规约加载配置（scoring、optimization、filters）并执行扫描；多池（含可选第四池）、输出 second_pool_id/score、pool_scores、liquidity_score、volatility_ratio；TA-Lib、VectorBT；单独运行、Dockerfile、镜像与版本、一键构建/部署与 deployable_units.module_b 一致"
+exit_criteria: "Module B 实现满足 02 规约 §3–§4；单测与联动验证通过；单独运行与一键构建/部署与 deployable_units.module_b 一致"
 logic_fill_design_refs:
   - "03_原子目标与规约/Stage3_模块实践/03_量化扫描引擎_设计.md#design-stage3-03-integration-talib"
   - "03_原子目标与规约/Stage3_模块实践/03_量化扫描引擎_设计.md#design-stage3-03-integration-vectorbt"

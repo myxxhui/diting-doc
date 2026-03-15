@@ -89,6 +89,8 @@ feature_items:
     description: "一键构建所有镜像：Makefile 提供单一 target（如 make build-images），一次构建本阶段所涉全部镜像"
   - id: "F10"
     description: "全 A 股标的池（universe）表 + 更新 Job；get_current_a_share_universe() 可读"
+  - id: "F11"
+    description: "ingest_business_profile（可选）：标的主营业务构成 → L2 标的主营构成表；细分注册表初始化；见 12_右脑数据支撑与细分规约"
 
 # 验证与测试项（与 L4 验证与测试结果清单表一致；执行者填测试结果）
 verification_items:

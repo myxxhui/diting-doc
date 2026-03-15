@@ -4,7 +4,7 @@
 > - **战略维度**: [技术栈与架构维度](../../02_战略维度/产品设计/02_技术栈与架构维度.md)
 > - **原子规约**: [_共享规约/09_核心模块架构规约](../_共享规约/09_核心模块架构规约.md)、[_共享规约/01_核心公式与MoE架构规约](../_共享规约/01_核心公式与MoE架构规约.md)
 > - **DNA**: [_System_DNA/Stage4_MoE与执行网关/dna_stage4_01.yaml](../_System_DNA/Stage4_MoE与执行网关/dna_stage4_01.yaml)
-> - **L4 实践**: [04_阶段规划与实践/Stage4_MoE与执行网关/01_ModuleC_MoE议会接入](../../04_阶段规划与实践/Stage4_MoE与执行网关/01_ModuleC_MoE议会接入.md#l4-stage4-01-exit)
+> - **L4 实践**: [04_阶段规划与实践/Stage4_MoE与执行网关/01_A轨_ModuleC_MoE议会接入_实践](../../04_阶段规划与实践/Stage4_MoE与执行网关/01_A轨_ModuleC_MoE议会接入_实践.md#l4-stage4-01-exit)
 > - **L5 锚点**: [02_验收标准#l5-stage-stage4_01](../../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_01)
 
 <a id="design-stage4-01-goal"></a>

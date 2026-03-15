@@ -7,13 +7,13 @@
 > - **阶段**: [Phase2_MoE与执行网关](README.md)
 > - **本步骤**: Router、专家调用与投票/聚合，与 D 的 Alpha 链路对接
 
-**本步设计文档**：[01_ModuleC_MoE议会接入设计](../../03_原子目标与规约/Stage4_MoE与执行网关/01_ModuleC_MoE议会接入设计.md#design-stage4-01-exit)  
+**本步设计文档**：[01_A轨_ModuleC_MoE议会接入_设计](../../03_原子目标与规约/Stage4_MoE与执行网关/01_A轨_ModuleC_MoE议会接入_设计.md#design-stage4-01-exit)  
 **本步 DNA 文件**：[03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_01.yaml](../../03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/dna_stage4_01.yaml)
 
 <a id="l4-step-nav"></a>
 ## 步骤导航
 - **上一步**：[05_全链路验证](../Stage3_模块实践/05_全链路验证_实践.md#l4-stage3-05-goal)
-- **下一步**：[02_ModuleF执行网关接入](02_ModuleF执行网关接入.md#l4-stage4-02-goal)
+- **下一步**：[02_A轨_ModuleF执行网关接入_实践](02_A轨_ModuleF执行网关接入_实践.md#l4-stage4-02-goal)
 
 > [!IMPORTANT] **实践测试方式约定**
 > 本步以**本地 Docker Compose**（或等价本地环境）为**主要（默认）**实践测试方式，可选 K3s/实盘；无云凭证或无需真实集群时**优先**使用本地 Compose 完成验收。见 [00_系统规则_通用项目协议](../../00_系统规则_通用项目协议.md)、[02_三位一体仓库规约](../../03_原子目标与规约/_共享规约/02_三位一体仓库规约.md)#本地开发与部署文件。
@@ -57,6 +57,7 @@
 | **DO** | Router 与 09_ Tag 约定一致；ExpertOpinion 与 D 的 vote 输入一致；工作目录 diting-core |
 | **DON'T** | 不要改变 D 判官已约定的 ExpertOpinion 结构（可扩展字段如 `horizon`，见 expert.proto） |
 | **可选** | 专家池可包含 VC-Agent（信仰专家），输出 `TimeHorizon = LONG_TERM` 的 ExpertOpinion，供判官双轨分流；见 [09_ Module C VC-Agent](../../03_原子目标与规约/_共享规约/09_核心模块架构规约.md) |
+| **已实现（B 轨）** | Router 按 `quant_signal.long_term_candidate` 路由至 VC-Agent：`diting-core/diting/moe/router.py`（route_and_collect_opinions）、`vc_agent.py`（vc_agent_opinion 返回 horizon=LONG_TERM）；见 [06_B轨需求与实现缺口分析](../../06_追溯与审计/B轨需求与实现缺口分析.md)。**B 轨专项**设计（输入契约、共识、B 轨候选表）见 [03_/B轨/01_B轨系统设计](../../03_原子目标与规约/B轨/01_B轨系统设计.md)；实践见 [Stage3 01_B轨_语义与候选](../Stage3_模块实践/01_B轨_语义与候选_实践.md)、[Stage4 01_B轨_共识与执行](01_B轨_共识与执行_实践.md) |
 | **边界** | 其他专家可为 Mock/占位；占位替换见 [Phase2 README 占位与真实实现衔接](README.md#占位与真实实现衔接) |
 
 ## 必读顺序
@@ -79,7 +80,7 @@
 **工作目录**：`diting-core`
 
 1. **Router**
-   - 实现 MoE Router：输入 symbol、domain_tags（来自 Module A）、quant_signal（来自 Module B）；按 Tag 分发到对应专家（AGRI/TECH/GEO），UNKNOWN 进 Trash Bin（见 09_ Module C）。
+   - 实现 MoE Router：输入 symbol、domain_tags（来自 Module A）、quant_signal（来自 Module B）；按领域标签分发到对应专家（农业/科技/宏观），未知 进 Trash Bin（见 09_ Module C）。**B 轨**：当 `quant_signal.long_term_candidate` 为 True 且 enable_vc_agent 时，将请求路由至 VC-Agent（见 diting/moe/router.py、vc_agent.py）。
 
 2. **专家调用与占位**
    - 至少实现一个垂类专家接口（如 Agri-Agent）或统一占位：输入 symbol、quant_signal，输出 ExpertOpinion（is_supported、direction、confidence、reasoning_summary）。
@@ -114,7 +115,7 @@ make test
 
 ## 本步骤最小上下文（逻辑密集时）
 
-- **路由规则**：按 Domain Tag（AGRI/TECH/GEO 等）分发；UNKNOWN → Trash Bin，返回不支持意见。
+- **路由规则**：按领域标签（农业/科技/宏观 等）分发；未知 → Trash Bin，返回不支持意见。
 - **ExpertOpinion 结构**：与 09_、Phase1 D 判官输入一致（is_supported、direction、confidence、reasoning_summary）；C 输出 List[ExpertOpinion] 可直接作为 D 的 vote(quant_signal, expert_opinions) 输入。
 
 ## 5D 执行顺序（逻辑密集时）
@@ -140,7 +141,7 @@ make test
 
 ## 下一步
 
-完成本步且通过验收、DoD 全勾后，进入 [02_ModuleF执行网关接入](02_ModuleF执行网关接入.md)。**重要**：02_ 依赖 E 风控输出可流入执行层，C 未就绪不影响 02_ 占位，但完整链路需 01_ 准出。
+完成本步且通过验收、DoD 全勾后，进入 [02_A轨_ModuleF执行网关接入_实践](02_A轨_ModuleF执行网关接入_实践.md)。**重要**：02_ 依赖 E 风控输出可流入执行层，C 未就绪不影响 02_ 占位，但完整链路需 01_ 准出。
 
 ## 产出物
 
@@ -160,7 +161,7 @@ make test
 
 ## Phase–Stage 接口
 
-- **本步准出即 Stage s2 准出条件之一**；本步验收命令纳入 [Stage2_数据采集与存储 01_](../Stage2_数据采集与存储/01_基础设施与依赖实践.md#l4-stage2-01-exit) 可执行验证清单。
+- **本步准出即 Stage s2 准出条件之一**；本步验收命令纳入 [Stage2_数据采集与存储 01_](../Stage2_数据采集与存储/01_A轨_基础设施与依赖_实践.md#l4-stage2-01-exit) 可执行验证清单。
 - **本步产出**：供 Stage2 01_ 或对应 Stage 可执行验证清单使用；Alpha 链路 Quant+Expert→D 可跑通。
 - **本步依赖**：依赖 [Stage1_仓库与骨架](../Stage1_仓库与骨架/README.md)（s1）准出；依赖 Stage1 全步骤准出。
 

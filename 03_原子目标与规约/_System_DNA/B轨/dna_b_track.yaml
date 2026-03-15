@@ -1,0 +1,80 @@
+# B 轨专项 DNA [Ref: 04_B轨系统概念与目标、03_/B轨/01_B轨系统设计]
+# 与 A 轨分离，供 B 轨开发、测试、优化与调试；L4 实践以本文件与 03_/B轨/ 设计文档为准。
+
+b_track:
+  concept_ref: "01_顶层概念/04_B轨系统概念与目标.md"
+  design_ref: "03_原子目标与规约/B轨/01_B轨系统设计.md"
+  practice_ref: "04_阶段规划与实践/B轨/README.md"
+
+  # 时间视野与回报目标
+  time_horizons: ["3Y", "5Y", "10Y"]
+  target_upside: "10x-100x"
+
+  # 数据需求（与 02_B轨数据与存储规约 一致）
+  data_requirement:
+    mandatory:
+      - financial_statements_detail  # 细财报、经营指标
+      - management                   # 管理层与治理
+      - business_competition         # 业务与竞争
+      - rd_innovation               # 研发与创新
+    optional:
+      - industry_policy             # 行业与政策
+
+  # 存储表名（建议；实现可别名）
+  storage:
+    company_fundamental: "company_fundamental"
+    management: "management"
+    b_track_raw_feed: "b_track_raw_feed"
+    b_track_candidate_snapshot: "b_track_candidate_snapshot"
+    b_track_consensus: "b_track_consensus"
+    b_track_events: "b_track_events"
+
+  # A 模块 B 轨扩展：输出字段与准入
+  module_a_extension:
+    output_fields:
+      - industry
+      - sub_industry
+      - lifecycle_stage  # early_growth | growth | mature | decline
+      - b_track_eligible
+      - theme
+      - tech_route
+    eligibility_rule: "TECH + lifecycle_stage in [early_growth, growth] -> b_track_eligible"
+
+  # B 模块 B 轨策略与候选表
+  module_b_b_track:
+    score_dimensions:
+      - long_term_score      # 长期动量分位
+      - growth_quality_score
+      - rd_intensity_score
+      - governance_score
+    pass_condition: "b_track_eligible and long_term_score >= threshold and growth_quality_score >= threshold"
+    candidate_table: "b_track_candidate_snapshot"
+
+  # C 模块 VC-Agent 与共识
+  consensus:
+    table: "b_track_consensus"
+    fields:
+      - symbol
+      - batch_id
+      - key_assumptions
+      - evidence_summary
+      - disproof_triggers
+      - potential_upside
+      - time_horizon
+      - created_at
+
+  # 逻辑证伪与大周期反转（与 03_B轨共识与逻辑证伪规约 一致）
+  disproof:
+    input: "consensus.disproof_triggers + event stream (b_track_events or message)"
+    output_reason_code: "logic_disproof"
+  major_reversal:
+    input: "price/MA, sector index, volatility regime, or VC-Agent suggestion"
+    output_reason_code: "major_trend_reversal"
+
+  # D/E/F：轨标识与约束
+  track_id: "B"
+  verdict_apply_2pct_stop: false
+  verdict_apply_cash_drag: false
+  risk_constraints:
+    single_name_cap: null   # 单标的 B 轨仓位上限比例，可配置
+    b_track_exposure_cap: null  # B 轨合计敞口占比上限，可配置
