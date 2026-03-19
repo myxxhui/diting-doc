@@ -24,7 +24,7 @@
 
 ## 本步骤落实的 DNA 键
 
-- `core_modules/dna_module_c.yaml`：`module_c_moe_council.router`、`strategy`、`expert_logic_required`、`risk_factor_templates`
+- `core_modules/dna_module_c.yaml`：`mode`（按股配置 + 统一分析）、`entry`（unified_opinion）、`router.supported_tags`、`strategy`、`pipeline_steps`、`risk_factor_templates`；`expert_logic_required` 与设计策略一一对应。
 - 策略详规见 [04_A轨_MoE议会_设计#design-stage3-04-strategy](../../03_原子目标与规约/Stage3_模块实践/04_A轨_MoE议会_设计.md#design-stage3-04-strategy)
 
 **必读（设计文档中已明确）**：
@@ -37,6 +37,8 @@
 ## 实现部分
 
 **工作目录**：`diting-core`
+
+**输入数据来源**：`segment_list`、`segment_signals` 由上游按 [12_右脑数据支撑与Segment规约](../../03_原子目标与规约/_共享规约/12_右脑数据支撑与Segment规约.md) 提供（如 A 的 ClassifierOutput.segment_shares 或 L2 标的主营构成表、L2 细分信号缓存表）；C 假定调用 `unified_opinion` 时已传入，不在此步实现数据拉取。
 
 ### 步骤 1：配置与包结构
 
@@ -57,11 +59,13 @@
    - 输入：`segment_list: List[dict]`（每项含 segment_id, revenue_share, is_primary）、`segment_signals: Dict[str, dict]`（segment_id -> 解析后信号）。
    - 输出：`alignment_score`（0~1）、是否触发主营一票否决、加权置信度、是否含高风险降权。
    - 公式与阈值与设计文档完全一致：alignment_score = 0.6*主营对齐 + 0.4*非主营加权；alignment_score < 0.3 则标记 is_supported=False；主营无信号或 bearish 则一票否决；任一 risk_tags 含「高风险」则 confidence *= 0.5。
+   - **认知边界四条**（任一条满足即必须输出「不支持」，理由摘要写清原因）：① 无主营构成（细分列表为空）；② **全部细分无有效信号**（该标的所有细分在信号表均无有效条目或均无方向）→ 理由含「全部细分无垂直信号」；③ 主营一票否决（主营无信号或主营信号为利空）；④ 利好与主营未对齐（alignment_score < 0.3）。
 
 ### 步骤 4：统一分析入口与 Router
 
 5. 实现 `diting/moe/experts.py` 中**统一分析入口** `unified_opinion(symbol, quant_signal, segment_list, segment_signals, config, domain_tag)`：
-   - 按设计文档「统一分析管道」步骤顺序：解析信号 → 对齐与主营否决 → 认知边界 → 多细分加权与利好强度/景气强度/风险等级 → 风险等级降权 → 拼结构化摘要与 risk_factors → 返回一条 ExpertOpinion。
+   - 按设计文档「统一分析管道」步骤顺序：解析信号 → 对齐与主营否决 → 认知边界 → 多细分加权与利好强度/景气强度/风险等级 → 风险等级降权 → 拼结构化摘要与 risk_factors → **根据主营/细分信号方向与聚合结果设置 `ExpertOpinion.direction`（看多/看空/中性）** → 返回一条 ExpertOpinion。
+   - **期限类型**：本步为 A 轨 MoE 议会，产出的 ExpertOpinion **必须设置 `horizon = SHORT_TERM`**（或等价枚举），供判官分流使用。
    - `domain_tag` 仅用于从 config 的 `risk_factor_templates[domain_tag]` 选用风险提示文案；逻辑与 tag 无关。
 6. 在 `diting/moe/router.py` 中：若 `domain_tags` 为空或首个有效 tag 不在 `moe_router.supported_tags`（或为「未知」），则返回 `[trash_bin_opinion(symbol, ...)]`；否则取首个 supported tag，调用 `unified_opinion(..., domain_tag=该 tag)`，返回 `[op]`。每标的一条意见。
 
@@ -72,8 +76,12 @@
 
 ### 步骤 6：契约与单测
 
-9. 专家意见与专家意见报文一致；domain 字段可按 domain_tag 映射（农业→1、科技→2、宏观→3）。
-10. 单测覆盖：**统一入口** unified_opinion 在给定 segment_list/signals 下输出一条意见且含四维度摘要；**Router** 有 supported tag 时返回一条、未知时返回一条「不支持」；无主营→不支持；主营无信号→一票否决；对齐<0.3→不支持；主营利好→支持且确信度>0；风险等级高时确信度降权。
+9. **ExpertOpinion 全字段**：输出须符合 [设计#C 模块输出](../../03_原子目标与规约/Stage3_模块实践/04_A轨_MoE议会_设计.md#design-stage3-04-c-output-and-d-contract) 及 `expert.proto`，必填字段包括：`symbol`、`domain`、`is_supported`、`direction`（看多/看空/中性）、`confidence`、`reasoning_summary`、`risk_factors`、`horizon`（本步为 SHORT_TERM）；domain 可按 domain_tag 映射（农业→1、科技→2、宏观→3）。单测须断言上述字段存在且类型正确。
+10. 单测覆盖：
+    - **统一入口**：给定 segment_list/signals 下输出一条意见且含四维度摘要；**horizon** 为 SHORT_TERM；**direction** 随聚合结果：主营利好且支持 → direction 为看多，主营利空或否决 → 看空或中性。
+    - **Router**：supported tag 时返回一条、未知时返回一条「不支持」。
+    - **认知边界**：无主营→不支持；**全部细分无有效信号→不支持且 reasoning_summary 含「全部细分无垂直信号」或等价表述**；主营无信号→一票否决；对齐<0.3→不支持。
+    - **支持路径**：主营利好→支持且确信度>0；风险等级高时确信度降权。
 
 ## 验证部分
 
@@ -81,11 +89,11 @@
 
 | 维度 | 验收标准 | 验证方法 |
 |------|----------|----------|
-| **接口 100%** | ExpertOpinion 符合 expert.proto | 单测断言 ExpertOpinion 字段存在且类型正确 |
+| **接口 100%** | ExpertOpinion 符合 expert.proto，含全部必填字段 | 单测断言 symbol、domain、is_supported、**direction**、confidence、reasoning_summary、risk_factors、**horizon** 等存在且类型正确；本步产出 **horizon = SHORT_TERM** |
 | **结构 100%** | moe 目录、config/moe_router.yaml、supported_tags 与策略参数与 DNA 一致 | `ls diting/moe config/moe_router.yaml`；配置含 supported_tags、alignment、risk_factor_templates |
-| **逻辑功能 100%** | 统一分析管道（unified_opinion）；Router 按 supported_tags 决定一条意见或一条「不支持」；对齐、聚合、认知边界按设计实现 | 单测：无主营→不支持；主营无信号→否决；对齐<0.3→不支持；有主营利好→支持 |
+| **逻辑功能 100%** | 统一分析管道（unified_opinion）；Router 按 supported_tags 决定一条意见或一条「不支持」；对齐、聚合、认知边界四条按设计实现 | 单测：无主营→不支持；**全部细分无有效信号→不支持且理由含「全部细分无垂直信号」**；主营无信号→否决；对齐<0.3→不支持；有主营利好→支持；**主营利好且支持时 direction 为看多** |
 | **结构化维度 100%** | 利好强度、景气强度、风险分级、理由摘要含四维度；风险等级高时确信度降权 | 单测：理由摘要含四维度；高风险时 confidence 降权 |
-| **代码测试 100%** | 单测覆盖 unified_opinion、Router、alignment、signal_parse、Trash Bin、结构化维度 | `cd diting-core && python3 -m pytest tests/unit/test_moe*.py -v` 通过 |
+| **代码测试 100%** | 单测覆盖 unified_opinion、Router、alignment、signal_parse、Trash Bin、结构化维度、horizon/direction、认知边界四条 | `cd diting-core && python3 -m pytest tests/unit/test_moe*.py -v` 通过 |
 
 ### 三层验证
 
@@ -96,7 +104,7 @@
 ## 核心指令（The Prompt）
 
 ```
-你是在 diting-core 中实现 Module C 的开发者。采用「按股配置 + 统一分析」：唯一入口 unified_opinion(symbol, quant_signal, segment_list, segment_signals, config, domain_tag)，按设计文档管道步骤输出一条 ExpertOpinion；Router 根据 supported_tags 调用统一入口或返回一条「不支持」。必读：04_A轨_MoE议会_设计（策略详规、实现细粒度约定）、dna_module_c.yaml、expert.proto。工作目录：diting-core。
+你是在 diting-core 中实现 Module C 的开发者。采用「按股配置 + 统一分析」：唯一入口 unified_opinion(symbol, quant_signal, segment_list, segment_signals, config, domain_tag)，按设计文档管道步骤输出一条 ExpertOpinion；Router 根据 supported_tags 调用统一入口或返回一条「不支持」。ExpertOpinion 须含全字段：symbol、domain、is_supported、direction（由聚合结果填看多/看空/中性）、confidence、reasoning_summary、risk_factors、horizon（本步固定 SHORT_TERM）；认知边界四条（含「全部细分无有效信号」）必须实现。必读：04_A轨_MoE议会_设计（策略详规、实现细粒度约定）、dna_module_c.yaml、expert.proto。工作目录：diting-core。
 ```
 
 <a id="l4-stage3-04-exit"></a>
@@ -106,15 +114,17 @@
 
 - **单测**：`cd diting-core && python3 -m pytest tests/unit/test_moe*.py -v`
 - **结构**：`ls -la diting-core/diting/moe/ diting-core/config/moe_router.yaml 2>/dev/null || true`
-- **契约**：单测中构造专家意见并断言具备 是否支持、确信度、理由摘要、风险提示 等字段
-- **结构化维度**：单测断言理由摘要含「对齐得分=」「景气强度=」「风险等级=」「利好强度=」；风险等级高时确信度≤0.5
+- **契约**：单测中构造专家意见并断言具备 **symbol、domain、is_supported、direction、confidence、reasoning_summary、risk_factors、horizon** 等全字段；**horizon 为本步默认 SHORT_TERM**；主营利好且支持时 **direction 为看多**。
+- **结构化维度**：单测断言理由摘要含「对齐得分=」「景气强度=」「风险等级=」「利好强度=」；风险等级高时确信度≤0.5。
+- **认知边界第四条**：单测断言当所有细分均无有效信号时，输出不支持且 reasoning_summary 含「全部细分无垂直信号」或等价表述。
 
 ### 准出检查清单
 
 - [ ] 设计文档中策略与 C 模块设计要求已实现且与文档一致
 - [ ] config/moe_router.yaml 存在且含 routing 与策略参数
 - [ ] 细分信号解析、对齐、多细分聚合、**统一分析入口 unified_opinion**、Router（supported_tags）、Trash Bin、利好强度/景气强度/风险分级/结构化摘要 已实现
-- [ ] 单测通过且覆盖：统一入口输出一条意见且含四维度；supported tag→一条意见、未知→一条不支持；无主营、主营否决、对齐阈值、主营利好、风险等级降权
+- [ ] **ExpertOpinion 全字段**：symbol、domain、is_supported、**direction**、confidence、reasoning_summary、risk_factors、**horizon**（本步 SHORT_TERM）均已赋值；**认知边界四条**（含「全部细分无有效信号」）均已实现
+- [ ] 单测通过且覆盖：统一入口输出一条意见且含四维度；**horizon=SHORT_TERM、direction 随聚合结果**；supported tag→一条意见、未知→一条不支持；无主营、**全部细分无信号**、主营否决、对齐阈值、主营利好、风险等级降权
 - [ ] 已更新 L5 02_验收标准 中本阶段对应行（若适用）
 
 ### 本步骤失败时
