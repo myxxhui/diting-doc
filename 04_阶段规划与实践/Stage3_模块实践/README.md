@@ -23,6 +23,8 @@
 
 **热路径**：判官（D）+ 风控（E）+ 执行（F）在一个实践步骤内完成，交付**同一镜像**（diting-hot-path），构建/部署/连调按 `deployable_units.hot_path_def` 执行。
 
+**补充规约（跨步骤）**：A 轨持仓与每日 B 复核、止损只紧不松见 [03_A轨_持仓与每日信号复核规约](../../03_原子目标与规约/Stage3_模块实践/03_A轨_持仓与每日信号复核规约.md)（衔接步骤 2、3、5 与 `diting-core/diting/position_lifecycle.py`）；**E 最小数据接口**（只读持仓、只读 last price）见规约 [§7](../../03_原子目标与规约/Stage3_模块实践/03_A轨_持仓与每日信号复核规约.md#design-a-track-pl-minimal-data)、09_ [Module E](../../03_原子目标与规约/_共享规约/09_核心模块架构规约.md#module-e-minimal-data-interfaces)、步骤 5 实践 [#l4-stage3-05-minimal-data](05_A轨_热路径判官风控与执行_实践.md#l4-stage3-05-minimal-data)。
+
 ## 步骤列表
 
 | 步骤 | 轨 | 文档 | 对应 DNA |

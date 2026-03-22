@@ -39,7 +39,7 @@ flowchart LR
 
 > **步骤级执行与验收**以各 Stage 目录下 `dna_stageX_0Y.yaml` 为准（见「步骤级 DNA 与规约级配置约定」）；规约级配置收敛至 `global_const.yaml` 各子树，_共享规约 01_～11_ 对应 `global_const#xxx` 键。所有与实现/测试/验收相关的参数与约束，应收敛到 `_System_DNA/global_const.yaml` 对应子树或步骤级 DNA 中，L4 阶段与后续代码/脚本以步骤级 DNA 及这些键值为准。
 
-下表每行设显式锚点 id（`l3-dna-01`～`l3-dna-13`），供 _共享规约 或其它文档链到本表行，如 `README.md#l3-dna-01`。
+下表每行设显式锚点 id（`l3-dna-01`～`l3-dna-14`），供 _共享规约 或其它文档链到本表行，如 `README.md#l3-dna-01`。
 
 | id | L3 规约文档 | 对应 DNA 根节点（`_System_DNA/global_const.yaml`） | 说明 |
 |----|-------------|----------------------------------------------------|------|
@@ -57,6 +57,7 @@ flowchart LR
 | <a id="l3-dna-11"></a>l3-dna-11 | `10_运营治理与灾备规约.md` | `governance_and_dr` | 合规性策略、故障分级、备份/恢复策略、BCP 与 DR 演练、运营监控 |
 | <a id="l3-dna-12"></a>l3-dna-12 | `01_开发生命周期与实践流程规约.md` | `_System_DNA/dna_dev_workflow.yaml`（`workflow_stages`, `module_to_stages`） | 从零到可提交的开发生命周期（骨架期、逻辑填充期、Mock 验证、Docker 期、K3s 测试开发期）、与三级流水线衔接、准入准出与过渡时机；L4 执行顺序以 workflow_stages 为准 |
 | <a id="l3-dna-13"></a>l3-dna-13 | `01_需求与产品范围.md` | `product_scope` | Phase 划分与阶段目标、功能范围与优先级、与 L1 映射、各 Phase 验收价值 |
+| <a id="l3-dna-14"></a>l3-dna-14 | `Stage3_模块实践/03_A轨_持仓与每日信号复核规约.md` | `core_modules.a_track_position_lifecycle`、[_System_DNA/core_modules/dna_a_track_position_lifecycle.yaml](_System_DNA/core_modules/dna_a_track_position_lifecycle.yaml)（含 `minimal_data_interfaces`） | A 轨持仓锚定、每日 B 复核、止损只紧不松；E 只读持仓/只读 last price 见规约 §7；实现见 `diting-core/diting/position_lifecycle.py` |
 
 **B 轨专项规约**（与 A 轨同列各 Stage，命名区分）：设计总览见 [B轨/README](B轨/README.md)、[01_B轨系统设计](B轨/01_B轨系统设计.md) 等；DNA 见 `_System_DNA/B轨/dna_b_track.yaml`。L4 实践已并入各 Stage：Stage2 [01_B轨_数据与采集_实践](../04_阶段规划与实践/Stage2_数据采集与存储/01_B轨_数据与采集_实践.md)、Stage3 [01_B轨_语义与候选_实践](../04_阶段规划与实践/Stage3_模块实践/01_B轨_语义与候选_实践.md)、Stage4 [01_B轨_共识与执行_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/01_B轨_共识与执行_实践.md)；索引表已含 stage2_b01、stage3_b01、stage4_b01 行。
 
@@ -81,6 +82,7 @@ flowchart LR
 | 03_dna_量化扫描引擎.yaml | dna_module_b.yaml | Module B 量化扫描引擎（执行层） |
 | 04_dna_MoE议会.yaml | dna_module_c.yaml | Module C MoE 议会 |
 | 05_dna_热路径判官风控与执行.yaml | dna_module_d/e/f.yaml | 热路径 D+E+F |
+| 02/03/05（B 输出 × 持仓） | [dna_a_track_position_lifecycle.yaml](_System_DNA/core_modules/dna_a_track_position_lifecycle.yaml) | A 轨持仓与每日信号复核（与 Module E 衔接） |
 | 06_dna_全链路验证.yaml | — | 全链路验证（无 core_modules 对应） |
 
 ## 设计–DNA–实践–L5 索引表
@@ -128,7 +130,7 @@ flowchart LR
 │   ├── Stage3_模块实践/                    # 步骤级 DNA（01_dna_语义分类器～05_dna_全链路验证）
 │   ├── Stage4_MoE与执行网关/               # 步骤级 DNA（01_dna_ModuleC_MoE议会接入～03_dna_回测或仿真验证）
 │   ├── Stage5_优化与扩展/                  # 步骤级 DNA（01_dna_可观测性与日志指标～04_dna_Level1与L5验收对齐）
-│   ├── core_modules/                       # Module A～F 语义（被 Stage3 步骤引用；dna_module_a～f）
+│   ├── core_modules/                       # Module A～F 语义（dna_module_a～f）+ A 轨持仓复核 dna_a_track_position_lifecycle.yaml
 │   └── B轨/                                 # B 轨专项：01_B轨系统设计、02_数据与存储、03_共识与逻辑证伪；DNA 见 _System_DNA/B轨/dna_b_track.yaml
 ├── _共享规约/                             # 跨轴线共享的规约文档（01～11 连续序号）
 │   ├── 01_核心公式与MoE架构规约.md

@@ -1,0 +1,36 @@
+# DNA：A 轨持仓与每日 B 信号复核（执行侧可消费）
+# 规约文档：03_原子目标与规约/Stage3_模块实践/03_A轨_持仓与每日信号复核规约.md
+# 代码仓镜像：diting-core/config/a_track_position_lifecycle.yaml（键须与下述一致）
+
+a_track_position_lifecycle:
+  purpose: "开仓锚定 R/止损/止盈档；持仓期用新数据复核去留；止损默认只紧不松；每日 B 不默认覆盖既有止盈阶梯"
+  boundaries:
+    module_b: "产出当日 QuantSignal / technical_score / risk 字段，不写持仓状态机"
+    module_e: "消费复核结果与止损合并规则，更新持仓与订单约束"
+  stop_loss:
+    tighten_only_default: true
+    merge_rule_long: "max(current_stop, suggested_stop)"
+    merge_rule_short: "min(current_stop, suggested_stop)"
+  signal_review:
+    min_technical_score_for_hold: 60
+    consecutive_days_below_before_exit: 3
+    treat_missing_daily_signal_as: "below_threshold"
+  take_profit:
+    daily_b_resets_tp_ladder_default: false
+  minimal_data_interfaces:
+    read_only_positions_api:
+      purpose: "E 与编排层获取持仓真相，用于合并止损、复核 streak、相关性等"
+      contract: "只读查询；写入止损/streak/平仓仍在 E→F→Broker 链路"
+      fields_min:
+        - symbol
+        - side
+        - quantity
+        - entry_price
+        - current_stop_price
+      optional_fields:
+        - exit_review_streak
+    read_only_last_price:
+      purpose: "盘中规则：当前价 vs 入场/止损线（硬止损等）"
+      semantics_one_of: ["last_trade", "mid", "mark"]
+      note: "日频复核可主要用当日 B + 持仓快照；盘中触发必须提供"
+  runtime_config_path: "config/a_track_position_lifecycle.yaml"

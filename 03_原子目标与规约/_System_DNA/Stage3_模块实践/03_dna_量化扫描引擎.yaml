@@ -2,8 +2,8 @@
 # 消费 Stage3-02 产出的策略规约与配置；语义详见 _System_DNA/core_modules/dna_module_b.yaml
 stage_id: "stage3_03"
 name: "Module B 量化扫描引擎"
-design_doc: "03_原子目标与规约/Stage3_模块实践/03_量化扫描引擎_设计.md"
-l4_practice_doc: "04_阶段规划与实践/Stage3_模块实践/03_量化扫描引擎_实践.md"
+design_doc: "03_原子目标与规约/Stage3_模块实践/03_A轨_量化扫描引擎_设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage3_模块实践/03_A轨_量化扫描引擎_实践.md"
 work_dir:
   type: "repo_i"
   repo_ref: "repo_i"
@@ -11,11 +11,17 @@ work_dir:
 delivery_scope: "Module B 执行层四项 100%；按 02 策略规约加载配置（scoring、optimization、filters）并执行扫描；多池（含可选第四池）、输出 second_pool_id/score、pool_scores、liquidity_score、volatility_ratio；TA-Lib、VectorBT；单独运行、Dockerfile、镜像与版本、一键构建/部署与 deployable_units.module_b 一致"
 exit_criteria: "Module B 实现满足 02 规约 §3–§4；单测与联动验证通过；单独运行与一键构建/部署与 deployable_units.module_b 一致"
 logic_fill_design_refs:
-  - "03_原子目标与规约/Stage3_模块实践/03_量化扫描引擎_设计.md#design-stage3-03-integration-talib"
-  - "03_原子目标与规约/Stage3_模块实践/03_量化扫描引擎_设计.md#design-stage3-03-integration-vectorbt"
+  - "03_原子目标与规约/Stage3_模块实践/03_A轨_量化扫描引擎_设计.md#design-stage3-03-integration-talib"
+  - "03_原子目标与规约/Stage3_模块实践/03_A轨_量化扫描引擎_设计.md#design-stage3-03-integration-vectorbt"
+  - "03_原子目标与规约/Stage3_模块实践/03_A轨_量化扫描引擎_设计.md#design-stage3-03-batch-ohlcv-sector"
+  - "03_原子目标与规约/Stage3_模块实践/03_A轨_量化扫描引擎_设计.md#design-stage3-03-coarse-regime-gate"
+  - "03_原子目标与规约/Stage3_模块实践/03_A轨_量化扫描引擎_设计.md#design-stage3-03-perf-obs"
 design_integration_anchors:
   - design-stage3-03-integration-talib
   - design-stage3-03-integration-vectorbt
+  - design-stage3-03-batch-ohlcv-sector
+  - design-stage3-03-coarse-regime-gate
+  - design-stage3-03-perf-obs
 l5_stage_anchor: "l5-mod-B"
 consumes: ["Stage3-02 准出"]
 artifacts: ["Module B 实现", "QuantSignal", "L2 quant_signal_*"]

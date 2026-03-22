@@ -13,6 +13,7 @@ module_a_semantic_classifier:
     - "Domain Tag (AGRI/TECH/GEO/UNKNOWN)"
     - "置信度分数 (0.0-1.0)"
     - "主营占比列表 segment_shares: repeated { 细分标识、营收占比、是否主营 }（与标的主营构成表一致，见 12_、04_ Proto 扩展）"
+    - "L2 快照表 classifier_output_snapshot：primary_tag 为领域标签字符串（varchar(64)，含「自定义」长标签）；segment_shares_json 每条含 disclosure_present（无 L2 主营行时为 seg_no_disclosure/false）"
   classification_rules:
     agri: "申万行业=农林牧渔 或 营收占比>50%"
     tech: "申万行业=电子/计算机/通信 或 研发投入>10%"

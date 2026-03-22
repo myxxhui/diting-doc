@@ -254,6 +254,16 @@ repeated SegmentShare segment_shares = N;  // N 为当前未占用的字段号
 
 - 与 L2 标的主营构成表一行对应一个 SegmentShare；同一标的多条即 repeated。
 
+### 5.2 生产实现绑定（diting-core / diting-infra）
+
+| 项 | 说明 |
+|----|------|
+| L2 DDL | `diting-infra/schemas/sql/09_l2_segment_registry.sql`、`10_l2_symbol_business_profile.sql`；Helm schema-init 同路径同步 |
+| 本地建表 | `make init-l2-business-profile-tables`（已纳入 `make init-l2-b-module-tables`） |
+| 采集入口 | `diting.ingestion.business_profile.run_ingest_business_profile`；数据源 **AkShare `stock_zygc_em`**，取**最新报告期**且 **`分类类型=按产品分类`** 的分部行；`segment_id=seg_bp_{md16}` 稳定键；`segment_registry.domain` 由同标的 `industry_revenue_summary.industry_name` 粗映射（农业/科技/宏观） |
+| 生产流水线 | `scripts/run_ingest_production.py` **Phase 2.3**（在 Phase 2 行业之后）；环境变量 `INGEST_PRODUCTION_BUSINESS_PROFILE`（默认 true）、`INGEST_BUSINESS_REFRESH_DAYS`（默认 120） |
+| Module A | `business_segment_provider`：`diting.classifier.business_segment_provider.get_business_segment_shares_batch`；若 L2 **无**主营行，则 **不**用多 Tag 伪造分部，仅 `_fallback_segment_shares_from_primary` 单条领域占位（与披露一致） |
+
 ---
 
 ## 六、可执行验收（设计层）

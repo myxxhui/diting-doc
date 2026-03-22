@@ -729,6 +729,11 @@ core_modules:
       universe_size: 5000  # 扫描标的数量
       technical_score_threshold: 70  # 技术面得分阈值
       sector_strength_threshold: 1.1  # 板块强弱阈值（强于板块 10%）
+
+  a_track_position_lifecycle:
+    purpose: "A 轨持仓与每日 B 信号复核：开仓锚定 R/止损/止盈；止损只紧不松；连续低于阈值日数"
+    dna_file: "core_modules/dna_a_track_position_lifecycle.yaml"
+    code_module: "diting.position_lifecycle"
   
   module_c_moe_council:
     purpose: "右脑 - 混合专家议会"

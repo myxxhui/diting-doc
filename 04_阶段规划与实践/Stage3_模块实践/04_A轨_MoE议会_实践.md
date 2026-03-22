@@ -40,6 +40,8 @@
 
 **输入数据来源**：`segment_list`、`segment_signals` 由上游按 [12_右脑数据支撑与Segment规约](../../03_原子目标与规约/_共享规约/12_右脑数据支撑与Segment规约.md) 提供（如 A 的 ClassifierOutput.segment_shares 或 L2 标的主营构成表、L2 细分信号缓存表）；C 假定调用 `unified_opinion` 时已传入，不在此步实现数据拉取。
 
+**本地一键脚本与部署形态**：`scripts/run_module_c_local.py` 支持 `MOE_SEGMENT_SOURCE=classifier`（默认，内存跑 `SemanticClassifier`，与 A 逻辑一致）与 `MOE_SEGMENT_SOURCE=snapshot`（从 L2 表 `classifier_output_snapshot` 读取 `tags_json`、`segment_shares_json`，**不重跑 Module A**，适合 C 独立进程/与 A 异步解耦）；可选 `MOE_CLASSIFIER_BATCH_ID` 与 A 当批 `batch_id` 对齐。解析实现见 `diting/classifier/snapshot_reader.py`。
+
 ### 步骤 1：配置与包结构
 
 1. 在 `diting-core/config/` 下维护 `moe_router.yaml`，包含：

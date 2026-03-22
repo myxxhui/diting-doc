@@ -70,9 +70,23 @@ module_b_quant_engine:
     multi_pool_tier2_enabled: false
     multi_pool_tier2_threshold: 60
     multi_pool_tier2_bonus: 5
+    coarse_screen:
+      enabled: true
+      min_momentum_percentile: 0.0
+      min_liquidity_percentile: 0.0
+    signal_cooldown_days: 1
+    signal_cooldown_confirmed_only: true
+  scanner_performance:
+    parallel_workers: 4
+    min_symbols_for_parallel: 48
+    metrics_log_json: true
+  product_signals:
+    emit_market_regime_per_row: true
+    emit_scanner_metrics_log: true
   filters:
     sector_strength:
-      enabled: false
+      enabled: true
+      mode: technical_ratio_to_sector_mean
     liquidity:
       enabled: false
       min_score: 0
@@ -81,6 +95,20 @@ module_b_quant_engine:
       enabled: false
       percentile_threshold: 0.90
       penalty_ratio: 0.8
+    index_regime:
+      enabled: true
+      benchmark_symbol: "000300.SH"
+      ma_short: 20
+      ma_long: 60
+      bear_trend_pool_mult: 0.72
+      stress_vol_enabled: true
+      stress_atr_percentile: 0.82
+      stress_breakout_mult: 0.88
+      stress_reversion_mult: 1.06
+      stress_lookback_bars: 60
+    classifier_gate:
+      enabled: true
+      allowed_primary_tags: []
   # B 轨长期价值发现：120d 收益截面分位 → long_term_score / long_term_candidate，供 Router 送 VC-Agent
   long_term:
     enabled: true
@@ -89,7 +117,7 @@ module_b_quant_engine:
   scanner:
     # 标的池以运行时 get_current_a_share_universe() 返回为准，不写死数量；见 11_ 全 A 股标的池（universe）
     technical_score_threshold: 70
-    sector_strength_threshold: 1.1
+    sector_strength_threshold: 1.0
     # 可选收紧：null 表示不启用；见 02_B模块通过组合与设计符合度分析 §五
     pass_require_lead_pool_min: null
     pass_require_second_pool_min: null
