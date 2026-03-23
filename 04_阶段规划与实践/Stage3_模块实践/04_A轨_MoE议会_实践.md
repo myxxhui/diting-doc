@@ -33,6 +33,7 @@
 - **判断与数据处理**：[设计#判断与数据处理](../../03_原子目标与规约/Stage3_模块实践/04_A轨_MoE议会_设计.md#design-stage3-04-implementation-mode) — 全部由代码逻辑实现。
 - **C 模块设计要求**：[设计#C 模块设计要求](../../03_原子目标与规约/Stage3_模块实践/04_A轨_MoE议会_设计.md#design-stage3-04-requirements) — 利好强度、景气强度、风险分级、理由摘要四维度。
 - **实现细粒度**：[设计#实现细粒度约定](../../03_原子目标与规约/Stage3_模块实践/04_A轨_MoE议会_设计.md#design-stage3-04-impl-detail) — 入口 `unified_opinion(...)`、管道步骤顺序、输入来源见设计文档。
+- **AC 模块优化**：大类/垂直分列、路由细化、认知边界拆分、风险等级去兜底见 [06_A轨_AC模块优化实践_设计](../../03_原子目标与规约/Stage3_模块实践/06_A轨_AC模块优化实践_设计.md)。
 
 ## 实现部分
 
@@ -67,7 +68,7 @@
 
 5. 实现 `diting/moe/experts.py` 中**统一分析入口** `unified_opinion(symbol, quant_signal, segment_list, segment_signals, config, domain_tag)`：
    - 按设计文档「统一分析管道」步骤顺序：解析信号 → 对齐与主营否决 → 认知边界 → 多细分加权与利好强度/景气强度/风险等级 → 风险等级降权 → 拼结构化摘要与 risk_factors → **根据主营/细分信号方向与聚合结果设置 `ExpertOpinion.direction`（看多/看空/中性）** → 返回一条 ExpertOpinion。
-   - **期限类型**：本步为 A 轨 MoE 议会，产出的 ExpertOpinion **必须设置 `horizon = SHORT_TERM`**（或等价枚举），供判官分流使用。
+   - **期限类型**：A 轨 `DITING_TRACK=a` 时 `horizon=SHORT_TERM`；B 轨 `DITING_TRACK=b` 时 `horizon=MEDIUM_TERM`（从 b_track_candidate_snapshot 取 universe）；供判官分流使用。
    - `domain_tag` 仅用于从 config 的 `risk_factor_templates[domain_tag]` 选用风险提示文案；逻辑与 tag 无关。
 6. 在 `diting/moe/router.py` 中：若 `domain_tags` 为空或首个有效 tag 不在 `moe_router.supported_tags`（或为「未知」），则返回 `[trash_bin_opinion(symbol, ...)]`；否则取首个 supported tag，调用 `unified_opinion(..., domain_tag=该 tag)`，返回 `[op]`。每标的一条意见。
 
@@ -84,6 +85,22 @@
     - **Router**：supported tag 时返回一条、未知时返回一条「不支持」。
     - **认知边界**：无主营→不支持；**全部细分无有效信号→不支持且 reasoning_summary 含「全部细分无垂直信号」或等价表述**；主营无信号→一票否决；对齐<0.3→不支持。
     - **支持路径**：主营利好→支持且确信度>0；风险等级高时确信度降权。
+
+<a id="l4-stage3-04-prod-moe-metadata"></a>
+### 生产级运行、缺陷治理与 L2 元数据（周全实践）
+
+以下与 **Module C 运行缺陷分析** 及 **最佳优化方案** 对齐，作为 Stage3-04 的**管理级实践约定**（实现见 `diting-core`：`run_module_c_local.py`、`moe/opinion_writer.py`、`scanner/quant_snapshot_reader.py`、`moe/experts.py`、`config/moe_router.yaml`；L2 DDL：`diting-infra` `08_l2_moe_expert_opinion_snapshot.sql`）。
+
+| 优先级 | 主题 | 约定与动作 |
+|--------|------|------------|
+| P0 | **细分信号来源** | **默认关闭占位**：`MOE_STUB_SEGMENT_SIGNALS` 未设置时视为 **0**，右脑使用真实 `segment_signals`（来自 L2 `segment_signal_cache` 或编排注入）。`stub=1` 时对齐得分在数学上易锁死（如仅主营销好强度 0.75 → 对齐得分恒 0.45），**仅用于管道联调**；`make run-module-c` 仍显式传 `MOE_STUB_SEGMENT_SIGNALS=1` 以保持一键可跑。 |
+| P0 | **L2 可追溯元数据** | 表 `moe_expert_opinion_snapshot` 增加 **`moe_run_metadata`（JSONB）**，每行写入同批一致元数据：`stub_segment_signals`、`vc_agent_enabled`、`require_quant_passed`、`pipeline`、`scope`、`moe_segment_source`、`classifier_batch_id`、`quant_batch_id`、`output_batch_id`、L2 A/B 行数、`processed_symbols`、`universe_symbols`、`alignment_warnings`（字符串数组）。下游判官/审计可按 `stub_segment_signals=false` 过滤生产意见。已有库执行 **`make init-l2-moe-opinion-table`** 做 `ADD COLUMN IF NOT EXISTS`。 |
+| P0 | **A/B 批次与行数对齐** | 当 `MOE_CLASSIFIER_BATCH_ID` / `MOE_QUANT_BATCH_ID` 未锁定时，L2 可能出现 classifier 与 `quant_signal_scan_all` **行数不一致**或 universe 内 **仅 A 有 / 仅 B 有** 的 symbol；脚本打印 **告警** 并写入 `alignment_warnings`，**不阻断**运行。生产调度应：**同一业务日同一编排** 写 A、再 B，再 C；必要时显式传两个 `MOE_*_BATCH_ID`。 |
+| P1 | **短轨确信度与 B 截面分位弱耦合** | `config/moe_router.yaml` 中 **`short_confidence_blend`**：`enabled: true` 且 `weight`（默认 0.25）时，在 `unified_opinion` 内将 `final_conf` 与 `quant_signal.technical_score_percentile` 线性混合，避免「技分横跨全市场而短轨置信度几乎恒为 0.75」。L2 读 B 时 **`fetch_quant_signal_scan_all_map` 已带出 `technical_score_percentile`**。单测覆盖见 `tests/unit/test_moe.py::test_unified_opinion_short_confidence_blend_with_percentile`。 |
+| P2 | **VC-Agent** | 占位长期意见仍可能误导双轨；生产可 **`MOE_ENABLE_VC_AGENT=0`** 直至接入基本面；文档与 `.env.template` 保持说明。 |
+| P2 | **终端与准出** | `stub=1` 时打印 **明确警告**；准出为「符合预期（stub 联调；生产请关 stub）」。`stub=0` 且无真实细分信号时短轨可能大量「不支持」——属**预期**，需补信号层而非重新打开 stub 冒充生产。 |
+
+**一键命令**：`make init-l2-moe-opinion-table`（建表/补列）；`make run-module-c`（联调 stub）；`make query-module-c-output`（批次摘要旁显示 stub 联调/关）。
 
 ## 验证部分
 
@@ -123,7 +140,8 @@
 ### 准出检查清单
 
 - [ ] 设计文档中策略与 C 模块设计要求已实现且与文档一致
-- [ ] config/moe_router.yaml 存在且含 routing 与策略参数
+- [ ] **生产级实践**（[生产级运行与 L2 元数据](#l4-stage3-04-prod-moe-metadata)）：`moe_expert_opinion_snapshot.moe_run_metadata` 已建列；默认 `MOE_STUB_SEGMENT_SIGNALS=0`；A/B 行数不一致时有终端告警与 `alignment_warnings`
+- [ ] config/moe_router.yaml 存在且含 routing 与策略参数（含可选 `short_confidence_blend`）
 - [ ] 细分信号解析、对齐、多细分聚合、**统一分析入口 unified_opinion**、Router（supported_tags）、Trash Bin、利好强度/景气强度/风险分级/结构化摘要 已实现
 - [ ] **ExpertOpinion 全字段**：symbol、domain、is_supported、**direction**、confidence、reasoning_summary、risk_factors、**horizon**（本步 SHORT_TERM）均已赋值；**认知边界四条**（含「全部细分无有效信号」）均已实现
 - [ ] 单测通过且覆盖：统一入口输出一条意见且含四维度；**horizon=SHORT_TERM、direction 随聚合结果**；supported tag→一条意见、未知→一条不支持；无主营、**全部细分无信号**、主营否决、对齐阈值、主营利好、风险等级降权

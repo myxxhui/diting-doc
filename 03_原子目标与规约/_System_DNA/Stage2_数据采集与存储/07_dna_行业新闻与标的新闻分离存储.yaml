@@ -1,0 +1,42 @@
+# Stage2-07 行业新闻与标的新闻分离存储（1:1:1 设计-实践-DNA）
+stage_id: "stage2_07"
+name: "行业新闻与标的新闻分离存储"
+design_doc: "03_原子目标与规约/Stage2_数据采集与存储/07_行业新闻与标的新闻分离存储_设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage2_数据采集与存储/07_行业新闻与标的新闻分离存储_实践.md"
+work_dir:
+  type: "repo_i"
+  repo_ref: "repo_i"
+  description: "diting-core"
+delivery_scope: "news_content 增加 scope/scope_id；全市场(market)、行业(industry)、标的(symbol) 三条采集路径；消费按 scope 查询；信号层 SegBpNewsAdapter 可按 segment 层级选 industry/symbol 新闻"
+exit_criteria: "Schema 迁移可执行；write_news_content_batch 支持 scope/scope_id；采集逻辑支持 market/industry/symbol 写入；消费方可按 scope 查询；与 11_、12_ 同源"
+consumes: ["Stage2-02 准出", "Stage2-06_B轨 信号层准出（可选，用于适配器扩展）"]
+artifacts: ["news_content scope/scope_id 列及索引", "迁移脚本", "run_ingest_news 行业路径", "write_news_content_batch scope 支持", "SegBpNewsAdapter scope 查询扩展"]
+logic_fill_design_refs:
+  - "03_原子目标与规约/Stage2_数据采集与存储/07_行业新闻与标的新闻分离存储_设计.md#design-stage2-07-schema"
+  - "03_原子目标与规约/Stage2_数据采集与存储/07_行业新闻与标的新闻分离存储_设计.md#design-stage2-07-ingest"
+  - "03_原子目标与规约/Stage2_数据采集与存储/07_行业新闻与标的新闻分离存储_设计.md#design-stage2-07-consumption"
+l5_stage_anchor: "l5-stage-stage2_07"
+required_config:
+  - PG_L2_DSN
+  - INGEST_PRODUCTION_NEWS_INDUSTRY   # 可选，是否采集行业新闻
+  - INGEST_INDUSTRY_NEWS_INDUSTRIES  # 可选，显式行业名列表
+verification_commands:
+  - cmd: "make verify-news-scope 或等价"
+    cwd_ref: "repo_i"
+    expected_exit: 0
+    expected_outcome: "news_content 中 scope/scope_id 分布正确、非空约束满足"
+  - cmd: "make ingest-test-news-scope 或等价"
+    cwd_ref: "repo_i"
+    expected_exit: 0
+    expected_outcome: "行业+标的采集写入 scope 正确"
+feature_items:
+  - id: "F1"
+    description: "news_content 增加 scope、scope_id 列及迁移脚本"
+  - id: "F2"
+    description: "write_news_content_batch 支持 scope/scope_id 写入"
+  - id: "F3"
+    description: "run_ingest_news 行业路径（Phase 1：全市场+关键词过滤）"
+  - id: "F4"
+    description: "消费按 scope+scope_id 查询，向后兼容 symbol"
+  - id: "F5"
+    description: "SegBpNewsAdapter 可按 segment 层级选 industry/symbol 新闻"
