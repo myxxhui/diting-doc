@@ -22,7 +22,9 @@
 | 06 | B | 信号层生产级数据采集 | [06_B轨_信号层生产级数据采集_实践](06_B轨_信号层生产级数据采集_实践.md#l4-stage2-b06-goal) |
 
 **设计**：[03_/Stage2_数据采集与存储/](../../03_原子目标与规约/Stage2_数据采集与存储/)  
-**DNA**：_System_DNA/Stage2_数据采集与存储/、global_const.deployable_units.ingestion
+**DNA**：_System_DNA/Stage2_数据采集与存储/、global_const.deployable_units.ingestion  
+
+**信号层 1:1:1**：06_B轨 设计-实践-DNA 对应见 [06_B轨_信号层_1对1对1](../../03_原子目标与规约/Stage2_数据采集与存储/06_B轨_信号层_1对1对1.md)。**全系统全链路**：`make run-full-pipeline`（A→B→refresh→C 串联运行/测试）
 
 <a id="stage2-data-plan-vs-steps"></a>
 ### 数据采集规划与实践步骤对照（确保按步骤开发即可满足系统数据需求）
@@ -38,7 +40,8 @@
 | **调度与超时** | 日级/小时级与 11_、DNA 一致 | 三个任务 | 逻辑填充期以 `make ingest-test` 可跑通为准；**生产部署**时须在 05 步配置 cron/调度与超时（见 [05_A轨_采集模块部署与验收_实践](05_A轨_采集模块部署与验收_实践.md)） | Stage2-05 准出时确认调度配置；DNA `data_ingestion` schedule/timeout |
 | **数据量与范围** | 全市场扫描（当前全 A 股 universe）、Module A/B 生产级 | 按生产级 | 02 步 F8、F10、`docs/ingest-test-target.md`；**自 02 步起按生产级**：单标日线 ≥5 年、标的 = 全 A 股 universe、复权与 Stage4 一致（见 [06_生产级数据要求](06_A轨_生产级数据要求_实践.md)） | V-DATA 与生产级目标数据约定一致；可选 `make verify-data-production`（06_ 实践） |
 | **全 A 股标的池（universe）** | Module A/B 标的池 = 当前全 A 股，由 [11_ 全 A 股标的池](../../03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md#全-a-股标的池universe) 约定 | **必做** | 02 步 F10：universe 表 + 更新 Job，表名、字段、触发方式与 11_ 一致；diting-core 通过 `get_current_a_share_universe()` 读取 | 表可写可查；有效条件与 check-before-use 见 11_ |
-| **细分一手信号（segment_signal_cache）** | Module C 右脑、利好与主营对齐；按细分按需拉取 | 信号层 `refresh_segment_signals_for_symbols` | **B 轨** [06_B轨_信号层生产级数据采集_实践](06_B轨_信号层生产级数据采集_实践.md)：适配器+信号理解→segment_signal_cache；见 [12_右脑数据支撑与Segment规约](../../03_原子目标与规约/_共享规约/12_右脑数据支撑与Segment规约.md) | 调用后对应细分行存在且 fetched_at 更新；12_ 验收 |
+| **细分一手信号（segment_signal_cache）** | Module C 右脑（**B 轨**）、利好与主营对齐；按细分按需拉取 | 信号层 `refresh_segment_signals_for_symbols` | **B 轨** [06_B轨_信号层生产级数据采集_实践](06_B轨_信号层生产级数据采集_实践.md)：→ **segment_signal_cache**；见 [12_右脑数据支撑与Segment规约](../../03_原子目标与规约/_共享规约/12_右脑数据支撑与Segment规约.md) | 调用后对应细分行存在且 fetched_at 更新；12_ 验收 |
+| **A 轨双路右脑（a_track_signal_cache）** | Module C（**A 轨**）标的级 + 申万行业新闻/公告打标，与 B 轨缓存合并 | `refresh_a_track_signals_for_symbols` | [07_行业新闻与标的新闻分离存储_实践](07_行业新闻与标的新闻分离存储_实践.md)；`make migrate-l2-news-content-scope`、`make init-l2-a-track-signal-cache`；设计见 [07_设计](../../03_原子目标与规约/Stage2_数据采集与存储/07_行业新闻与标的新闻分离存储_设计.md) | refresh 后 `sym:`/`ind:` 键（有正文时）；合并见 `diting.moe.a_track_signal_reader` |
 
 **结论**：按 01（基础设施与表）→ 02（三任务 + AkShare/OpenBB + DVC 写入 + **universe 表与 Job**，**数据量按生产级**）→ 03（连调、MarketDataFeed 读 L1）→ 04（镜像）→ 05（部署与验收）→ **06（生产级数据要求验收）** 顺序执行并准出，即可完成系统所需的数据采集需求。双轨所需 OHLCV、行业/营收、基本面、新闻均落在 F1～F3/F5 与 11_ 写入契约内；**数据量、历史深度、复权、标的覆盖**自 02 步起即按 [06_生产级数据要求](06_A轨_生产级数据要求_实践.md) 与 [11_ 生产级数据要求](../../03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md) 执行；05 步配置调度与超时与 DNA 一致。
 

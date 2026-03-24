@@ -395,6 +395,21 @@ data_ingestion:
     ingest_news:
       data_source: "news"
       write_target: "knowledge_bases"
+  # 细分注册表层级（与 12_ §2.2、diting-core diting.ingestion.segment_tier 一致）
+  segment_registry:
+    tier_domain: 1
+    tier_sector: 2
+    tier_business: 3
+    disclosure_default_tier: 3
+    code_module: "diting.ingestion.segment_tier"
+    ddl_sql: "diting-infra/schemas/sql/09_l2_segment_registry.sql"
+    init_make_target: "init-l2-business-profile-tables"
+  a_track_signal:
+    cache_table: "a_track_signal_cache"
+    code_refresh: "diting.signal_layer.a_track_refresh.refresh_a_track_signals_for_symbols"
+    code_reader: "diting.moe.a_track_signal_reader"
+    news_scope_migration: "migrate-l2-news-content-scope"
+    design_ref: "03_原子目标与规约/Stage2_数据采集与存储/07_行业新闻与标的新闻分离存储_设计.md"
   verification_commands:
     - cmd: "make ingest-test"
       cwd_ref: "repo_i"
