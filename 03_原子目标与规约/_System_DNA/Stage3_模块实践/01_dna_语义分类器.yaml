@@ -2,7 +2,7 @@
 # 语义详见 _System_DNA/core_modules/dna_module_a.yaml
 stage_id: "stage3_01"
 name: "Module A 语义分类器"
-design_doc: "03_原子目标与规约/Stage3_模块实践/01_A轨_语义分类器_设计.md"
+design_doc: "03_原子目标与规约/Stage3_模块实践/01_内容理解与语义分类_设计.md"
 l4_practice_doc: "04_阶段规划与实践/Stage3_模块实践/01_语义分类器_实践.md"
 work_dir:
   type: "repo_i"

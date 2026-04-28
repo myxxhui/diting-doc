@@ -1,7 +1,7 @@
 # Stage1-03 基础设施 ECS 与 K3s 就绪
 
 > [!NOTE] **[TRACEBACK] 步骤锚点**
-> - **原子规约**: [_共享规约/02_三位一体仓库规约](../../03_原子目标与规约/_共享规约/02_三位一体仓库规约.md)、[02_基础设施与部署规约](../../03_原子目标与规约/开发与交付/02_基础设施与部署规约.md)
+> - **原子规约**: [_共享规约/02_三位一体仓库规约](../../03_原子目标与规约/_共享规约/02_三位一体仓库规约.md)、[02_基础设施与部署规约](../../03_原子目标与规约/节奏与交付/02_基础设施与部署规约.md)
 > - **DNA stage_id**: `stage1_03`
 > - **本步设计文档**: [03_基础设施ECS与K3s设计](../../03_原子目标与规约/Stage1_仓库与骨架/03_基础设施ECS与K3s设计.md#design-stage1-03-exit)
 > - **本步 DNA 文件**: [dna_stage1_03.yaml](../../03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/dna_stage1_03.yaml)
@@ -84,7 +84,7 @@ cp deploy-engine/config/examples/default-dev.yaml.example config/diting-dev.yaml
 
 ### 任务与规约引用
 
-必读：03_原子目标与规约/_共享规约/02_三位一体仓库规约.md、03_原子目标与规约/开发与交付/02_基础设施与部署规约.md。diting-infra 的 Makefile 中 `CONFIG_ROOT` 指向扁平目录 `config`，project/env 与 deploy.yaml 中 `deployment_id` 一致（如 diting、dev）。
+必读：03_原子目标与规约/_共享规约/02_三位一体仓库规约.md、03_原子目标与规约/节奏与交付/02_基础设施与部署规约.md。diting-infra 的 Makefile 中 `CONFIG_ROOT` 指向扁平目录 `config`，project/env 与 deploy.yaml 中 `deployment_id` 一致（如 diting、dev）。
 
 <a id="l4-stage1-03-exit"></a>
 ## 验证与准出
@@ -118,4 +118,4 @@ cp deploy-engine/config/examples/default-dev.yaml.example config/diting-dev.yaml
 
 - **回退目标**：执行 Down 回收后，回退到上一阶段最后一步（Stage1-02 准出）。
 - **重试**：建议重试上限 3 次；仍失败则执行 Down 后按回退目标处理。
-- **临时跳过**：须架构师或项目负责人审批；具体回退操作见 [03_ 工作流详细规划 八、失败与回退策略](../../03_原子目标与规约/开发与交付/03_项目全功能开发测试实践工作流详细规划.md)。
+- **临时跳过**：须架构师或项目负责人审批；具体回退操作见 [03_ 工作流详细规划 八、失败与回退策略](../../03_原子目标与规约/节奏与交付/03_项目全功能开发测试实践工作流详细规划.md)。

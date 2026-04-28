@@ -7,7 +7,7 @@
 | dna_module_a.yaml | Module A 语义分类器 |
 | dna_module_b.yaml | Module B 量化扫描引擎 |
 | dna_module_c.yaml | Module C MoE 议会 |
-| dna_module_d.yaml | Module D 判官 |
+| dna_module_d.yaml | Module D 决策中枢 |
 | dna_module_e.yaml | Module E 风控盾 |
 | dna_module_f.yaml | Module F 执行网关 |
 

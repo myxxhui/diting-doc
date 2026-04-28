@@ -1,6 +1,6 @@
 # B 模块 · 胜率/盈亏比变量化最佳实践
 
-> 设计目标：将 B 模块的 `win_rate_prediction`、`payoff_ratio` 做成**可配置变量**，**默认关闭**；开启时由配置或回测统计提供，供 Module D 判官凯利计算使用。
+> 设计目标：将 B 模块的 `win_rate_prediction`、`payoff_ratio` 做成**可配置变量**，**默认关闭**；开启时由配置或回测统计提供，供 Module D 决策中枢凯利计算使用。
 
 ## 一、设计原则
 

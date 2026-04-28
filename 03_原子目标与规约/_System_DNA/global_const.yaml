@@ -111,8 +111,8 @@ tech_stack:
   cache: "Redis"
   message_queue: "RabbitMQ"
 
-# 产品范围与路线图（L2 产品设计维度 → L3 01_需求与产品范围）
-# 引用：03_原子目标与规约/产品设计/01_需求与产品范围.md
+# 产品范围与路线图（L2 产品范围与优先级 → L3 01_需求与产品范围）
+# 引用：03_原子目标与规约/平台与产品/01_需求与产品范围.md
 product_scope:
   phases:
     - id: "Phase0-Infra"
@@ -158,7 +158,7 @@ product_scope:
           l5_anchor: "l5-mod-C"
         - step_id: "04"
           l4_doc_name: "04_ModuleD"
-          delivery_scope: "Module D 判官，四项 100%"
+          delivery_scope: "Module D 决策中枢，四项 100%"
           l5_anchor: "l5-mod-D"
         - step_id: "05"
           l4_doc_name: "05_ModuleE"
@@ -169,9 +169,9 @@ product_scope:
           delivery_scope: "Module F 执行网关，四项 100%；全链路 A→F 验证"
           l5_anchor: "l5-mod-F"
     - id: "Phase1-xxx"
-      goal: "核心链路最小可跑通：量化信号 → 判官 → 风控占位"
+      goal: "核心链路最小可跑通：研究信号 → 决策中枢 → 风控占位"
       lifecycle_stage: "阶段 1 + 可选 1b（Mock）+ 阶段 2"
-      modules: "Module A/B 骨架 + Module D 判官最小闭环 + Module E 占位"
+      modules: "Module A/B 骨架 + Module D 决策中枢最小闭环 + Module E 占位"
       steps:
         - step_id: "01"
           l4_doc_name: "01_ModuleA_B骨架与接口"
@@ -181,11 +181,11 @@ product_scope:
           l5_acceptance_criterion: "Module A/B 目录与接口存在，量化信号可产出"
           verification_method: "单测或占位通过、接口契约满足；由 Phase1 01_ 准出时更新本行"
         - step_id: "02"
-          l4_doc_name: "02_ModuleD判官最小闭环"
-          delivery_scope: "判官投票+Kelly+Alpha 输出与 03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md 一致"
+          l4_doc_name: "02_ModuleD决策最小闭环"
+          delivery_scope: "决策投票与 Alpha 输出链路满足 03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md 的主约束"
           exit_criteria: "Table-Driven 单测、边界覆盖"
           l5_anchor: "l5-func-02"
-          l5_acceptance_criterion: "判官投票+Kelly+Alpha 输出与 03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md 一致"
+          l5_acceptance_criterion: "决策投票与 Alpha 输出链路满足 03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md 的主约束"
           verification_method: "Table-Driven 单测、边界覆盖；由 Phase1 02_ 准出时更新本行"
         - step_id: "03"
           l4_doc_name: "03_ModuleE风控占位"
@@ -202,7 +202,7 @@ product_scope:
           l5_acceptance_criterion: "A→B→D→E 最小路径可跑通，Mock/Table-Driven 可验证"
           verification_method: "集成测试或主路径执行；由 Phase1 04_ 准出时更新本行"
     - id: "Phase2-xxx"
-      goal: "MoE 议会与执行网关接入，回测/仿真可验证"
+      goal: "MoE 议会与执行网关接入，评测/仿真可验证"
       lifecycle_stage: "阶段 3 + 阶段 4"
       modules: "Module C 议会、Module F 执行网关"
       steps:
@@ -221,16 +221,16 @@ product_scope:
           l5_acceptance_criterion: "Broker 抽象与占位/仿真实现，E→F 衔接"
           verification_method: "单测或 place_order 调用验证；由 Phase2 02_ 准出时更新本行"
         - step_id: "03"
-          l4_doc_name: "03_研产同构与回测仿真"
-          delivery_scope: "Docker/K3s 下回测或仿真路径跑通"
-          exit_criteria: "回测/仿真任务成功、结果可判定"
+          l4_doc_name: "03_评测一致性与仿真验证"
+          delivery_scope: "Docker/K3s 下评测或仿真路径跑通"
+          exit_criteria: "评测/仿真任务成功、结果可判定"
           l5_anchor: "l5-func-07"
-          l5_acceptance_criterion: "Docker/K3s 下回测或仿真路径跑通"
-          verification_method: "回测/仿真任务成功、结果可判定；由 Phase2 03_ 准出时更新本行"
+          l5_acceptance_criterion: "Docker/K3s 下评测或仿真路径跑通"
+          verification_method: "评测/仿真任务成功、结果可判定；由 Phase2 03_ 准出时更新本行"
     - id: "Phase3-xxx"
       goal: "优化与扩展（多策略池、可观测性、成本治理等）"
       lifecycle_stage: "阶段 3、4"
-      modules: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/产品设计/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
+      modules: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/平台与产品/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
       steps:
         - step_id: "01"
           l4_doc_name: "01_可观测性与健康检查"
@@ -248,7 +248,7 @@ product_scope:
           verification_method: "配置读取与熔断路径验证；由 Phase3 02_ 准出时更新本行"
         - step_id: "03"
           l4_doc_name: "03_多策略与扩展"
-          delivery_scope: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/产品设计/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
+          delivery_scope: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/平台与产品/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
           exit_criteria: "按 Phase3 03_ 约定"
           l5_anchor: null
           l5_acceptance_criterion: null
@@ -262,11 +262,11 @@ product_scope:
           verification_method: "入口条件核对、05_成功标识与验证/02_验收标准.md 表补齐"
   priority_rules:
     p0: "生存底线相关：风控盾（Module E）、密钥与合规、回撤与止损"
-    p1: "认知边界与复利：量化信号与判官闭环（A/B/D）、MoE 议会（C）、研产同构"
-  l1_mapping_ref: "03_原子目标与规约/产品设计/01_需求与产品范围.md 第四节"
+    p1: "认知边界与复利：研究信号与决策闭环、MoE 议会、评测一致性与发布闭环"
+  l1_mapping_ref: "03_原子目标与规约/平台与产品/01_需求与产品范围.md 第四节"
 
-# 成本治理（L2 07_成本治理维度 → L3 10_运营治理与灾备等）
-# 规约文档（AI 可读）：02_战略维度/产品设计/07_成本治理维度.md；03_原子目标与规约/_共享规约/06_动态配置中心规约.md、09_核心模块架构规约.md、10_运营治理与灾备规约.md 引用本子树
+# 成本治理（L2 07_成本治理与资源效率 → L3 10_运营治理与灾备等）
+# 规约文档（AI 可读）：02_战略维度/平台与产品/07_成本治理与资源效率.md；03_原子目标与规约/_共享规约/06_动态配置中心规约.md、09_核心模块架构规约.md、10_运营治理与灾备规约.md 引用本子树
 cost_governance:
   used_by_l4_stages: ["stage3_01", "stage5_02", "stage5_03"]
   token_budget:
@@ -321,15 +321,15 @@ deployable_units:
     scale_to_zero: null
     workflow_stages: ["stage3_03"]
   hot_path_def:
-    name: "热路径 D+E+F（判官+风控+执行）"
+    name: "热路径 D+E+F（决策+风控+执行）"
     image_name: "diting-hot-path"
     dockerfile_path: "diting-core/docker/hot_path"  # 单镜像单进程
     chart_path: "diting-infra/charts/hot_path"
     scale_to_zero: false
     workflow_stages: ["stage3_04"]  # 热路径 D+E+F 一步完成，同镜像
 
-# 数据架构与分层存储（L2 03_数据架构与分层存储维度 → L3 07_数据版本控制等）
-# 规约文档（AI 可读）：02_战略维度/产品设计/03_数据架构与分层存储维度.md；03_原子目标与规约/_共享规约/07_数据版本控制规约.md
+# 数据架构与分层存储（L2 03_数据体系与分层存储 → L3 07_数据版本控制等）
+# 规约文档（AI 可读）：02_战略维度/平台与产品/03_数据体系与分层存储.md；03_原子目标与规约/_共享规约/07_数据版本控制规约.md
 data_architecture:
   l1_hot:
     timescaledb:
@@ -419,13 +419,13 @@ data_ingestion:
 # 战略维度与 DNA 映射（主责 L3 见 06_追溯与审计/00_L2_L3_DNA_映射.md）
 strategic_dimensions:
   dim_00_product_design:
-    doc: "02_战略维度/产品设计/01_产品设计维度.md"
+    doc: "02_战略维度/平台与产品/01_产品范围与优先级.md"
     primary_l3_docs:
-      - "03_原子目标与规约/产品设计/01_需求与产品范围.md"
+      - "03_原子目标与规约/平台与产品/01_需求与产品范围.md"
     dna_nodes:
       - "product_scope"
   dim_01_tech_and_arch:
-    doc: "02_战略维度/产品设计/02_技术栈与架构维度.md"
+    doc: "02_战略维度/平台与产品/02_平台技术栈与系统架构.md"
     primary_l3_docs:
       - "03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md"
     dna_nodes:
@@ -434,7 +434,7 @@ strategic_dimensions:
       - "core_modules"
       - "abstraction_layer"
   dim_02_data_arch_and_storage:
-    doc: "02_战略维度/产品设计/03_数据架构与分层存储维度.md"
+    doc: "02_战略维度/平台与产品/03_数据体系与分层存储.md"
     primary_l3_docs:
       - "03_原子目标与规约/_共享规约/07_数据版本控制规约.md"
     dna_nodes:
@@ -443,7 +443,7 @@ strategic_dimensions:
       - "governance_and_dr.disaster_recovery.backup_strategy"
       - "traceability_and_audit.data_traceability"
   dim_03_production_and_observability:
-    doc: "02_战略维度/产品设计/04_生产保障与可观测性维度.md"
+    doc: "02_战略维度/平台与产品/04_可观测性与运行保障.md"
     primary_l3_docs:
       - "03_原子目标与规约/_共享规约/08_心跳协议与健康检查规约.md"
     dna_nodes:
@@ -451,7 +451,7 @@ strategic_dimensions:
       - "heartbeat_protocol"
       - "production_requirements.deployment"
   dim_04_security_and_secrets:
-    doc: "02_战略维度/产品设计/05_安全与机密治理维度.md"
+    doc: "02_战略维度/平台与产品/05_安全隔离与机密治理.md"
     primary_l3_docs:
       - "03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md"
     dna_nodes:
@@ -459,7 +459,7 @@ strategic_dimensions:
       - "success_markers.security_acceptance"
       - "traceability_and_audit.audit_logging"
   dim_05_research_production_isomorphism:
-    doc: "02_战略维度/产品设计/06_研产同构维度.md"
+    doc: "02_战略维度/平台与产品/06_评测一致性与发布闭环.md"
     primary_l3_docs:
       - "03_原子目标与规约/_共享规约/05_接口抽象层规约.md"
     dna_nodes:
@@ -468,7 +468,7 @@ strategic_dimensions:
       - "environments"
       - "abstraction_layer"
   dim_06_cost_governance:
-    doc: "02_战略维度/产品设计/07_成本治理维度.md"
+    doc: "02_战略维度/平台与产品/07_成本治理与资源效率.md"
     primary_l3_docs:
       - "03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md"
     dna_nodes:
@@ -476,7 +476,7 @@ strategic_dimensions:
       - "governance_and_dr.disaster_recovery"
       - "production_requirements.performance"
   dim_07_broker_decoupling_and_redundancy:
-    doc: "02_战略维度/产品设计/08_经纪商解耦与冗余维度.md"
+    doc: "02_战略维度/平台与产品/08_外部系统接入与边界抽象.md"
     primary_l3_docs:
       - "03_原子目标与规约/_共享规约/05_接口抽象层规约.md"
     dna_nodes:
@@ -484,9 +484,9 @@ strategic_dimensions:
       - "core_modules.module_f_execution_gateway"
       - "governance_and_dr.compliance.allowed_channels"
   dim_08_dev_and_delivery:
-    doc: "02_战略维度/开发与交付/01_开发与交付流程维度.md"
+    doc: "02_战略维度/节奏与交付/01_八个月开发与交付节奏.md"
     primary_l3_docs:
-      - "03_原子目标与规约/开发与交付/01_开发生命周期与实践流程规约.md"
+      - "03_原子目标与规约/节奏与交付/01_开发生命周期与实践流程规约.md"
     dna_nodes:
       - "_System_DNA/dna_dev_workflow.yaml"
 
@@ -773,7 +773,7 @@ core_modules:
         domain_tag: "UNKNOWN"
   
   module_d_gavel:
-    purpose: "决策中枢 - 判官"
+    purpose: "决策中枢"
     voting_mechanism:
       rule: "Quant (Pass) + Expert (Strong Buy) = 有效信号"
       quant_threshold: 70  # 技术面得分阈值
@@ -1336,7 +1336,7 @@ traceability_and_audit:
         date: "2026-02-11"
         traceability:
           l1: "可追溯性"
-          l2: "技术栈与架构维度"
+          l2: "平台技术栈与系统架构"
           l3: "三位一体仓库规约"
       
       adr_002:
@@ -1345,7 +1345,7 @@ traceability_and_audit:
         date: "2026-02-11"
         traceability:
           l1: "不可能三角"
-          l2: "技术栈与架构维度"
+          l2: "平台技术栈与系统架构"
           l3: "核心公式与MoE架构规约"
       
       adr_003:
@@ -1354,7 +1354,7 @@ traceability_and_audit:
         date: "2026-02-11"
         traceability:
           l1: "成本控制"
-          l2: ["成本治理维度", "数据架构与分层存储维度"]
+          l2: ["成本治理与资源效率", "数据体系与分层存储"]
           l3: "运营治理与灾备规约"
       
       adr_004:
@@ -1363,7 +1363,7 @@ traceability_and_audit:
         date: "2026-02-11"
         traceability:
           l1: "合规性"
-          l2: "安全与机密治理维度"
+          l2: "安全隔离与机密治理"
           l3: "核心模块架构规约"
       
       adr_005:
@@ -1372,7 +1372,7 @@ traceability_and_audit:
         date: "2026-02-11"
         traceability:
           l1: "不可能三角"
-          l2: "技术栈与架构维度"
+          l2: "平台技术栈与系统架构"
           l3: "核心模块架构规约"
   
   # 审计日志体系

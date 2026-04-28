@@ -9,7 +9,7 @@ work_dir:
   description: "diting-core"
 delivery_scope: "news_content 增加 scope/scope_id；全市场(market)、行业(industry)、标的(symbol) 三条采集路径；消费按 scope 查询；信号层 SegBpNewsAdapter 可按 segment 层级选 industry/symbol 新闻"
 exit_criteria: "Schema 迁移可执行；write_news_content_batch 支持 scope/scope_id；采集逻辑支持 market/industry/symbol 写入；消费方可按 scope 查询；与 11_、12_ 同源"
-consumes: ["Stage2-02 准出", "Stage2-06_B轨 信号层准出（可选，用于适配器扩展）"]
+consumes: ["Stage2-02 准出", "Stage2-06 准出（可选，用于 Segment 信号层适配器扩展）"]
 artifacts: ["news_content scope/scope_id 列及索引", "迁移脚本", "run_ingest_news 行业路径", "write_news_content_batch scope 支持", "SegBpNewsAdapter scope 查询扩展"]
 logic_fill_design_refs:
   - "03_原子目标与规约/Stage2_数据采集与存储/07_行业新闻与标的新闻分离存储_设计.md#design-stage2-07-schema"

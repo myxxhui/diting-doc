@@ -1,13 +1,22 @@
 # L3 · 原子目标与规约
 
 > [!NOTE] **[TRACEBACK] 原子规约锚点**
-> - **顶层概念**: [一句话定义与核心价值](../01_顶层概念/01_一句话定义与核心价值.md)
+> - **顶层概念**: [项目定义与核心价值](../01_顶层概念/01_项目定义与核心价值.md)
 > - **战略维度**: [战略维度目录](../02_战略维度/)
 > - **本文档**: L3 层级，定义原子能力规约与技术规约
 
 ## 规约说明
 
-L3 层级负责定义**原子能力规约、技术规约、架构共识**，为 L4 阶段实践提供明确的约束与标准。本目录下 **开发与交付/**、**产品设计/** 为按轴线划分的子目录，分别存放 01_开发生命周期与实践流程规约、01_需求与产品范围；其余规约位于本目录根下。
+L3 层级负责定义**产品系统的具体执行规约**，承接 L1/L2 的产品目标与战略约束，并为 L4 阶段实践提供明确标准。
+
+当前 L3 的组织原则如下：
+
+- `平台与产品/`：承接产品范围、能力范围、分层目标与执行边界
+- `节奏与交付/`：承接 8 个月节奏、开发生命周期、实践顺序与 L4 执行方式
+- `_共享规约/`：承接跨 Stage 的核心架构、接口、数据、运行治理与模块边界
+- `_System_DNA/`：承接机器可读的真相源，所有路径、阶段、设计与 L4/L5 锚点以此为准
+
+历史 `B轨/`、`C轨/` 与 Stage 内轨道命名内容已收口完成。仍有工程价值的内容已并入 `平台与产品/`、`_共享规约/09_核心模块架构规约.md`、`_共享规约/11_数据采集与输入层规约.md`、`_共享规约/12_右脑数据支撑与Segment规约.md` 等主规约。
 
 **L2 维度与 L3/DNA 对应关系**：见 [06_追溯与审计/00_L2_L3_DNA_映射](../06_追溯与审计/00_L2_L3_DNA_映射.md)，该表为 L2 战略维度 → 主责 L3 规约 → DNA 子树的唯一总表。
 
@@ -56,10 +65,11 @@ flowchart LR
 | <a id="l3-dna-10"></a>l3-dna-10 | `09_核心模块架构规约.md` | `core_modules`, `production_requirements` | Module A–F 的输入/输出/规则，以及生产工业级要求（容错、性能、监控、安全、测试、部署、错误处理）。**键名约定**：文档与 L4 中可简写为 `module_a`、`module_b` 等，对应 DNA 键 `core_modules.module_a_semantic_classifier`、`core_modules.module_b_quant_engine` 等（见 global_const.yaml）。 |
 | <a id="l3-dna-11"></a>l3-dna-11 | `10_运营治理与灾备规约.md` | `governance_and_dr` | 合规性策略、故障分级、备份/恢复策略、BCP 与 DR 演练、运营监控 |
 | <a id="l3-dna-12"></a>l3-dna-12 | `01_开发生命周期与实践流程规约.md` | `_System_DNA/dna_dev_workflow.yaml`（`workflow_stages`, `module_to_stages`） | 从零到可提交的开发生命周期（骨架期、逻辑填充期、Mock 验证、Docker 期、K3s 测试开发期）、与三级流水线衔接、准入准出与过渡时机；L4 执行顺序以 workflow_stages 为准 |
-| <a id="l3-dna-13"></a>l3-dna-13 | `01_需求与产品范围.md` | `product_scope` | Phase 划分与阶段目标、功能范围与优先级、与 L1 映射、各 Phase 验收价值 |
-| <a id="l3-dna-14"></a>l3-dna-14 | `Stage3_模块实践/03_A轨_持仓与每日信号复核规约.md` | `core_modules.a_track_position_lifecycle`、[_System_DNA/core_modules/dna_a_track_position_lifecycle.yaml](_System_DNA/core_modules/dna_a_track_position_lifecycle.yaml)（含 `minimal_data_interfaces`） | A 轨持仓锚定、每日 B 复核、止损只紧不松；E 只读持仓/只读 last price 见规约 §7；实现见 `diting-core/diting/position_lifecycle.py` |
+| <a id="l3-dna-13"></a>l3-dna-13 | `01_需求与产品范围.md` | `product_scope` | 产品目标、功能范围与优先级、阶段验收价值与产品门禁边界 |
+| <a id="l3-dna-13b"></a>l3-dna-13b | `02_产品分层设计与双目标实现路径规约.md` | `product_scope`（分层实施与验收约束） | Layer5→Layer1 的目标/边界/输入输出/指标/验收/实现路径与执行证据约束 |
+| <a id="l3-dna-14"></a>l3-dna-14 | `Stage3_模块实践/03_研究对象状态与每日复核规约.md` | `core_modules.a_track_position_lifecycle`、[_System_DNA/core_modules/dna_a_track_position_lifecycle.yaml](_System_DNA/core_modules/dna_a_track_position_lifecycle.yaml)（含 `minimal_data_interfaces`） | A 轨持仓锚定、每日 B 复核、止损只紧不松；E 只读持仓/只读 last price 见规约 §7；实现见 `diting-core/diting/position_lifecycle.py` |
 
-**B 轨专项规约**（与 A 轨同列各 Stage，命名区分）：设计总览见 [B轨/README](B轨/README.md)、[01_B轨系统设计](B轨/01_B轨系统设计.md) 等；DNA 见 `_System_DNA/B轨/dna_b_track.yaml`。L4 实践已并入各 Stage：Stage2 [01_B轨_数据与采集_实践](../04_阶段规划与实践/Stage2_数据采集与存储/01_B轨_数据与采集_实践.md)、Stage3 [01_B轨_语义与候选_实践](../04_阶段规划与实践/Stage3_模块实践/01_B轨_语义与候选_实践.md)、Stage4 [01_B轨_共识与执行_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/01_B轨_共识与执行_实践.md)；索引表已含 stage2_b01、stage3_b01、stage4_b01 行。
+**历史专项目录说明**：`B轨/`、`C轨/` 和 `_System_DNA/B轨/` 已完成收敛删除；后续不再新增任何轨道命名文件。
 
 > 当新增 L3 文档或扩展现有规约时，必须同步：  
 > 1）在 `_System_DNA/global_const.yaml` 中补充相应子树；  
@@ -81,7 +91,7 @@ flowchart LR
 | 02_dna_B模块策略.yaml | dna_module_b（策略语义） | B 模块策略设计/实践/验证/优化 |
 | 03_dna_量化扫描引擎.yaml | dna_module_b.yaml | Module B 量化扫描引擎（执行层） |
 | 04_dna_MoE议会.yaml | dna_module_c.yaml | Module C MoE 议会 |
-| 05_dna_热路径判官风控与执行.yaml | dna_module_d/e/f.yaml | 热路径 D+E+F |
+| 05_dna_决策风控与动作主链.yaml | dna_module_d/e/f.yaml | 热路径 D+E+F |
 | 02/03/05（B 输出 × 持仓） | [dna_a_track_position_lifecycle.yaml](_System_DNA/core_modules/dna_a_track_position_lifecycle.yaml) | A 轨持仓与每日信号复核（与 Module E 衔接） |
 | 06_dna_全链路验证.yaml | — | 全链路验证（无 core_modules 对应） |
 
@@ -95,24 +105,21 @@ flowchart LR
 | stage1_02 | [02_核心接口与Proto_设计](Stage1_仓库与骨架/02_核心接口与Proto_设计.md#design-stage1-02-exit) | [02_dna_核心接口与Proto](_System_DNA/Stage1_仓库与骨架/02_dna_核心接口与Proto.yaml) | [02_核心接口与Proto_实践](../04_阶段规划与实践/Stage1_仓库与骨架/02_核心接口与Proto_实践.md#l4-stage1-02-exit) | [l5-stage-stage1_02](../05_成功标识与验证/02_验收标准.md#l5-stage-stage1_02) |
 | stage1_03 | [03_基础设施ECS与K3s_设计](Stage1_仓库与骨架/03_基础设施ECS与K3s_设计.md#design-stage1-03-exit) | [03_dna_基础设施ECS与K3s](_System_DNA/Stage1_仓库与骨架/03_dna_基础设施ECS与K3s.yaml) | [03_基础设施ECS与K3s_实践](../04_阶段规划与实践/Stage1_仓库与骨架/03_基础设施ECS与K3s_实践.md#l4-stage1-03-exit) | [l5-stage-stage1_03](../05_成功标识与验证/02_验收标准.md#l5-stage-stage1_03) |
 | stage1_04 | [04_密钥与配置模板_设计](Stage1_仓库与骨架/04_密钥与配置模板_设计.md#design-stage1-04-exit) | [04_dna_密钥与配置模板](_System_DNA/Stage1_仓库与骨架/04_dna_密钥与配置模板.yaml) | [04_密钥与配置模板_实践](../04_阶段规划与实践/Stage1_仓库与骨架/04_密钥与配置模板_实践.md#l4-stage1-04-exit) | [l5-stage-stage1_04](../05_成功标识与验证/02_验收标准.md#l5-stage-stage1_04) |
-| stage2_01 | [01_A轨_基础设施与依赖_设计](Stage2_数据采集与存储/01_A轨_基础设施与依赖_设计.md#design-stage2-01-exit) | [01_dna_基础设施与依赖](_System_DNA/Stage2_数据采集与存储/01_dna_基础设施与依赖.yaml) | [01_A轨_基础设施与依赖_实践](../04_阶段规划与实践/Stage2_数据采集与存储/01_A轨_基础设施与依赖_实践.md#l4-stage2-01-exit) | [l5-stage-stage2_01](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_01) |
-| stage2_02 | [02_A轨_采集逻辑与Dockerfile_设计](Stage2_数据采集与存储/02_A轨_采集逻辑与Dockerfile_设计.md#design-stage2-02-exit) | [02_dna_采集逻辑与Dockerfile](_System_DNA/Stage2_数据采集与存储/02_dna_采集逻辑与Dockerfile.yaml) | [02_A轨_采集逻辑与Dockerfile_实践](../04_阶段规划与实践/Stage2_数据采集与存储/02_A轨_采集逻辑与Dockerfile_实践.md#l4-stage2-02-exit) | [l5-stage-stage2_02](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_02) |
-| stage2_03 | [03_A轨_本地测试与K3s连调_设计](Stage2_数据采集与存储/03_A轨_本地测试与K3s连调_设计.md#design-stage2-03-exit) | [03_dna_本地测试与K3s连调](_System_DNA/Stage2_数据采集与存储/03_dna_本地测试与K3s连调.yaml) | [03_A轨_本地测试与K3s连调_实践](../04_阶段规划与实践/Stage2_数据采集与存储/03_A轨_本地测试与K3s连调_实践.md#l4-stage2-03-exit) | [l5-stage-stage2_03](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_03) |
-| stage2_04 | [04_A轨_镜像打包与ACR推送_设计](Stage2_数据采集与存储/04_A轨_镜像打包与ACR推送_设计.md#design-stage2-04-exit) | [04_dna_镜像打包与ACR推送](_System_DNA/Stage2_数据采集与存储/04_dna_镜像打包与ACR推送.yaml) | [04_A轨_镜像打包与ACR推送_实践](../04_阶段规划与实践/Stage2_数据采集与存储/04_A轨_镜像打包与ACR推送_实践.md#l4-stage2-04-exit) | [l5-stage-stage2_04](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_04) |
-| stage2_05 | [05_A轨_采集模块部署与验收_设计](Stage2_数据采集与存储/05_A轨_采集模块部署与验收_设计.md#design-stage2-05-exit) | [05_dna_采集模块部署与验收](_System_DNA/Stage2_数据采集与存储/05_dna_采集模块部署与验收.yaml) | [05_A轨_采集模块部署与验收_实践](../04_阶段规划与实践/Stage2_数据采集与存储/05_A轨_采集模块部署与验收_实践.md#l4-stage2-05-exit) | [l5-stage-stage2_05](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_05) |
-| stage2_06 | [06_A轨_生产级数据要求_设计](Stage2_数据采集与存储/06_A轨_生产级数据要求_设计.md#design-stage2-06-exit) | [06_dna_生产级数据要求](_System_DNA/Stage2_数据采集与存储/06_dna_生产级数据要求.yaml) | [06_A轨_生产级数据要求_实践](../04_阶段规划与实践/Stage2_数据采集与存储/06_A轨_生产级数据要求_实践.md#l4-stage2-06-exit) | [l5-stage-stage2_06](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_06) |
-| stage2_b01 | [01_B轨_数据与采集_设计](Stage2_数据采集与存储/01_B轨_数据与采集_设计.md#design-stage2-b01-exit) | [_System_DNA/B轨/dna_b_track.yaml](_System_DNA/B轨/dna_b_track.yaml) | [01_B轨_数据与采集_实践](../04_阶段规划与实践/Stage2_数据采集与存储/01_B轨_数据与采集_实践.md#l4-stage2-b01-exit) | — |
-| stage3_01 | [01_A轨_语义分类器_设计](Stage3_模块实践/01_A轨_语义分类器_设计.md#design-stage3-01-exit) | [01_dna_语义分类器](_System_DNA/Stage3_模块实践/01_dna_语义分类器.yaml) | [01_A轨_语义分类器_实践](../04_阶段规划与实践/Stage3_模块实践/01_A轨_语义分类器_实践.md#l4-stage3-01-exit) | [l5-stage-stage3_01](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_01) |
-| stage3_02 | [02_A轨_B模块策略_设计](Stage3_模块实践/02_A轨_B模块策略_设计.md#design-stage3-02-exit) | [02_dna_B模块策略](_System_DNA/Stage3_模块实践/02_dna_B模块策略.yaml) | [02_A轨_B模块策略_实践](../04_阶段规划与实践/Stage3_模块实践/02_A轨_B模块策略_实践.md#l4-stage3-02-exit) | [l5-stage-stage3_02](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_02) |
-| stage3_03 | [03_A轨_量化扫描引擎_设计](Stage3_模块实践/03_A轨_量化扫描引擎_设计.md#design-stage3-03-exit) | [03_dna_量化扫描引擎](_System_DNA/Stage3_模块实践/03_dna_量化扫描引擎.yaml) | [03_A轨_量化扫描引擎_实践](../04_阶段规划与实践/Stage3_模块实践/03_A轨_量化扫描引擎_实践.md#l4-stage3-03-exit) | [l5-stage-stage3_03](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_03) |
-| stage3_04 | [04_A轨_MoE议会_设计](Stage3_模块实践/04_A轨_MoE议会_设计.md#design-stage3-04-exit) | [04_dna_MoE议会](_System_DNA/Stage3_模块实践/04_dna_MoE议会.yaml) | [04_A轨_MoE议会_实践](../04_阶段规划与实践/Stage3_模块实践/04_A轨_MoE议会_实践.md#l4-stage3-04-exit) | [l5-stage-stage3_04](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_04) |
-| stage3_05 | [05_A轨_热路径判官风控与执行_设计](Stage3_模块实践/05_A轨_热路径判官风控与执行_设计.md#design-stage3-05-exit) | [05_dna_热路径判官风控与执行](_System_DNA/Stage3_模块实践/05_dna_热路径判官风控与执行.yaml) | [05_A轨_热路径判官风控与执行_实践](../04_阶段规划与实践/Stage3_模块实践/05_A轨_热路径判官风控与执行_实践.md#l4-stage3-05-exit) | [l5-stage-stage3_05](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_05) |
-| stage3_06 | [06_A轨_全链路验证_设计](Stage3_模块实践/06_A轨_全链路验证_设计.md#design-stage3-06-exit) | [06_dna_全链路验证](_System_DNA/Stage3_模块实践/06_dna_全链路验证.yaml) | [06_A轨_全链路验证_实践](../04_阶段规划与实践/Stage3_模块实践/06_A轨_全链路验证_实践.md#l4-stage3-06-exit) | [l5-stage-stage3_06](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_06) |
-| stage3_b01 | [01_B轨_语义与候选_设计](Stage3_模块实践/01_B轨_语义与候选_设计.md#design-stage3-b01-exit) | [_System_DNA/B轨/dna_b_track.yaml](_System_DNA/B轨/dna_b_track.yaml) | [01_B轨_语义与候选_实践](../04_阶段规划与实践/Stage3_模块实践/01_B轨_语义与候选_实践.md#l4-stage3-b01-exit) | — |
-| stage4_01 | [01_A轨_ModuleC_MoE议会接入_设计](Stage4_MoE与执行网关/01_A轨_ModuleC_MoE议会接入_设计.md#design-stage4-01-exit) | [01_dna_ModuleC_MoE议会接入](_System_DNA/Stage4_MoE与执行网关/01_dna_ModuleC_MoE议会接入.yaml) | [01_A轨_ModuleC_MoE议会接入_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/01_A轨_ModuleC_MoE议会接入_实践.md#l4-stage4-01-exit) | [l5-stage-stage4_01](../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_01) |
-| stage4_02 | [02_A轨_ModuleF执行网关接入_设计](Stage4_MoE与执行网关/02_A轨_ModuleF执行网关接入_设计.md#design-stage4-02-exit) | [02_dna_ModuleF执行网关接入](_System_DNA/Stage4_MoE与执行网关/02_dna_ModuleF执行网关接入.yaml) | [02_A轨_ModuleF执行网关接入_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/02_A轨_ModuleF执行网关接入_实践.md#l4-stage4-02-exit) | [l5-stage-stage4_02](../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_02) |
-| stage4_03 | [03_A轨_回测或仿真验证_设计](Stage4_MoE与执行网关/03_A轨_回测或仿真验证_设计.md#design-stage4-03-exit) | [03_dna_回测或仿真验证](_System_DNA/Stage4_MoE与执行网关/03_dna_回测或仿真验证.yaml) | [03_A轨_回测或仿真验证_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/03_A轨_回测或仿真验证_实践.md#l4-stage4-03-exit) | [l5-stage-stage4_03](../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_03) |
-| stage4_b01 | [01_B轨_共识与执行_设计](Stage4_MoE与执行网关/01_B轨_共识与执行_设计.md#design-stage4-b01-exit) | [_System_DNA/B轨/dna_b_track.yaml](_System_DNA/B轨/dna_b_track.yaml) | [01_B轨_共识与执行_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/01_B轨_共识与执行_实践.md#l4-stage4-b01-exit) | — |
+| stage2_01 | [01_数据底座与基础依赖_设计](Stage2_数据采集与存储/01_数据底座与基础依赖_设计.md#design-stage2-01-exit) | [01_dna_基础设施与依赖](_System_DNA/Stage2_数据采集与存储/01_dna_基础设施与依赖.yaml) | [01_数据底座与基础依赖_实践](../04_阶段规划与实践/Stage2_数据采集与存储/01_数据底座与基础依赖_实践.md#l4-stage2-01-exit) | [l5-stage-stage2_01](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_01) |
+| stage2_02 | [02_采集逻辑与容器封装_设计](Stage2_数据采集与存储/02_采集逻辑与容器封装_设计.md#design-stage2-02-exit) | [02_dna_采集逻辑与Dockerfile](_System_DNA/Stage2_数据采集与存储/02_dna_采集逻辑与Dockerfile.yaml) | [02_采集逻辑与容器封装_实践](../04_阶段规划与实践/Stage2_数据采集与存储/02_采集逻辑与容器封装_实践.md#l4-stage2-02-exit) | [l5-stage-stage2_02](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_02) |
+| stage2_03 | [03_本地验证与K3s连调_设计](Stage2_数据采集与存储/03_本地验证与K3s连调_设计.md#design-stage2-03-exit) | [03_dna_本地测试与K3s连调](_System_DNA/Stage2_数据采集与存储/03_dna_本地测试与K3s连调.yaml) | [03_本地验证与K3s连调_实践](../04_阶段规划与实践/Stage2_数据采集与存储/03_本地验证与K3s连调_实践.md#l4-stage2-03-exit) | [l5-stage-stage2_03](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_03) |
+| stage2_04 | [04_镜像构建与仓库推送_设计](Stage2_数据采集与存储/04_镜像构建与仓库推送_设计.md#design-stage2-04-exit) | [04_dna_镜像打包与ACR推送](_System_DNA/Stage2_数据采集与存储/04_dna_镜像打包与ACR推送.yaml) | [04_镜像构建与仓库推送_实践](../04_阶段规划与实践/Stage2_数据采集与存储/04_镜像构建与仓库推送_实践.md#l4-stage2-04-exit) | [l5-stage-stage2_04](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_04) |
+| stage2_05 | [05_采集服务部署与验收_设计](Stage2_数据采集与存储/05_采集服务部署与验收_设计.md#design-stage2-05-exit) | [05_dna_采集模块部署与验收](_System_DNA/Stage2_数据采集与存储/05_dna_采集模块部署与验收.yaml) | [05_采集服务部署与验收_实践](../04_阶段规划与实践/Stage2_数据采集与存储/05_采集服务部署与验收_实践.md#l4-stage2-05-exit) | [l5-stage-stage2_05](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_05) |
+| stage2_06 | [06_生产级数据要求_设计](Stage2_数据采集与存储/06_生产级数据要求_设计.md#design-stage2-06-exit) | [06_dna_生产级数据要求](_System_DNA/Stage2_数据采集与存储/06_dna_生产级数据要求.yaml) | [06_生产级数据要求_实践](../04_阶段规划与实践/Stage2_数据采集与存储/06_生产级数据要求_实践.md#l4-stage2-06-exit) | [l5-stage-stage2_06](../05_成功标识与验证/02_验收标准.md#l5-stage-stage2_06) |
+| stage3_01 | [01_内容理解与语义分类_设计](Stage3_模块实践/01_内容理解与语义分类_设计.md#design-stage3-01-exit) | [01_dna_语义分类器](_System_DNA/Stage3_模块实践/01_dna_语义分类器.yaml) | [01_内容理解与语义分类_实践](../04_阶段规划与实践/Stage3_模块实践/01_内容理解与语义分类_实践.md#l4-stage3-01-exit) | [l5-stage-stage3_01](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_01) |
+| stage3_02 | [02_策略特征与规则引擎_设计](Stage3_模块实践/02_策略特征与规则引擎_设计.md#design-stage3-02-exit) | [02_dna_B模块策略](_System_DNA/Stage3_模块实践/02_dna_B模块策略.yaml) | [02_策略特征与规则引擎_实践](../04_阶段规划与实践/Stage3_模块实践/02_策略特征与规则引擎_实践.md#l4-stage3-02-exit) | [l5-stage-stage3_02](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_02) |
+| stage3_03 | [03_信号扫描与候选生成_设计](Stage3_模块实践/03_信号扫描与候选生成_设计.md#design-stage3-03-exit) | [03_dna_量化扫描引擎](_System_DNA/Stage3_模块实践/03_dna_量化扫描引擎.yaml) | [03_信号扫描与候选生成_实践](../04_阶段规划与实践/Stage3_模块实践/03_信号扫描与候选生成_实践.md#l4-stage3-03-exit) | [l5-stage-stage3_03](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_03) |
+| stage3_04 | [04_研究议会与Agent编排_设计](Stage3_模块实践/04_研究议会与Agent编排_设计.md#design-stage3-04-exit) | [04_dna_MoE议会](_System_DNA/Stage3_模块实践/04_dna_MoE议会.yaml) | [04_研究议会与Agent编排_实践](../04_阶段规划与实践/Stage3_模块实践/04_研究议会与Agent编排_实践.md#l4-stage3-04-exit) | [l5-stage-stage3_04](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_04) |
+| stage3_05 | [05_决策风控与动作主链_设计](Stage3_模块实践/05_决策风控与动作主链_设计.md#design-stage3-05-exit) | [05_dna_决策风控与动作主链](_System_DNA/Stage3_模块实践/05_dna_决策风控与动作主链.yaml) | [05_决策风控与动作主链_实践](../04_阶段规划与实践/Stage3_模块实践/05_决策风控与动作主链_实践.md#l4-stage3-05-exit) | [l5-stage-stage3_05](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_05) |
+| stage3_06 | [06_全链路验证与回归_设计](Stage3_模块实践/06_全链路验证与回归_设计.md#design-stage3-06-exit) | [06_dna_全链路验证](_System_DNA/Stage3_模块实践/06_dna_全链路验证.yaml) | [06_全链路验证与回归_实践](../04_阶段规划与实践/Stage3_模块实践/06_全链路验证与回归_实践.md#l4-stage3-06-exit) | [l5-stage-stage3_06](../05_成功标识与验证/02_验收标准.md#l5-stage-stage3_06) |
+| stage4_01 | [01_研究议会接入与服务化_设计](Stage4_MoE与执行网关/01_研究议会接入与服务化_设计.md#design-stage4-01-exit) | [01_dna_ModuleC_MoE议会接入](_System_DNA/Stage4_MoE与执行网关/01_dna_ModuleC_MoE议会接入.yaml) | [01_研究议会接入与服务化_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/01_研究议会接入与服务化_实践.md#l4-stage4-01-exit) | [l5-stage-stage4_01](../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_01) |
+| stage4_02 | [02_外部动作边界接入_设计](Stage4_MoE与执行网关/02_外部动作边界接入_设计.md#design-stage4-02-exit) | [02_dna_ModuleF执行网关接入](_System_DNA/Stage4_MoE与执行网关/02_dna_ModuleF执行网关接入.yaml) | [02_外部动作边界接入_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/02_外部动作边界接入_实践.md#l4-stage4-02-exit) | [l5-stage-stage4_02](../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_02) |
+| stage4_03 | [03_评测或仿真验证_设计](Stage4_MoE与执行网关/03_评测或仿真验证_设计.md#design-stage4-03-exit) | [03_dna_评测或仿真验证](_System_DNA/Stage4_MoE与执行网关/03_dna_评测或仿真验证.yaml) | [03_评测或仿真验证_实践](../04_阶段规划与实践/Stage4_MoE与执行网关/03_评测或仿真验证_实践.md#l4-stage4-03-exit) | [l5-stage-stage4_03](../05_成功标识与验证/02_验收标准.md#l5-stage-stage4_03) |
 | stage5_01 | [01_可观测性与日志指标_设计](Stage5_优化与扩展/01_可观测性与日志指标_设计.md#design-stage5-01-exit) | [01_dna_可观测性与日志指标](_System_DNA/Stage5_优化与扩展/01_dna_可观测性与日志指标.yaml) | [01_可观测性与日志指标_实践](../04_阶段规划与实践/Stage5_优化与扩展/01_可观测性与日志指标_实践.md#l4-stage5-01-exit) | [l5-stage-stage5_01](../05_成功标识与验证/02_验收标准.md#l5-stage-stage5_01) |
 | stage5_02 | [02_成本治理与Token熔断_设计](Stage5_优化与扩展/02_成本治理与Token熔断_设计.md#design-stage5-02-exit) | [02_dna_成本治理与Token熔断](_System_DNA/Stage5_优化与扩展/02_dna_成本治理与Token熔断.yaml) | [02_成本治理与Token熔断_实践](../04_阶段规划与实践/Stage5_优化与扩展/02_成本治理与Token熔断_实践.md#l4-stage5-02-exit) | [l5-stage-stage5_02](../05_成功标识与验证/02_验收标准.md#l5-stage-stage5_02) |
 | stage5_03 | [03_多策略池或配置扩展_设计](Stage5_优化与扩展/03_多策略池或配置扩展_设计.md#design-stage5-03-exit) | [03_dna_多策略池或配置扩展](_System_DNA/Stage5_优化与扩展/03_dna_多策略池或配置扩展.yaml) | [03_多策略池或配置扩展_实践](../04_阶段规划与实践/Stage5_优化与扩展/03_多策略池或配置扩展_实践.md#l4-stage5-03-exit) | [l5-stage-stage5_03](../05_成功标识与验证/02_验收标准.md#l5-stage-stage5_03) |
@@ -128,10 +135,9 @@ flowchart LR
 │   ├── Stage1_仓库与骨架/                  # 步骤级 DNA（01_dna_三位一体仓库～04_dna_密钥与配置模板）
 │   ├── Stage2_数据采集与存储/              # 步骤级 DNA（01_dna_基础设施与依赖～05_dna_采集模块部署与验收）
 │   ├── Stage3_模块实践/                    # 步骤级 DNA（01_dna_语义分类器～05_dna_全链路验证）
-│   ├── Stage4_MoE与执行网关/               # 步骤级 DNA（01_dna_ModuleC_MoE议会接入～03_dna_回测或仿真验证）
+│   ├── Stage4_MoE与执行网关/               # 步骤级 DNA（01_dna_ModuleC_MoE议会接入～03_dna_评测或仿真验证）
 │   ├── Stage5_优化与扩展/                  # 步骤级 DNA（01_dna_可观测性与日志指标～04_dna_Level1与L5验收对齐）
-│   ├── core_modules/                       # Module A～F 语义（dna_module_a～f）+ A 轨持仓复核 dna_a_track_position_lifecycle.yaml
-│   └── B轨/                                 # B 轨专项：01_B轨系统设计、02_数据与存储、03_共识与逻辑证伪；DNA 见 _System_DNA/B轨/dna_b_track.yaml
+│   └── core_modules/                       # Module A～F 语义与补充能力 DNA
 ├── _共享规约/                             # 跨轴线共享的规约文档（01～11 连续序号）
 │   ├── 01_核心公式与MoE架构规约.md
 │   ├── 02_三位一体仓库规约.md
@@ -144,11 +150,11 @@ flowchart LR
 │   ├── 09_核心模块架构规约.md
 │   ├── 10_运营治理与灾备规约.md
 │   └── 11_数据采集与输入层规约.md
-├── 开发与交付/
+├── 节奏与交付/
 │   ├── 01_开发生命周期与实践流程规约.md
 │   ├── 02_基础设施与部署规约.md
 │   └── 03_项目全功能开发测试实践工作流详细规划.md
-├── 产品设计/
+├── 平台与产品/
 │   └── 01_需求与产品范围.md
 ├── Stage1_仓库与骨架/ ～ Stage5_优化与扩展/
 └── _Design_Artifacts/                    # Proto 等设计产物
@@ -170,7 +176,7 @@ flowchart LR
 
 ### 4. 全链路通信协议矩阵
 - **文件**: [_共享规约/04_全链路通信协议矩阵.md](./_共享规约/04_全链路通信协议矩阵.md)
-- **内容**: Expert Protocol（专家辩论协议）、Verdict Protocol（判官裁决协议）、Execution Protocol（执行指令协议）、Risk Protocol（风控遥测协议）
+- **内容**: Expert Protocol（专家辩论协议）、Verdict Protocol（决策裁决协议/历史文档或写作「判官」仅作兼容）、Execution Protocol（执行指令协议）、Risk Protocol（风控遥测协议）
 
 ### 5. 接口抽象层规约
 - **文件**: [_共享规约/05_接口抽象层规约.md](./_共享规约/05_接口抽象层规约.md)
@@ -190,7 +196,7 @@ flowchart LR
 
 ### 9. 核心模块架构规约
 - **文件**: [_共享规约/09_核心模块架构规约.md](./_共享规约/09_核心模块架构规约.md)
-- **内容**: Module A（语义分类器）、Module B（量化扫描引擎）、Module C（MoE 议会）、Module D（判官）、Module E（风控盾）、Module F（执行网关）的详细架构规约
+- **内容**: Module A（语义分类器）、Module B（量化扫描引擎）、Module C（MoE 议会）、Module D（决策中枢）、Module E（风控盾）、Module F（执行网关）的详细架构规约
 
 ### 10. 运营治理与灾备规约
 - **文件**: [_共享规约/10_运营治理与灾备规约.md](./_共享规约/10_运营治理与灾备规约.md)
@@ -201,18 +207,22 @@ flowchart LR
 - **内容**: 数据源（行情、新闻、行业、财报）、采集任务与调度、写入 L1/L2/L3 路径与契约；与 07_、09_ 输入层衔接；为 Module A-F 真实数据验证提供前提
 
 ### 12. 开发生命周期与实践流程规约
-- **文件**: [01_开发生命周期与实践流程规约.md](./开发与交付/01_开发生命周期与实践流程规约.md)
+- **文件**: [01_开发生命周期与实践流程规约.md](./节奏与交付/01_开发生命周期与实践流程规约.md)
 - **内容**: 从零到可提交的开发生命周期（骨架期、逻辑填充期、Docker 期、K3s 测试开发期）、与三级流水线衔接、准入准出与过渡时机
 
 ### 13. 需求与产品范围规约
-- **文件**: [01_需求与产品范围.md](./产品设计/01_需求与产品范围.md)
-- **内容**: Phase 划分与阶段目标、功能范围与优先级（与 09 核心模块对应）、与 L1 不可能三角的映射、各 Phase 验收价值标准；与 01 规约配合（产品定范围，交付定流程）
+- **文件**: [01_需求与产品范围.md](./平台与产品/01_需求与产品范围.md)
+- **内容**: 产品目标、功能范围与优先级、阶段验收价值标准与产品门禁；与 01 规约配合（产品定范围，交付定流程）
+
+### 14. 产品分层实现路径规约
+- **文件**: [02_产品分层设计与双目标实现路径规约.md](./平台与产品/02_产品分层设计与双目标实现路径规约.md)
+- **内容**: 收敛 Layer5→Layer1 的产品目标、功能边界、输入输出、指标、验收、实现路径，并定义产品执行证据约束
 
 ## 规约类型
 
 ### 1. 能力规约
 
-定义每个原子能力（如：MoE 专家路由、动态凯利计算、风控拦截）的：
+定义每个原子能力（如：研究工作流、推理基础设施、运行时隔离、评测闭环）的：
 - 输入/输出接口（Protocol Buffers）
 - 业务规则（YAML 配置）
 - 异常处理（边界条件）
@@ -221,9 +231,9 @@ flowchart LR
 ### 2. 技术规约
 
 定义技术选型与约束：
-- 技术栈（Python 3.11+、DeepSeek-R1、Backtrader、K3s）
-- 架构模式（Neuro-Symbolic MoE、依赖倒置、接口抽象）
-- 数据模型（TimescaleDB、PostgreSQL、pgvector）
+- 技术栈（Python 3.11+、LangGraph、vLLM、K8s/K3s、pgvector）
+- 架构模式（工作流编排、依赖倒置、接口抽象、运行时隔离）
+- 数据模型（PostgreSQL、pgvector、对象存储、评测数据集）
 - 接口协议（Protocol Buffers、gRPC）
 
 ### 3. 架构共识

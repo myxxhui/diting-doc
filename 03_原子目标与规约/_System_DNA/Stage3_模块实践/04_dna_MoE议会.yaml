@@ -2,8 +2,8 @@
 # 语义详见 _System_DNA/core_modules/dna_module_c.yaml
 stage_id: "stage3_04"
 name: "Module C MoE 议会"
-design_doc: "03_原子目标与规约/Stage3_模块实践/04_A轨_MoE议会_设计.md"
-l4_practice_doc: "04_阶段规划与实践/Stage3_模块实践/04_A轨_MoE议会_实践.md"
+design_doc: "03_原子目标与规约/Stage3_模块实践/04_研究议会与Agent编排_设计.md"
+l4_practice_doc: "04_阶段规划与实践/Stage3_模块实践/04_研究议会与Agent编排_实践.md"
 work_dir:
   type: "repo_i"
   repo_ref: "repo_i"

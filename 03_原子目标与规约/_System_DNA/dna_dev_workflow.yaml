@@ -1,7 +1,7 @@
 # 开发工作流阶段与模块映射（单轨 Stage1～5）
 # 说明：L4 执行顺序来源于本文件 workflow_stages。
-# 规约文档（AI 可读）：03_原子目标与规约/开发与交付/01_开发生命周期与实践流程规约.md、03_原子目标与规约/产品设计/01_需求与产品范围.md
-# 2026-02 重构：双轨（00_交付流程步骤 + Phase）合并为单轨 Stage1～5
+# 规约文档（AI 可读）：03_原子目标与规约/节奏与交付/01_开发生命周期与实践流程规约.md、03_原子目标与规约/平台与产品/01_需求与产品范围.md
+# 2026-04 重构：历史交易导向阶段收敛为双目标 Stage1～5
 
 execution_order:
   - stage1_01
@@ -330,12 +330,12 @@ workflow_stages:
     artifacts: ["MoE 议会实现"]
 
   - stage_id: "stage3_05"
-    name: "热路径判官风控与执行"
+    name: "热路径决策风控与执行"
     l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "05_热路径判官风控与执行_实践.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/05_热路径判官风控与执行_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/05_dna_热路径判官风控与执行.yaml"
-    delivery_scope: "热路径 D+E+F 四项 100%；全链路 A→F 验证"
+    l4_step_doc: "05_决策风控与动作主链_实践.md"
+    design_doc: "03_原子目标与规约/Stage3_模块实践/05_决策风控与动作主链_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/05_dna_决策风控与动作主链.yaml"
+    delivery_scope: "热路径 D+E+F 四项 100%；研究到执行主链路验证"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
@@ -395,19 +395,19 @@ workflow_stages:
     artifacts: ["执行网关接入"]
 
   - stage_id: "stage4_03"
-    name: "回测或仿真验证"
+    name: "评测或仿真验证"
     l4_stage_dir: "Stage4_MoE与执行网关"
-    l4_step_doc: "03_回测或仿真验证_实践.md"
-    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/03_回测或仿真验证_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/03_dna_回测或仿真验证.yaml"
-    delivery_scope: "Docker/K3s 下回测或仿真路径跑通"
+    l4_step_doc: "03_评测或仿真验证_实践.md"
+    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/03_评测或仿真验证_设计.md"
+    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/03_dna_评测或仿真验证.yaml"
+    delivery_scope: "Docker/K3s 下评测或仿真路径跑通"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
       description: "diting-core"
     l5_stage_anchor: "l5-func-07"
     consumes: ["Stage4-02 准出"]
-    artifacts: ["回测/仿真验证", "Stage4 准出"]
+    artifacts: ["评测/仿真验证", "Stage4 准出"]
 
   # ----- Stage5 优化与扩展 -----
   - stage_id: "stage5_01"
@@ -446,7 +446,7 @@ workflow_stages:
     l4_step_doc: "03_多策略池或配置扩展_实践.md"
     design_doc: "03_原子目标与规约/Stage5_优化与扩展/03_多策略池或配置扩展_设计.md"
     dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/03_dna_多策略池或配置扩展.yaml"
-    delivery_scope: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/产品设计/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
+    delivery_scope: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/平台与产品/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
     work_dir:
       type: "repo_i"
       repo_ref: "repo_i"
@@ -498,7 +498,7 @@ deployable_units:
     first_docker_stage: "stage3_05"     # 热路径镜像在本步构建
     first_k3s_stage: "stage2_05"
 
-# Release bundle：一次发布包含的镜像列表，与 03_原子目标与规约/开发与交付/02_基础设施与部署规约.md 一致
+# Release bundle：一次发布包含的镜像列表，与 03_原子目标与规约/节奏与交付/02_基础设施与部署规约.md 一致
 release_bundle:
   description: "一次发布使用同一 tag 的全体可部署单元镜像"
   image_keys: ["ingestion", "module_a", "module_b", "module_c", "hot_path_def"]
@@ -523,7 +523,7 @@ module_to_stages:
     first_docker_stage: "stage2_04"
     first_k3s_stage: "stage2_05"
   module_d:
-    name: "Module D 判官（热路径）"
+    name: "Module D 决策中枢（热路径）"
     first_delivery_stage: "stage3_05"
     first_docker_stage: "stage3_05"
     first_k3s_stage: "stage2_05"

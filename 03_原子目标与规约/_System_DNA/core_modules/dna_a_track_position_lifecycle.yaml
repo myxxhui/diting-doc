@@ -1,5 +1,5 @@
 # DNA：A 轨持仓与每日 B 信号复核（执行侧可消费）
-# 规约文档：03_原子目标与规约/Stage3_模块实践/03_A轨_持仓与每日信号复核规约.md
+# 规约文档：03_原子目标与规约/Stage3_模块实践/03_研究对象状态与每日复核规约.md
 # 代码仓镜像：diting-core/config/a_track_position_lifecycle.yaml（键须与下述一致）
 
 a_track_position_lifecycle:

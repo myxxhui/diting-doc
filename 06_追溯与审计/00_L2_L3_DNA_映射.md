@@ -6,33 +6,39 @@
 
 - **主责 L3 规约**：每个 L2 维度有且仅有 1 份「主责」L3 文档；变更时优先更新该文档。
 - **DNA 根**：每个 L2 维度在 DNA 中有至少 1 个根级子树或独立文件作为该维度的配置真相源（`global_const.yaml` 根节点或 `dna_*.yaml`）。
-- **09_通俗易懂的逻辑链路图**：沟通用图表，不占主责 L3；与 L2/L3 一致，冲突时以 L3 为准。
+- **09_主业务与工程链路图**：沟通用图表，不占主责 L3；与 L2/L3 一致，冲突时以 L3 为准。
 
 ## 映射表
 
 | L2 维度 | 主责 L3 规约 | 辅 L3 规约（可选） | DNA 子树/文件 |
 |---------|--------------|--------------------|----------------|
-| [01_产品设计维度](../02_战略维度/产品设计/01_产品设计维度.md) | [01_需求与产品范围](../03_原子目标与规约/产品设计/01_需求与产品范围.md) | — | `product_scope` / `roadmap`（见 global_const） |
-| [02_技术栈与架构维度](../02_战略维度/产品设计/02_技术栈与架构维度.md) | [01_核心公式与MoE架构规约](../03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md) | 02_三位一体、09_核心模块架构规约 | `core_formula`, `constraints`, `tech_stack`, `trinity_repos`, `core_modules`, `abstraction_layer` |
-| [03_数据架构与分层存储维度](../02_战略维度/产品设计/03_数据架构与分层存储维度.md) | [07_数据版本控制规约](../03_原子目标与规约/_共享规约/07_数据版本控制规约.md) | 05_接口抽象层、09_核心模块、10_运营治理与灾备、11_数据采集与输入层 | `data_version_control`, `data_architecture`, `data_ingestion`（见 global_const） |
-| [04_生产保障与可观测性维度](../02_战略维度/产品设计/04_生产保障与可观测性维度.md) | [08_心跳协议与健康检查规约](../03_原子目标与规约/_共享规约/08_心跳协议与健康检查规约.md) | 09_核心模块、10_运营治理与灾备、03_架构设计共识 | `heartbeat_protocol`, `production_requirements.observability`, `production_requirements.deployment`（该维度无单一 DNA 根，以列举为准） |
-| [05_安全与机密治理维度](../02_战略维度/产品设计/05_安全与机密治理维度.md) | [10_运营治理与灾备规约](../03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md) | 02_三位一体、03_架构设计共识、开发与交付/02_基础设施与部署 | `governance_and_dr.compliance`, `trinity_repos.repo_a.secrets`, `success_markers.security_acceptance`, `traceability_and_audit.audit_logging` |
-| [06_研产同构维度](../02_战略维度/产品设计/06_研产同构维度.md) | [05_接口抽象层规约](../03_原子目标与规约/_共享规约/05_接口抽象层规约.md) | 02_三位一体、03_架构设计共识、07_数据版本控制、09_核心模块 | `abstraction_layer`, `architecture_consensus.gitflow`, `data_version_control` |
-| [07_成本治理维度](../02_战略维度/产品设计/07_成本治理维度.md) | [10_运营治理与灾备规约](../03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md) | 06_动态配置、09_核心模块 | `cost_governance`（见 global_const） |
-| [08_经纪商解耦与冗余维度](../02_战略维度/产品设计/08_经纪商解耦与冗余维度.md) | [05_接口抽象层规约](../03_原子目标与规约/_共享规约/05_接口抽象层规约.md) | 09_核心模块、10_运营治理与灾备 | `abstraction_layer.broker_driver`, `core_modules`（Module F）, `governance_and_dr.compliance.allowed_channels` |
-| [01_开发与交付流程维度](../02_战略维度/开发与交付/01_开发与交付流程维度.md) | [01_开发生命周期与实践流程规约](../03_原子目标与规约/开发与交付/01_开发生命周期与实践流程规约.md) | 02_基础设施与部署、03_项目全功能开发测试实践工作流详细规划 | `_System_DNA/dna_dev_workflow.yaml`（`workflow_stages`, `module_to_stages`） |
-| [02_落地操作顺序与协作战略](../02_战略维度/开发与交付/02_落地操作顺序与协作战略.md) | [03_项目全功能开发测试实践工作流详细规划](../03_原子目标与规约/开发与交付/03_项目全功能开发测试实践工作流详细规划.md) | 01_开发生命周期、02_基础设施与部署、04_全链路通信协议矩阵 | `_System_DNA/dna_dev_workflow.yaml` |
+| [01_产品范围与优先级](../02_战略维度/平台与产品/01_产品范围与优先级.md) | [01_需求与产品范围](../03_原子目标与规约/平台与产品/01_需求与产品范围.md) | — | `product_scope` / `roadmap`（见 global_const） |
+| [02_平台技术栈与系统架构](../02_战略维度/平台与产品/02_平台技术栈与系统架构.md) | [01_核心公式与MoE架构规约](../03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md) | 02_三位一体、09_核心模块架构规约 | `core_formula`, `constraints`, `tech_stack`, `trinity_repos`, `core_modules`, `abstraction_layer` |
+| [03_数据体系与分层存储](../02_战略维度/平台与产品/03_数据体系与分层存储.md) | [07_数据版本控制规约](../03_原子目标与规约/_共享规约/07_数据版本控制规约.md) | 05_接口抽象层、09_核心模块、10_运营治理与灾备、11_数据采集与输入层 | `data_version_control`, `data_architecture`, `data_ingestion`（见 global_const） |
+| [04_可观测性与运行保障](../02_战略维度/平台与产品/04_可观测性与运行保障.md) | [08_心跳协议与健康检查规约](../03_原子目标与规约/_共享规约/08_心跳协议与健康检查规约.md) | 09_核心模块、10_运营治理与灾备、03_架构设计共识 | `heartbeat_protocol`, `production_requirements.observability`, `production_requirements.deployment`（该维度无单一 DNA 根，以列举为准） |
+| [05_安全隔离与机密治理](../02_战略维度/平台与产品/05_安全隔离与机密治理.md) | [10_运营治理与灾备规约](../03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md) | 02_三位一体、03_架构设计共识、节奏与交付/02_基础设施与部署 | `governance_and_dr.compliance`, `trinity_repos.repo_a.secrets`, `success_markers.security_acceptance`, `traceability_and_audit.audit_logging` |
+| [06_评测一致性与发布闭环](../02_战略维度/平台与产品/06_评测一致性与发布闭环.md) | [05_接口抽象层规约](../03_原子目标与规约/_共享规约/05_接口抽象层规约.md) | 02_三位一体、03_架构设计共识、07_数据版本控制、09_核心模块 | `abstraction_layer`, `architecture_consensus.gitflow`, `data_version_control` |
+| [07_成本治理与资源效率](../02_战略维度/平台与产品/07_成本治理与资源效率.md) | [10_运营治理与灾备规约](../03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md) | 06_动态配置、09_核心模块 | `cost_governance`（见 global_const） |
+| [08_外部系统接入与边界抽象](../02_战略维度/平台与产品/08_外部系统接入与边界抽象.md) | [05_接口抽象层规约](../03_原子目标与规约/_共享规约/05_接口抽象层规约.md) | 09_核心模块、10_运营治理与灾备 | `abstraction_layer.broker_driver`, `core_modules`（Module F）, `governance_and_dr.compliance.allowed_channels` |
+| [01_八个月开发与交付节奏](../02_战略维度/节奏与交付/01_八个月开发与交付节奏.md) | [01_开发生命周期与实践流程规约](../03_原子目标与规约/节奏与交付/01_开发生命周期与实践流程规约.md) | 02_基础设施与部署、03_项目全功能开发测试实践工作流详细规划 | `_System_DNA/dna_dev_workflow.yaml`（`workflow_stages`, `module_to_stages`） |
+| [02_落地操作顺序与协作战略](../02_战略维度/节奏与交付/02_通用落地顺序与协作原则.md) | [03_项目全功能开发测试实践工作流详细规划](../03_原子目标与规约/节奏与交付/03_项目全功能开发测试实践工作流详细规划.md) | 01_开发生命周期、02_基础设施与部署、04_全链路通信协议矩阵 | `_System_DNA/dna_dev_workflow.yaml` |
+
+## 历史专项目录处理说明
+
+- 原 `B轨/`、`C轨/` 专项目录及 Stage 内「A轨/B轨」命名文件已删除或重命名；**不得**再以轨道名新增文档。
+- 能力语义已并入 `平台与产品/`、`_共享规约/09_核心模块架构规约.md`、`_共享规约/11_数据采集与输入层规约.md`、`_共享规约/12_右脑数据支撑与Segment规约.md` 等主责 L3。
+- 若旧链接或笔记仍写历史文件名，查阅时一律以本表「主责 L3 规约」列与对应 Stage 设计/实践文档为准。
 
 ## 可部署单元与运行形态
 
-实盘多服务部署时，**可部署单元**（数据采集与存储、Module A/B/C、热路径 D+E+F）见 [09_ 可部署单元与热路径](../03_原子目标与规约/_共享规约/09_核心模块架构规约.md#可部署单元与热路径)；DNA 定义见 `global_const.deployable_units` 与 `dna_dev_workflow.deployable_units`、`release_bundle`。**三种运行形态**（回测=单进程+历史数据、实盘=多服务、开发期连调=本地服务+远程 K3s+线上数据）见 [06_ 研产同构维度](../02_战略维度/产品设计/06_研产同构维度.md#53-三种运行形态)。
+实盘多服务部署时，**可部署单元**（数据采集与存储、Module A/B/C、热路径 D+E+F）见 [09_ 可部署单元与热路径](../03_原子目标与规约/_共享规约/09_核心模块架构规约.md#可部署单元与热路径)；DNA 定义见 `global_const.deployable_units` 与 `dna_dev_workflow.deployable_units`、`release_bundle`。**三种运行形态**（回测=单进程+历史数据、实盘=多服务、开发期连调=本地服务+远程 K3s+线上数据）见 [06_ 评测一致性与发布闭环](../02_战略维度/平台与产品/06_评测一致性与发布闭环.md#53-三种运行形态)。
 
 ## 说明
 
 - **L4 依赖引用**：L4 步骤引用依赖或语义时，仅引用**步骤级 DNA**（dna_stage*、core_modules/dna_module_*）及 `global_const`；规约级配置收敛至 global_const 各子树，L2↔L3 映射以 global_const#xxx 为准，不设独立 dna_01～dna_11 文件。
-- **product_scope / roadmap**：产品设计维度 DNA 根，在 global_const 中补全后本表无需改列名。
+- **product_scope / roadmap**：产品范围与优先级 DNA 根，在 global_const 中补全后本表无需改列名。
 - **data_architecture**：数据架构维度专用 DNA 根，在 global_const 中新增后与 data_version_control 并列引用。
-- **cost_governance**：成本治理维度专用 DNA 根，在 global_const 中新增。
+- **cost_governance**：成本治理与资源效率专用 DNA 根，在 global_const 中新增。
 - **04_生产保障与可观测性**：当前无单一 DNA 根，以多节点列举为准；可选后续新增 `production_assurance` 聚合子树。
 
 ## L3/DNA 变更对 L4 的影响

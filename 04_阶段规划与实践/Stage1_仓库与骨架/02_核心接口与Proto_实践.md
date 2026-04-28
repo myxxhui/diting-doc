@@ -52,13 +52,13 @@
 | 名称 | 作用/设计目标 | 验收 |
 |------|---------------|------|
 | **Proto** | | |
-| `expert.proto` | 规范 MoE 专家辩论输出（ExpertOpinion、认知边界、双轨分流） | □ |
-| `verdict.proto` | 判官裁决书（CouncilVerdict），下发执行层 | □ |
+| `expert.proto` | 规范 MoE 专家辩论输出（ExpertOpinion、认知边界、horizon/期限分流） | □ |
+| `verdict.proto` | 决策中枢裁决书（CouncilVerdict），下发执行层 | □ |
 | `order.proto` | 执行层与券商交互（TradeOrder、人工审核、幂等） | □ |
 | `classifier_output.proto` | 语义分类器输出（Domain Tag、置信度） | □ |
 | `quant_signal.proto` | 量化扫描输出（technical_score、strategy_source） | □ |
-| `trade_signal.proto` | 判官至执行层统一格式；核心公式 Alpha 输出形态 | □ |
-| `telemetry.proto` | 风控遥测（PortfolioState）：回撤监控、利润锁定线、支撑 A 轨生存底线 | □ |
+| `trade_signal.proto` | 决策中枢至执行层统一格式；核心公式 Alpha 输出形态 | □ |
+| `telemetry.proto` | 风控遥测（PortfolioState）：回撤监控、利润锁定线、支撑短周期风控底线 | □ |
 | **接口** | | |
 | `BrokerDriver` | 交易网关抽象：研产同构、经纪商解耦 | □ |
 | `CognitiveEngine` | 认知引擎抽象：模型切换、Mock 测试 | □ |
