@@ -1,0 +1,3 @@
+# diagrams 架构图脚本依赖（需配合系统 Graphviz：`dot` 在命令行可用）
+diagrams>=0.23.0
+graphviz>=0.20
