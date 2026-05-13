@@ -1,51 +1,67 @@
-# L2 战略维度 ↔ 主责 L3 规约 ↔ DNA 子树 映射表
+# 06 · L2 ↔ L3 ↔ DNA ↔ L4/L5 总映射
 
-> 本表为 L2/L3/DNA 三者对应关系的**唯一总表**。L2 维度变更时，须先更新主责 L3 文档，再同步对应 DNA 子树，最后检查 L4 引用。详见 [03_原子目标与规约/README 变更传播规则](../03_原子目标与规约/README.md)。
+> [!NOTE] **[TRACEBACK]**
+> - **L2**：[02_战略维度](../02_战略维度/00_双目标与战略维度关系.md)
+> - **L3**：[03_原子目标与规约](../03_原子目标与规约/README.md)
+> - **DNA**：[`_System_DNA/`](../03_原子目标与规约/_System_DNA/)
+> - **L4**：[04_阶段规划与实践](../04_阶段规划与实践/README.md)
+> - **L5**：[05_/02_验收标准](../05_成功标识与验证/02_验收标准.md)
 
-## 约定
+## 一、版本说明（2026-05-13 第 3 批）
 
-- **主责 L3 规约**：每个 L2 维度有且仅有 1 份「主责」L3 文档；变更时优先更新该文档。
-- **DNA 根**：每个 L2 维度在 DNA 中有至少 1 个根级子树或独立文件作为该维度的配置真相源（`global_const.yaml` 根节点或 `dna_*.yaml`）。
-- **09_主业务与工程链路图**：沟通用图表，不占主责 L3；与 L2/L3 一致，冲突时以 L3 为准。
+本表已**完全替换**旧 ABCD 模块映射，与新四大模块（极寒防御 / 纵深进攻 / 状态机监控 / 超级个体进化）+ 前端工程 + 共享平台基础对齐。
 
-## 映射表
+## 二、L2 战略维度 ↔ L3 模块 总映射
 
-| L2 维度 | 主责 L3 规约 | 辅 L3 规约（可选） | DNA 子树/文件 |
-|---------|--------------|--------------------|----------------|
-| [01_产品范围与优先级](../02_战略维度/平台与产品/01_产品范围与优先级.md) | [01_需求与产品范围](../03_原子目标与规约/平台与产品/01_需求与产品范围.md) | — | `product_scope` / `roadmap`（见 global_const） |
-| [02_平台技术栈与系统架构](../02_战略维度/平台与产品/02_平台技术栈与系统架构.md) | [01_核心公式与MoE架构规约](../03_原子目标与规约/_共享规约/01_核心公式与MoE架构规约.md) | 02_三位一体、09_核心模块架构规约 | `core_formula`, `constraints`, `tech_stack`, `trinity_repos`, `core_modules`, `abstraction_layer` |
-| [03_数据体系与分层存储](../02_战略维度/平台与产品/03_数据体系与分层存储.md) | [07_数据版本控制规约](../03_原子目标与规约/_共享规约/07_数据版本控制规约.md) | 05_接口抽象层、09_核心模块、10_运营治理与灾备、11_数据采集与输入层 | `data_version_control`, `data_architecture`, `data_ingestion`（见 global_const） |
-| [04_可观测性与运行保障](../02_战略维度/平台与产品/04_可观测性与运行保障.md) | [08_心跳协议与健康检查规约](../03_原子目标与规约/_共享规约/08_心跳协议与健康检查规约.md) | 09_核心模块、10_运营治理与灾备、03_架构设计共识 | `heartbeat_protocol`, `production_requirements.observability`, `production_requirements.deployment`（该维度无单一 DNA 根，以列举为准） |
-| [05_安全隔离与机密治理](../02_战略维度/平台与产品/05_安全隔离与机密治理.md) | [10_运营治理与灾备规约](../03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md) | 02_三位一体、03_架构设计共识、节奏与交付/02_基础设施与部署 | `governance_and_dr.compliance`, `trinity_repos.repo_a.secrets`, `success_markers.security_acceptance`, `traceability_and_audit.audit_logging` |
-| [06_评测一致性与发布闭环](../02_战略维度/平台与产品/06_评测一致性与发布闭环.md) | [05_接口抽象层规约](../03_原子目标与规约/_共享规约/05_接口抽象层规约.md) | 02_三位一体、03_架构设计共识、07_数据版本控制、09_核心模块 | `abstraction_layer`, `architecture_consensus.gitflow`, `data_version_control` |
-| [07_成本治理与资源效率](../02_战略维度/平台与产品/07_成本治理与资源效率.md) | [10_运营治理与灾备规约](../03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md) | 06_动态配置、09_核心模块 | `cost_governance`（见 global_const） |
-| [08_外部系统接入与边界抽象](../02_战略维度/平台与产品/08_外部系统接入与边界抽象.md) | [05_接口抽象层规约](../03_原子目标与规约/_共享规约/05_接口抽象层规约.md) | 09_核心模块、10_运营治理与灾备 | `abstraction_layer.broker_driver`, `core_modules`（Module F）, `governance_and_dr.compliance.allowed_channels` |
-| [01_八个月开发与交付节奏](../02_战略维度/节奏与交付/01_八个月开发与交付节奏.md) | [01_开发生命周期与实践流程规约](../03_原子目标与规约/节奏与交付/01_开发生命周期与实践流程规约.md) | 02_基础设施与部署、03_项目全功能开发测试实践工作流详细规划 | `_System_DNA/dna_dev_workflow.yaml`（`workflow_stages`, `module_to_stages`） |
-| [02_落地操作顺序与协作战略](../02_战略维度/节奏与交付/02_通用落地顺序与协作原则.md) | [03_项目全功能开发测试实践工作流详细规划](../03_原子目标与规约/节奏与交付/03_项目全功能开发测试实践工作流详细规划.md) | 01_开发生命周期、02_基础设施与部署、04_全链路通信协议矩阵 | `_System_DNA/dna_dev_workflow.yaml` |
+| L2 战略维度 | L3 模块（pillar） | L3 设计文档 | DNA 顶层 |
+|------------|------------------|------------|---------|
+| **防御战略**（Absolute Survival） | 极寒防御 | [03_/极寒防御/](../03_原子目标与规约/极寒防御/) | `global_const.yaml#cryo_guard_top` |
+| **进攻战略**（Unstructured Alpha Strike） | 纵深进攻 | [03_/纵深进攻/](../03_原子目标与规约/纵深进攻/) | `global_const.yaml#deep_strike_top` |
+| **持仓战略 + 演进战略观察面**（Dynamic Thesis Observability） | 状态机监控 | [03_/状态机监控/](../03_原子目标与规约/状态机监控/) | `global_const.yaml#state_watch_top` |
+| **演进战略**（Cognitive Flywheel） | 超级个体进化 | [03_/超级个体进化/](../03_原子目标与规约/超级个体进化/) | `global_const.yaml#super_evo_top` |
+| **个人财富战略 + 用户面**（Tech-Stack Pivot + UX） | 前端工程与服务 | [03_/前端工程与服务/](../03_原子目标与规约/前端工程与服务/) | `global_const.yaml#frontend_top` |
+| **平台底座**（Foundation） | 共享平台基础 | [03_/_共享规约/](../03_原子目标与规约/_共享规约/) | `global_const.yaml#tech_stack` 等 |
 
-## 历史专项目录处理说明
+## 三、L3 模块 ↔ 步骤级 DNA ↔ L4 实践 ↔ L5 锚点
 
-- 原 `B轨/`、`C轨/` 专项目录及 Stage 内「A轨/B轨」命名文件已删除或重命名；**不得**再以轨道名新增文档。
-- 能力语义已并入 `平台与产品/`、`_共享规约/09_核心模块架构规约.md`、`_共享规约/11_数据采集与输入层规约.md`、`_共享规约/12_右脑数据支撑与Segment规约.md` 等主责 L3。
-- 若旧链接或笔记仍写历史文件名，查阅时一律以本表「主责 L3 规约」列与对应 Stage 设计/实践文档为准。
+| pillar | milestone | DNA file | L4 实践文档 | L5 锚点 |
+|--------|-----------|----------|------------|---------|
+| shared_platform | mvp | [shared/dna_shared_platform_baseline.yaml](../03_原子目标与规约/_System_DNA/shared/dna_shared_platform_baseline.yaml) | [共享平台基础/01](../04_阶段规划与实践/共享平台基础/01_本阶段实践与验证.md) | `l5-shared-platform-baseline` |
+| cryo_guard | mvp | [cryo_guard/dna_cryo_guard_mvp.yaml](../03_原子目标与规约/_System_DNA/cryo_guard/dna_cryo_guard_mvp.yaml) | [极寒防御/01_MVP](../04_阶段规划与实践/极寒防御/01_MVP_本阶段实践与验证.md) | `l5-pillar-cryo-mvp` |
+| cryo_guard | v1 | [cryo_guard/dna_cryo_guard_v1.yaml](../03_原子目标与规约/_System_DNA/cryo_guard/dna_cryo_guard_v1.yaml) | [极寒防御/02_V1](../04_阶段规划与实践/极寒防御/02_V1_本阶段实践与验证.md) | `l5-pillar-cryo-v1` |
+| cryo_guard | v2 | [cryo_guard/dna_cryo_guard_v2.yaml](../03_原子目标与规约/_System_DNA/cryo_guard/dna_cryo_guard_v2.yaml) | [极寒防御/03_V2](../04_阶段规划与实践/极寒防御/03_V2_本阶段实践与验证.md) | `l5-pillar-cryo-v2` |
+| deep_strike | mvp | [deep_strike/dna_deep_strike_mvp.yaml](../03_原子目标与规约/_System_DNA/deep_strike/dna_deep_strike_mvp.yaml) | [纵深进攻/01_MVP](../04_阶段规划与实践/纵深进攻/01_MVP_本阶段实践与验证.md) | `l5-pillar-deep-mvp` |
+| deep_strike | v1 | [deep_strike/dna_deep_strike_v1_council.yaml](../03_原子目标与规约/_System_DNA/deep_strike/dna_deep_strike_v1_council.yaml) | [纵深进攻/02_V1_council](../04_阶段规划与实践/纵深进攻/02_V1_council_本阶段实践与验证.md) | `l5-pillar-deep-v1-council` |
+| deep_strike | v1 | [deep_strike/dna_deep_strike_v1_feature.yaml](../03_原子目标与规约/_System_DNA/deep_strike/dna_deep_strike_v1_feature.yaml) | [纵深进攻/03_V1_feature](../04_阶段规划与实践/纵深进攻/03_V1_feature_本阶段实践与验证.md) | `l5-pillar-deep-v1-feature` |
+| deep_strike | v1 | [deep_strike/dna_deep_strike_v1_eval.yaml](../03_原子目标与规约/_System_DNA/deep_strike/dna_deep_strike_v1_eval.yaml) | [纵深进攻/04_V1_eval](../04_阶段规划与实践/纵深进攻/04_V1_eval_本阶段实践与验证.md) | `l5-pillar-deep-v1-eval` |
+| deep_strike | v2 | [deep_strike/dna_deep_strike_v2.yaml](../03_原子目标与规约/_System_DNA/deep_strike/dna_deep_strike_v2.yaml) | [纵深进攻/05_V2_runtime](../04_阶段规划与实践/纵深进攻/05_V2_runtime_本阶段实践与验证.md) | `l5-pillar-deep-v2-runtime` |
+| state_watch | mvp | [state_watch/dna_state_watch_mvp.yaml](../03_原子目标与规约/_System_DNA/state_watch/dna_state_watch_mvp.yaml) | [状态机监控/01_MVP](../04_阶段规划与实践/状态机监控/01_MVP_本阶段实践与验证.md) | `l5-pillar-watch-mvp` |
+| state_watch | v1 | [state_watch/dna_state_watch_v1_probe.yaml](../03_原子目标与规约/_System_DNA/state_watch/dna_state_watch_v1_probe.yaml) | [状态机监控/02_V1_probe](../04_阶段规划与实践/状态机监控/02_V1_probe_本阶段实践与验证.md) | `l5-pillar-watch-v1-probe` |
+| state_watch | v1 | [state_watch/dna_state_watch_v1_gate.yaml](../03_原子目标与规约/_System_DNA/state_watch/dna_state_watch_v1_gate.yaml) | [状态机监控/03_V1_gate](../04_阶段规划与实践/状态机监控/03_V1_gate_本阶段实践与验证.md) | `l5-pillar-watch-v1-gate` |
+| state_watch | v1 | [state_watch/dna_state_watch_v1_budget.yaml](../03_原子目标与规约/_System_DNA/state_watch/dna_state_watch_v1_budget.yaml) | [状态机监控/04_V1_budget](../04_阶段规划与实践/状态机监控/04_V1_budget_本阶段实践与验证.md) | `l5-pillar-watch-v1-budget` |
+| state_watch | v2 | [state_watch/dna_state_watch_v2.yaml](../03_原子目标与规约/_System_DNA/state_watch/dna_state_watch_v2.yaml) | [状态机监控/05_V2_template](../04_阶段规划与实践/状态机监控/05_V2_template_本阶段实践与验证.md) | `l5-pillar-watch-v2-template` |
+| super_evo | mvp | [super_evo/dna_super_evo_mvp.yaml](../03_原子目标与规约/_System_DNA/super_evo/dna_super_evo_mvp.yaml) | [超级个体进化/01_MVP](../04_阶段规划与实践/超级个体进化/01_MVP_本阶段实践与验证.md) | `l5-pillar-evo-mvp` |
+| super_evo | v1 | [super_evo/dna_super_evo_v1_eval.yaml](../03_原子目标与规约/_System_DNA/super_evo/dna_super_evo_v1_eval.yaml) | [超级个体进化/02_V1_eval](../04_阶段规划与实践/超级个体进化/02_V1_eval_本阶段实践与验证.md) | `l5-pillar-evo-v1-eval` |
+| super_evo | v1 | [super_evo/dna_super_evo_v1_retro.yaml](../03_原子目标与规约/_System_DNA/super_evo/dna_super_evo_v1_retro.yaml) | [超级个体进化/03_V1_retro](../04_阶段规划与实践/超级个体进化/03_V1_retro_本阶段实践与验证.md) | `l5-pillar-evo-v1-retro` |
+| super_evo | v1 | [super_evo/dna_super_evo_v1_version.yaml](../03_原子目标与规约/_System_DNA/super_evo/dna_super_evo_v1_version.yaml) | [超级个体进化/04_V1_version](../04_阶段规划与实践/超级个体进化/04_V1_version_本阶段实践与验证.md) | `l5-pillar-evo-v1-version` |
+| super_evo | v2 | [super_evo/dna_super_evo_v2.yaml](../03_原子目标与规约/_System_DNA/super_evo/dna_super_evo_v2.yaml) | [超级个体进化/05_V2_online](../04_阶段规划与实践/超级个体进化/05_V2_online_本阶段实践与验证.md) | `l5-pillar-evo-v2-online` |
+| frontend | mvp | [frontend/dna_frontend_mvp.yaml](../03_原子目标与规约/_System_DNA/frontend/dna_frontend_mvp.yaml) | [前端工程与服务/01_MVP](../04_阶段规划与实践/前端工程与服务/01_MVP_本阶段实践与验证.md) | `l5-frontend-mvp` |
+| frontend | v1 | [frontend/dna_frontend_v1_full.yaml](../03_原子目标与规约/_System_DNA/frontend/dna_frontend_v1_full.yaml) | [前端工程与服务/02_V1_full](../04_阶段规划与实践/前端工程与服务/02_V1_full_本阶段实践与验证.md) | `l5-frontend-v1-full` |
+| frontend | v2 | [frontend/dna_frontend_v2.yaml](../03_原子目标与规约/_System_DNA/frontend/dna_frontend_v2.yaml) | [前端工程与服务/03_V2_pwa](../04_阶段规划与实践/前端工程与服务/03_V2_pwa_本阶段实践与验证.md) | `l5-frontend-v2-pwa` |
 
-## 可部署单元与运行形态
+**计 22 行**，与 [`dna_dev_workflow.yaml#workflow_stages`](../03_原子目标与规约/_System_DNA/dna_dev_workflow.yaml) 严格 1:1。
 
-实盘多服务部署时，**可部署单元**（数据采集与存储、Module A/B/C、热路径 D+E+F）见 [09_ 可部署单元与热路径](../03_原子目标与规约/_共享规约/09_核心模块架构规约.md#可部署单元与热路径)；DNA 定义见 `global_const.deployable_units` 与 `dna_dev_workflow.deployable_units`、`release_bundle`。**三种运行形态**（回测=单进程+历史数据、实盘=多服务、开发期连调=本地服务+远程 K3s+线上数据）见 [06_ 评测一致性与发布闭环](../02_战略维度/平台与产品/06_评测一致性与发布闭环.md#53-三种运行形态)。
+## 四、跨模块共享元数据（core_modules）
 
-## 说明
+| 文件 | 用途 |
+|------|------|
+| [core_modules/dna_pillar_definitions.yaml](../03_原子目标与规约/_System_DNA/core_modules/dna_pillar_definitions.yaml) | 五大 pillar + shared_platform 元定义；为 `global_const.yaml#vision.pillars` 真相源 |
+| [core_modules/dna_core_formulas.yaml](../03_原子目标与规约/_System_DNA/core_modules/dna_core_formulas.yaml) | 议会一致性、预期差、状态机迁移、四大退出模型、风控约束、推理成本 |
+| [core_modules/dna_subject_taxonomy.yaml](../03_原子目标与规约/_System_DNA/core_modules/dna_subject_taxonomy.yaml) | 标的 / 行业 / segment / 证据类型枚举 |
+| [core_modules/dna_severity_taxonomy.yaml](../03_原子目标与规约/_System_DNA/core_modules/dna_severity_taxonomy.yaml) | 全局严重度 / 通知通道矩阵 / 风险事件严重度映射 |
 
-- **L4 依赖引用**：L4 步骤引用依赖或语义时，仅引用**步骤级 DNA**（dna_stage*、core_modules/dna_module_*）及 `global_const`；规约级配置收敛至 global_const 各子树，L2↔L3 映射以 global_const#xxx 为准，不设独立 dna_01～dna_11 文件。
-- **product_scope / roadmap**：产品范围与优先级 DNA 根，在 global_const 中补全后本表无需改列名。
-- **data_architecture**：数据架构维度专用 DNA 根，在 global_const 中新增后与 data_version_control 并列引用。
-- **cost_governance**：成本治理与资源效率专用 DNA 根，在 global_const 中新增。
-- **04_生产保障与可观测性**：当前无单一 DNA 根，以多节点列举为准；可选后续新增 `production_assurance` 聚合子树。
+## 五、维护规则
 
-## L3/DNA 变更对 L4 的影响
-
-当 L3 规约或 DNA 子树变更时，需复核的 L4 阶段见 [01_L3_DNA_变更对L4影响表](01_L3_DNA_变更对L4影响表.md)。各 01_ 中「本步骤依赖的 DNA 键或主责 L3 发生变更时，须复核本步骤」见协议 §8.4a。
-
-## 下一步
-
-- 03_README、02_战略维度/README 在显著位置链接至本表。
-- 各 L2 维度文档「下一步」改为精确主责 L3 链接 + 本映射表链接。
+- **DNA 增删 stage** → 同步本表 + L5 02_验收标准 + 04_/README 索引（按 §4.1）
+- **L3 设计文档结构变更** → 同步本表「L3 设计文档」列与锚点
+- **本表与 DNA 强一致**：可由脚本（`03_审计与一致性报告/check_dna_00_l5.sh`）做 stage_id 一致性校验

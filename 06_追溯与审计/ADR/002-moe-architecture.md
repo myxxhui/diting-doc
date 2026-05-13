@@ -80,7 +80,7 @@ Accepted
 ### Router 实现
 
 ```python
-# diting-core/diting/moe/router.py
+# diting-src/diting/moe/router.py
 class MoERouter:
     """MoE 路由器：根据 Domain Tag 分发到对应专家"""
     
@@ -96,7 +96,7 @@ class MoERouter:
 ### 专家实现
 
 ```python
-# diting-core/diting/moe/specialists/agri_agent.py
+# diting-src/diting/moe/specialists/agri_agent.py
 class AgriAgent:
     """农业专家：关注季节性、期货升贴水"""
     

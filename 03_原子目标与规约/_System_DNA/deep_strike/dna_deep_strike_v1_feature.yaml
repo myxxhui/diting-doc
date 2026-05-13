@@ -1,0 +1,61 @@
+# 纵深进攻 V1 特征工程 · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: deep_strike_v1_feature
+pillar: deep_strike
+milestone: v1
+
+design_doc: ../../纵深进攻/05_实施推演_设计.md#三v1完整能力
+l4_doc:    ../../../04_阶段规划与实践/纵深进攻/03_V1_feature_本阶段实践与验证.md
+l5_anchor: l5-pillar-deep-v1-feature
+
+work_dir: diting-src/diting/deep_strike/feature_engine/
+
+services_in_scope:
+  - feature_engine_batch
+  - feature_engine_stream
+  - embedding_index
+  - expectation_gap_quantifier
+
+feature_engine_batch:
+  scheduler: airflow_or_argo
+  cadence: daily
+  outputs: feature_store
+  failure_recovery: keep_last_snapshot
+
+feature_engine_stream:
+  framework: faust_or_flink
+  triggers: [event_stream, cryo_risk_events]
+  latency_p99_seconds: 5
+
+embedding_index:
+  store: milvus
+  fallback: pgvector
+  hybrid_retrieval: true
+  retrieval_p99_ms: 500
+
+expectation_gap_quantifier:
+  formula_ref: ../../纵深进攻/04_数据契约_设计.md
+  decay_function: time_weighted_exp
+  market_consensus_source: external_research_data
+
+depends_on:
+  - deep_strike_v1_council
+
+verification_commands:
+  - cmd: "cd diting-src && make test-feature-engine"
+    expect_exit: 0
+  - cmd: "cd diting-src && make daily-batch-feature"
+    expect_keywords: ["batch success"]
+  - cmd: "cd diting-src && make rag-latency-bench"
+    expect_keywords: ["P99<=500ms"]
+  - cmd: "cd diting-src && make expectation-gap-bench"
+    expect_keywords: ["gap_score computed"]
+
+exit_criteria:
+  - 每日批跑成功；Feature Store 写入
+  - RAG 检索 P99 < 500ms
+  - gap_score 可计算且与历史样本一致
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: 保留上次成功 snapshot；议会 degraded=true 消费旧特征

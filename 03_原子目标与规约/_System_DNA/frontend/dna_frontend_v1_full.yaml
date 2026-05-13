@@ -1,0 +1,69 @@
+# 前端工程 V1 全功能 · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: frontend_v1_full
+pillar: frontend
+milestone: v1
+
+design_doc: ../../前端工程与服务/05_实施推演_设计.md#三v1完整能力
+l4_doc:    ../../../04_阶段规划与实践/前端工程与服务/02_V1_full_本阶段实践与验证.md
+l5_anchor: l5-frontend-v1-full
+
+work_dir: diting-src/web/
+
+apps_full:
+  - { id: console,    framework: nextjs }
+  - { id: admin,      framework: nextjs }
+  - { id: chat-bff,   framework: hono_or_nestjs }
+  - { id: ws-gateway, framework: nodejs }
+
+bff_full:
+  read_aggregation: true
+  workflow_orchestration: true
+  sse_ws_fanout: true
+  consistent_hash_for_ws: true
+
+performance_budget:
+  lcp_ms_max: 2500
+  inp_ms_max: 200
+  cls_max: 0.1
+  ttfb_ms_max: 800
+  js_bundle_max_kb: 350
+
+i18n:
+  framework: next-intl
+  locales: [zh-CN, en-US]
+
+wcag_2_1_aa:
+  required: true
+  ci_check: pnpm a11y
+
+observability_full:
+  rum: true
+  dashboards: true
+  slow_request_attribution_categories: [server, network, render]
+
+depends_on:
+  - frontend_mvp
+  - cryo_guard_v1
+  - deep_strike_v1_council
+  - state_watch_v1_budget
+  - super_evo_v1_eval
+
+verification_commands:
+  - cmd: "cd diting-src/web && pnpm test:v1"
+    expect_exit: 0
+  - cmd: "cd diting-src/web && pnpm e2e:v1"
+    expect_exit: 0
+  - cmd: "cd diting-src/web && pnpm lighthouse:strict"
+    expect_keywords: ["LCP<=2500", "INP<=200", "CLS<=0.1"]
+  - cmd: "cd diting-src/web && pnpm a11y"
+    expect_keywords: ["0 critical"]
+
+exit_criteria:
+  - 全 5 模块全功能可用
+  - 性能预算达标
+  - WCAG 2.1 AA 通过
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: 性能或可访问性回归 → 阻断发布；先修复

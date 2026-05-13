@@ -88,7 +88,7 @@ Accepted
 ### 执行网关实现
 
 ```python
-# diting-core/diting/execution/gateway.py
+# diting-src/diting/execution/gateway.py
 class ExecutionGateway:
     async def execute_order(self, order: TradeOrder):
         if order.audit_status == AuditStatus.AUTO_EXECUTED:
@@ -102,7 +102,7 @@ class ExecutionGateway:
 ### 通知系统
 
 ```python
-# diting-core/diting/execution/notification.py
+# diting-src/diting/execution/notification.py
 class NotificationService:
     async def send_approval_request(self, order: TradeOrder):
         """发送审批请求到手机"""

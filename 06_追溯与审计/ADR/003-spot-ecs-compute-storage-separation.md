@@ -103,7 +103,7 @@ resource "alicloud_ecs_instance" "spot" {
 ### 优雅关闭流程
 
 ```python
-# diting-core/diting/dr/graceful_shutdown.py
+# diting-src/diting/dr/graceful_shutdown.py
 class GracefulShutdown:
     def execute(self):
         # 1. kubectl drain

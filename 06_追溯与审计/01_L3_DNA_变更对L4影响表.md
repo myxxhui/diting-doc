@@ -1,44 +1,59 @@
-# L3/DNA 变更 → L4 影响表
+# 06 · L3/DNA 变更对 L4 影响表
 
-> 当某 L3 文档或某 DNA 子树发生变更时，本表列出需**复核或再生成**的 L4 阶段/步骤。L4 步骤文档中「本步骤落实的 _System_DNA 键」所涉键或主责 L3 变更时，须按本表执行复核。参见 [00_系统规则 §8.4a DNA/L3 变更时复核](../00_系统规则_通用项目协议.md)。
+> [!NOTE] **[TRACEBACK]**
+> - **L3**：[03_原子目标与规约](../03_原子目标与规约/README.md)
+> - **DNA**：[`_System_DNA/`](../03_原子目标与规约/_System_DNA/)
+> - **L4**：[04_阶段规划与实践](../04_阶段规划与实践/README.md)
+> - **L5**：[02_验收标准](../05_成功标识与验证/02_验收标准.md)
+> - **本表 2026-05-13 第 3 批重写**：与新四大模块 + 前端 + 共享平台对齐
 
-## 约定
+## 一、变更类型
 
-- **复核**：检查对应 00_ 阶段目录下 `01_本阶段实践与验证.md` 及 README 的实施内容、验证清单、DNA 键引用是否仍与 L3/DNA 一致；必要时重跑该阶段或更新 01_。
-- **可选**：DNA 关键节点可增加 `used_by_l4_stages: [s0_pre, s0, ...]` 便于脚本自动推导影响范围。
+| 变更类型 | 影响面 |
+|---------|-------|
+| **A. global_const.yaml 顶层 pillar 配置变更** | 影响所有 pillar；须更新 5 个 L4 模块 README + 22 个 L5 行 + 5 个 03_/<pillar>/ 设计文档 |
+| **B. dna_dev_workflow.yaml workflow_stages 变更** | 影响对应 stage 的 L4 实践文档 + L5 行 + 06_/00_映射 + 03_/<pillar>/ 实施推演 |
+| **C. core_modules/*.yaml 共享元数据变更** | 影响所有引用方（severity / formulas / subject 等）；须批量更新 |
+| **D. 步骤级 DNA 字段变更** | 仅影响该 stage 的 L4 实践文档 + L5 行 |
+| **E. 03_/<pillar>/0N_*_设计.md 结构变更** | 须同步更新 DNA `design_doc` 锚点 + L4 实践文档引用 |
 
-## L3 文档变更 → 需复核的 L4 阶段
+## 二、按 stage 的影响矩阵（22 行）
 
-| L3 规约文档 | 需复核的 L4 阶段（04_ Stage1～5） | 说明 |
-|-------------|--------------------------------------|------|
-| [01_开发生命周期与实践流程规约](../03_原子目标与规约/节奏与交付/01_开发生命周期与实践流程规约.md) | 全部 Stage（s0_pre～s4） | 阶段顺序、准入准出、工作目录、失败回退均引用本规约 |
-| [02_基础设施与部署规约](../03_原子目标与规约/节奏与交付/02_基础设施与部署规约.md) | Stage3_K3s测试开发期、Stage4_与流水线衔接 | 编排、Secret、deploy-engine、环境与发布 |
-| [03_项目全功能开发测试实践工作流详细规划](../03_原子目标与规约/节奏与交付/03_项目全功能开发测试实践工作流详细规划.md) | 全部 Stage | 5D 总览、工作目录总表、失败与回退策略被各 01_ 引用 |
-| [02_三位一体仓库规约](../03_原子目标与规约/_共享规约/02_三位一体仓库规约.md) | Stage0_pre_仓库与L3就绪、Stage0_骨架期、Stage3、Stage4 | 仓库结构、secrets、diting-infra |
-| [01_需求与产品范围](../03_原子目标与规约/平台与产品/01_需求与产品范围.md) | Stage1_逻辑填充期及关联 Phase 步骤 | 产品目标、岗位训练目标、delivery_scope 与 Phase 任务拆分 |
-| [08_心跳协议与健康检查规约](../03_原子目标与规约/_共享规约/08_心跳协议与健康检查规约.md) | Stage3_K3s测试开发期 | 可观测性、健康检查 |
-| [09_核心模块架构规约](../03_原子目标与规约/_共享规约/09_核心模块架构规约.md) | [Stage1_仓库与骨架](../04_阶段规划与实践/Stage1_仓库与骨架/README.md#本阶段步骤索引)、[Stage3_模块实践](../04_阶段规划与实践/Stage3_模块实践/README.md#本阶段步骤索引) 01_～06_（若涉及模块部署） | 模块与生产要求 |
-| [10_运营治理与灾备规约](../03_原子目标与规约/_共享规约/10_运营治理与灾备规约.md) | Stage4_与流水线衔接、Stage3（若涉及合规/密钥） | 准出后运维、Level 2/3、合规与灾备 |
-| [11_数据采集与输入层规约](../03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md) | Stage0_数据采集、Phase1_按模块实践 01_～06_（真实数据验证） | 数据源、L1/L2 写入与消费 |
+| stage_id | 受影响 L4 文档 | 受影响 L5 行 | 受影响 03_ 设计 |
+|----------|---------------|-------------|----------------|
+| shared_platform_baseline | [04_/共享平台基础/01](../04_阶段规划与实践/共享平台基础/01_本阶段实践与验证.md) | `l5-shared-platform-baseline` | [03_/_共享规约/](../03_原子目标与规约/_共享规约/) |
+| cryo_guard_mvp | [04_/极寒防御/01_MVP](../04_阶段规划与实践/极寒防御/01_MVP_本阶段实践与验证.md) | `l5-pillar-cryo-mvp` | [03_/极寒防御/05_实施推演_设计.md](../03_原子目标与规约/极寒防御/05_实施推演_设计.md) |
+| cryo_guard_v1 | [04_/极寒防御/02_V1](../04_阶段规划与实践/极寒防御/02_V1_本阶段实践与验证.md) | `l5-pillar-cryo-v1` | 同上 |
+| cryo_guard_v2 | [04_/极寒防御/03_V2](../04_阶段规划与实践/极寒防御/03_V2_本阶段实践与验证.md) | `l5-pillar-cryo-v2` | 同上 |
+| deep_strike_mvp | [04_/纵深进攻/01_MVP](../04_阶段规划与实践/纵深进攻/01_MVP_本阶段实践与验证.md) | `l5-pillar-deep-mvp` | [03_/纵深进攻/05_实施推演_设计.md](../03_原子目标与规约/纵深进攻/05_实施推演_设计.md) |
+| deep_strike_v1_council | [04_/纵深进攻/02_V1_council](../04_阶段规划与实践/纵深进攻/02_V1_council_本阶段实践与验证.md) | `l5-pillar-deep-v1-council` | 同上 |
+| deep_strike_v1_feature | [04_/纵深进攻/03_V1_feature](../04_阶段规划与实践/纵深进攻/03_V1_feature_本阶段实践与验证.md) | `l5-pillar-deep-v1-feature` | 同上 |
+| deep_strike_v1_eval | [04_/纵深进攻/04_V1_eval](../04_阶段规划与实践/纵深进攻/04_V1_eval_本阶段实践与验证.md) | `l5-pillar-deep-v1-eval` | 同上 |
+| deep_strike_v2_runtime | [04_/纵深进攻/05_V2_runtime](../04_阶段规划与实践/纵深进攻/05_V2_runtime_本阶段实践与验证.md) | `l5-pillar-deep-v2-runtime` | 同上 |
+| state_watch_mvp | [04_/状态机监控/01_MVP](../04_阶段规划与实践/状态机监控/01_MVP_本阶段实践与验证.md) | `l5-pillar-watch-mvp` | [03_/状态机监控/05_实施推演_设计.md](../03_原子目标与规约/状态机监控/05_实施推演_设计.md) |
+| state_watch_v1_probe | [04_/状态机监控/02_V1_probe](../04_阶段规划与实践/状态机监控/02_V1_probe_本阶段实践与验证.md) | `l5-pillar-watch-v1-probe` | 同上 |
+| state_watch_v1_gate | [04_/状态机监控/03_V1_gate](../04_阶段规划与实践/状态机监控/03_V1_gate_本阶段实践与验证.md) | `l5-pillar-watch-v1-gate` | 同上 |
+| state_watch_v1_budget | [04_/状态机监控/04_V1_budget](../04_阶段规划与实践/状态机监控/04_V1_budget_本阶段实践与验证.md) | `l5-pillar-watch-v1-budget` | 同上 |
+| state_watch_v2_template | [04_/状态机监控/05_V2_template](../04_阶段规划与实践/状态机监控/05_V2_template_本阶段实践与验证.md) | `l5-pillar-watch-v2-template` | 同上 |
+| super_evo_mvp | [04_/超级个体进化/01_MVP](../04_阶段规划与实践/超级个体进化/01_MVP_本阶段实践与验证.md) | `l5-pillar-evo-mvp` | [03_/超级个体进化/05_实施推演_设计.md](../03_原子目标与规约/超级个体进化/05_实施推演_设计.md) |
+| super_evo_v1_eval | [04_/超级个体进化/02_V1_eval](../04_阶段规划与实践/超级个体进化/02_V1_eval_本阶段实践与验证.md) | `l5-pillar-evo-v1-eval` | 同上 |
+| super_evo_v1_retro | [04_/超级个体进化/03_V1_retro](../04_阶段规划与实践/超级个体进化/03_V1_retro_本阶段实践与验证.md) | `l5-pillar-evo-v1-retro` | 同上 |
+| super_evo_v1_version | [04_/超级个体进化/04_V1_version](../04_阶段规划与实践/超级个体进化/04_V1_version_本阶段实践与验证.md) | `l5-pillar-evo-v1-version` | 同上 |
+| super_evo_v2_online | [04_/超级个体进化/05_V2_online](../04_阶段规划与实践/超级个体进化/05_V2_online_本阶段实践与验证.md) | `l5-pillar-evo-v2-online` | 同上 |
+| frontend_mvp | [04_/前端工程与服务/01_MVP](../04_阶段规划与实践/前端工程与服务/01_MVP_本阶段实践与验证.md) | `l5-frontend-mvp` | [03_/前端工程与服务/05_实施推演_设计.md](../03_原子目标与规约/前端工程与服务/05_实施推演_设计.md) |
+| frontend_v1_full | [04_/前端工程与服务/02_V1_full](../04_阶段规划与实践/前端工程与服务/02_V1_full_本阶段实践与验证.md) | `l5-frontend-v1-full` | 同上 |
+| frontend_v2_pwa | [04_/前端工程与服务/03_V2_pwa](../04_阶段规划与实践/前端工程与服务/03_V2_pwa_本阶段实践与验证.md) | `l5-frontend-v2-pwa` | 同上 |
 
-## DNA 子树/文件变更 → 需复核的 L4 阶段
+## 三、变更操作 SOP
 
-| DNA 子树/文件 | 需复核的 L4 阶段 | 说明 |
-|---------------|------------------|------|
-| `dna_dev_workflow.yaml`（workflow_stages, module_to_stages） | 全部 Stage | 阶段定义、delivery_scope、exit_criteria、artifacts 直引 |
-| `global_const.trinity_repos` | Stage0_pre、Stage0、Stage3、Stage4 | 仓库路径、repo_a/secrets |
-| `global_const.production_requirements`（observability, deployment） | Stage3、Stage4 | 可观测性、部署要求 |
-| `global_const.cost_governance` | Stage1（选型）、Stage3（部署资源） | 成本敏感步骤须引用 |
-| `_System_DNA/core_modules/`（dna_module_a～f.yaml） | Phase1_按模块实践 01_～06_ | 每模块 L4 步骤引用对应 dna_module_*.yaml |
-| `global_const.data_ingestion` | Stage0_数据采集、Phase1_按模块实践 | 数据采集与真实数据验证 |
-| 其他 global_const 根节点（core_formula, data_architecture 等） | 引用该键的 Stage 01_ | 按各 01_「本步骤落实的 _System_DNA 键」逐项对照 |
+1. **识别变更类型**（A/B/C/D/E）
+2. **修订源文件**（DNA 或 03_/<pillar>/0N_*_设计.md）
+3. **同步下游**：按上表逐项更新；每个 04_/0N_*.md 的 `## 二、本步骤落实的 DNA 键` 同步
+4. **更新 L5**：受影响 L5 行的「本阶段对应 L5 验收」列；锚点保持不变
+5. **更新 06_/00_映射**：若 stage 集合变了，须同步该表
+6. **关键重构（§4.5）**：若涉及目录结构 / 全局约定，须同步 `00_系统规则_通用项目协议.md` + `.cursorrules` 的「协议修订记录」
+7. **运行一致性脚本**：`03_审计与一致性报告/check_*.sh` 全部通过
 
-## 历史专项说明
+## 四、本次重构（2026-05-13 第 3 批）
 
-- `B轨/`、`C轨/` 及 Stage 内旧轨道命名已收口；复核 L4 时以当前主责 L3 与 `dna_dev_workflow.yaml` 指向的 DNA 文件为准。
-- 若 L4 仍引用已删除路径，须改为本表对应规约或 Stage 设计/实践文档，并同步 DNA 键。
-
-## 下一步
-
-- L3 或 DNA 变更后，执行方按本表复核对应 L4 阶段，并更新 01_/README 或重跑验证。
-- 协议 §4.1：L3 变更 → 同步 L4 阶段、L5 验收项；本表为「同步 L4」的具体索引。
+旧 ABCD/Stage1~5 22 行映射全部删除，重写为 22 行新 stage 映射。

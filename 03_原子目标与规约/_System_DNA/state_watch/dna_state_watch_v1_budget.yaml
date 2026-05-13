@@ -1,0 +1,62 @@
+# 状态机监控 V1 通知预算 · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: state_watch_v1_budget
+pillar: state_watch
+milestone: v1
+
+design_doc: ../../状态机监控/05_实施推演_设计.md#三v1完整能力
+l4_doc:    ../../../04_阶段规划与实践/状态机监控/04_V1_budget_本阶段实践与验证.md
+l5_anchor: l5-pillar-watch-v1-budget
+
+work_dir: diting-src/diting/state_watch/notification/
+
+services_in_scope:
+  - notification_budget_with_digest
+  - integration_with_deep_strike_candidate_active
+  - sse_realtime
+  - opensearch_indexer
+
+notification_budget_with_digest:
+  per_user_daily_max:
+    free: 20
+    pro: 100
+    admin: unlimited
+  digest_window_minutes: 60
+  bypass_for_severity: [critical]
+
+integration_with_deep_strike_candidate_active:
+  on_active_create_instance_template: tmpl_breakout_v1
+  webhook_topic: "diting.events.candidate.active"
+
+sse_realtime:
+  channel: "/sse/state-watch"
+  push_p99_seconds: 1
+
+opensearch_indexer:
+  index_targets: [transitions, breaches, advisories]
+  retention_days: 90
+  search_p99_ms: 1000
+
+depends_on:
+  - state_watch_v1_probe
+  - state_watch_v1_gate
+  - deep_strike_mvp
+
+verification_commands:
+  - cmd: "cd diting-src && make test-state-watch-budget"
+    expect_exit: 0
+  - cmd: "cd diting-src && make notification-budget-bench"
+    expect_keywords: ["digest_triggered_on_overflow"]
+  - cmd: "cd diting-src && make e2e-candidate-to-instance"
+    expect_keywords: ["instance created"]
+  - cmd: "cd diting-src && make sse-state-watch-bench"
+    expect_keywords: ["P99<=1s"]
+
+exit_criteria:
+  - 单用户单日通知 ≤ 配置上限
+  - 候选 active → 实例自动创建
+  - SSE 实时通道稳定
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: 通知通道全失败 → 写"未送达"队列 + RiskEvent

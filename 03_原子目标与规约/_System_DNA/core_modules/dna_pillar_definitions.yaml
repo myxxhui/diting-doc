@@ -1,0 +1,137 @@
+# 四大模块 + 前端 + 共享平台 元定义
+# 与 ../global_const.yaml#vision.pillars 顶层定义对齐
+schema_version: "1.0.0"
+source_of_truth: "本文件为 pillar 元数据的单一真相源；global_const.yaml#vision.pillars 由本文件派生"
+
+pillars:
+  - id: cryo_guard
+    cn: 极寒防御
+    en: Cryo-Guard
+    tagline: "欺诈解构与逻辑验尸（The Fraud Deconstruction Engine）"
+    role: 全局安检防火墙
+    scope:
+      in:
+        - 风险事件总线
+        - 决策门禁器（7 层）
+        - 输入污染检测（7 类）
+        - 服务熔断（嵌入式 SDK + 中心协调）
+        - 审计日志（链式 hash + 签名 + WORM）
+        - 红线一票否决（财务造假 / 高管言行不一）
+      out:
+        - 不做研究 / 议会推理
+        - 不做交易 / 持仓建议
+    exit_to_v2:
+      - 100% 出站对象走 decision_gate
+      - 合规导出周期 ≤ 1 周
+      - Chaos 演练通过
+    color: "#0EA5E9"   # ice blue
+
+  - id: deep_strike
+    cn: 纵深进攻
+    en: Deep-Strike
+    tagline: "产业链暗网与动量折现（The Deep-Chain Momentum Harvester）"
+    role: 机会剧本分发层
+    scope:
+      in:
+        - 内容理解（NER + 事件 + 主营对齐）
+        - 研究议会（多 Agent + MoE Router）
+        - 候选注册表（生命周期管理）
+        - 议程编排（周期 + 事件 + 用户实时）
+        - 特征工程（批 + 流 + 嵌入索引）
+        - 预期差量化（动量折现）
+        - Tool Runtime（browser/computer-use）
+      out:
+        - 不做风控审查（极寒防御负责）
+        - 不做交易执行
+    exit_to_v2:
+      - Tool Runtime 沙箱无逃逸
+      - 自适应议程指标可衡量
+      - 多模态证据议会可消费
+    color: "#F59E0B"   # amber
+
+  - id: state_watch
+    cn: 状态机监控
+    en: State-Machine Watch
+    tagline: "逻辑的可观测性与衰减模型（The Thesis State Machine）"
+    role: 持仓与关注列表的逻辑可观测性
+    scope:
+      in:
+        - 模板（DSL + canary 灰度）
+        - 实例（创建 / 升级 / 归档）
+        - 多探针（行情 / 新闻 / 衍生 / 自定义沙箱）
+        - 状态迁移评估器
+        - Advisory（必经决策门禁）
+        - 通知调度（预算 + digest + SSE）
+        - 越界保护带（hard / soft）
+      out:
+        - 不做研究（消费纵深进攻输出）
+        - 不做风控（消费极寒防御服务）
+    exit_to_v2:
+      - 模板灰度可推进与回滚
+      - 自定义探针沙箱无逃逸
+      - 跨用户聚合差分隐私达标
+    color: "#10B981"   # emerald
+
+  - id: super_evo
+    cn: 超级个体进化
+    en: Super-Individual Evolution
+    tagline: "闭环反哺与数字分身（The Cognitive Cloner）"
+    role: LLMOps 数据飞轮与 DPO 对齐管道
+    scope:
+      in:
+        - 反馈采集（rating / explicit / implicit）
+        - 数据集治理（版本 / 签名 / 防污染）
+        - 训练流水线（SFT / DPO / RLHF）
+        - 评测中枢（rule + LLM-as-judge + human）
+        - 自动复盘归档与知识库
+        - 模型版本治理（lineage + canary + rollback）
+        - 在线持续学习
+      out:
+        - 不直接产出研究结论
+        - 不直接对外执行
+    exit_to_v2:
+      - 在线学习不引发回归
+      - DPO 偏好对齐有效
+      - 安全防护通过
+    color: "#A855F7"   # purple
+
+  - id: frontend
+    cn: 前端工程与服务
+    en: Frontend & Services
+    tagline: "一站式 SPA / PWA + BFF + 强可观测"
+    role: 多端用户面与 BFF 编排
+    scope:
+      in:
+        - Console / Admin / 投研工作台
+        - Chat-BFF + WS Gateway
+        - SDK 自动生成（OpenAPI/Proto → TS）
+        - 性能预算（Web Vitals）
+        - i18n + WCAG 2.1 AA
+        - PWA + 离线 + Yjs 协作
+        - Edge BFF + 多区域路由
+      out:
+        - 不实现业务规则（仅展示与编排）
+        - 不直接访问 DB（必须经 BFF）
+    exit_to_v2:
+      - PWA 评分达标
+      - 离线提交对账无丢失
+      - 协作无冲突
+    color: "#EC4899"   # pink
+
+  - id: shared_platform
+    cn: 共享平台基础
+    en: Shared Platform Baseline
+    tagline: "底座组件 + 推理网关 + 配置中心 + 鉴权"
+    role: 全模块的 depends_on 起点
+    scope:
+      in:
+        - PostgreSQL / TimescaleDB / OpenSearch / Redis / Kafka
+        - K3s + HAMi GPU 调度
+        - 推理网关（vLLM + LoRA 多路复用）
+        - 配置中心（热更新 + 版本回滚）
+        - API Gateway + JWT + mTLS
+        - CDN
+      out:
+        - 不实现任何业务能力
+    exit_to_v2: []
+    color: "#64748B"   # slate

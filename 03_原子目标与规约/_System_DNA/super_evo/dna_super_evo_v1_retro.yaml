@@ -1,0 +1,62 @@
+# 超级个体进化 V1 复盘归档 · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: super_evo_v1_retro
+pillar: super_evo
+milestone: v1
+
+design_doc: ../../超级个体进化/05_实施推演_设计.md#三v1完整能力
+l4_doc:    ../../../04_阶段规划与实践/超级个体进化/03_V1_retro_本阶段实践与验证.md
+l5_anchor: l5-pillar-evo-v1-retro
+
+work_dir: diting-src/diting/super_evo/retrospective/
+
+services_in_scope:
+  - auto_retrospective_archive
+  - knowledge_base
+  - cross_topic_recall
+
+auto_retrospective_archive:
+  triggers:
+    - daily_cron: "0 2 * * *"
+    - on_critical_event: true
+  sources:
+    - cryo_guard_audit
+    - state_watch_transitions
+    - deep_strike_sessions
+
+knowledge_base:
+  schema:
+    - lesson_id
+    - topic
+    - context_summary
+    - action_taken
+    - outcome
+    - confidence
+  llm_extraction: true
+  human_review_required: true
+
+cross_topic_recall:
+  api: /knowledge_base/recall
+  consumer: deep_strike_council
+  recall_min_relevance: 0.6
+
+depends_on:
+  - super_evo_mvp
+  - state_watch_v1_budget
+  - cryo_guard_v1
+
+verification_commands:
+  - cmd: "cd diting-src && make test-retrospective"
+    expect_exit: 0
+  - cmd: "cd diting-src && make e2e-knowledge-recall"
+    expect_keywords: ["lesson_recalled"]
+  - cmd: "cd diting-src && make weekly-review-report"
+    expect_keywords: ["report_generated"]
+
+exit_criteria:
+  - 复盘日报自动生成
+  - 知识库可被议会召回
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: lesson 抽取错误 → 人工审核标记 + 不入库

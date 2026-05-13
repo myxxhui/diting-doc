@@ -1,0 +1,67 @@
+# 状态机监控 V2 模板灰度 · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: state_watch_v2_template
+pillar: state_watch
+milestone: v2
+
+design_doc: ../../状态机监控/05_实施推演_设计.md#四v2生产稳态
+l4_doc:    ../../../04_阶段规划与实践/状态机监控/05_V2_template_本阶段实践与验证.md
+l5_anchor: l5-pillar-watch-v2-template
+
+work_dir: diting-src/diting/state_watch/
+
+services_in_scope:
+  - template_canary_rollout
+  - instance_upgrade
+  - custom_probe_in_sandbox
+  - cross_user_aggregation
+  - template_marketplace
+
+template_canary_rollout:
+  stages: [staging, canary, prod]
+  canary_user_pct: 5
+  prod_promotion_min_days: 7
+  integration_with_super_evo_version_manager: true
+
+instance_upgrade:
+  diff_view_required: true
+  user_confirmation_required: true
+  history_kept: true
+
+custom_probe_in_sandbox:
+  sandbox: gvisor_or_wasm
+  resource_quota:
+    cpu_milli: 500
+    memory_mb: 256
+    timeout_seconds: 30
+
+cross_user_aggregation:
+  privacy_mechanism: differential_privacy
+  epsilon: 1.0
+
+template_marketplace:
+  rating: true
+  share: true
+  review_required_before_publish: true
+
+depends_on:
+  - state_watch_v1_budget
+
+verification_commands:
+  - cmd: "cd diting-src && make sandbox-escape-tests-state-watch"
+    expect_exit: 0
+  - cmd: "cd diting-src && make template-canary-rollout-drill"
+    expect_keywords: ["canary_pass", "rollback_pass"]
+  - cmd: "cd diting-src && make instance-upgrade-bench"
+    expect_keywords: ["smooth_upgrade"]
+  - cmd: "cd diting-src && make cross-user-aggregation-privacy-test"
+    expect_keywords: ["dp_pass"]
+
+exit_criteria:
+  - 模板灰度可推进与回滚
+  - 自定义探针沙箱无逃逸
+  - 跨用户聚合差分隐私达标
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: Sandbox 异常 → 立即下线该探针 + critical RiskEvent

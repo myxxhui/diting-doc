@@ -1,0 +1,59 @@
+# 超级个体进化 V1 版本治理 · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: super_evo_v1_version
+pillar: super_evo
+milestone: v1
+
+design_doc: ../../超级个体进化/05_实施推演_设计.md#三v1完整能力
+l4_doc:    ../../../04_阶段规划与实践/超级个体进化/04_V1_version_本阶段实践与验证.md
+l5_anchor: l5-pillar-evo-v1-version
+
+work_dir: diting-src/diting/super_evo/version/
+
+services_in_scope:
+  - model_versions_governance
+  - auto_canary_strategy
+  - one_click_rollback
+
+model_versions_governance:
+  table: model_versions
+  required_fields:
+    - version_id
+    - parent_version_id
+    - dataset_signature
+    - training_params_hash
+    - eval_report_id
+    - status   # candidate / canary / prod / deprecated
+
+auto_canary_strategy:
+  promote_when:
+    - eval_score >= baseline + 0.02
+    - safety_pass = true
+  progressive_rollout_pcts: [1, 5, 25, 50, 100]
+  pause_on_metric_regression: true
+
+one_click_rollback:
+  ui: super_evo_console_versions
+  cli: "make super-evo-rollback VERSION=<id>"
+  rollback_p95_seconds: 30
+
+depends_on:
+  - super_evo_mvp
+  - super_evo_v1_eval
+
+verification_commands:
+  - cmd: "cd diting-src && make test-version-manager"
+    expect_exit: 0
+  - cmd: "cd diting-src && make canary-rollout-drill"
+    expect_keywords: ["canary_advanced", "auto_pause_on_regression"]
+  - cmd: "cd diting-src && make rollback-drill"
+    expect_keywords: ["P95<=30s"]
+
+exit_criteria:
+  - 自动灰度达标推进
+  - 回滚 P95 < 30s
+  - lineage 可视化
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: 灰度指标恶化 → 自动暂停 + 通知 + 触发 RiskEvent

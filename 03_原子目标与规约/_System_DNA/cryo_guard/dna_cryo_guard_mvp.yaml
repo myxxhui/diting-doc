@@ -1,0 +1,74 @@
+# 极寒防御 MVP · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: cryo_guard_mvp
+pillar: cryo_guard
+milestone: mvp
+
+design_doc: ../../极寒防御/05_实施推演_设计.md#二mvp最小可用产品
+l4_doc:    ../../../04_阶段规划与实践/极寒防御/01_MVP_本阶段实践与验证.md
+l5_anchor: l5-pillar-cryo-mvp
+
+work_dir: diting-src/diting/cryo_guard/
+
+services_in_scope:
+  - risk_event_bus_basic
+  - decision_gate_layers_basic   # schema + evidence
+  - audit_log_service_basic       # 无链式 hash
+
+proto_v1_minimal:
+  - RiskEvent
+  - GateRequest
+  - GateDecision
+  - AuditEntry
+
+db_tables:
+  - risk_events
+  - gate_decisions
+  - audit_logs
+
+decision_gate_layers:
+  - layer: schema
+    enabled: true
+    config:
+      strict_required_fields: true
+  - layer: evidence
+    enabled: true
+    config:
+      require_evidence_ref: true
+      allow_local_only: false
+
+risk_event_bus:
+  ingress: [http, grpc]
+  persistence: postgresql
+  realtime_push: websocket
+
+audit_log:
+  chain_hash: false               # MVP 关闭；V1 开启
+  signature_snapshot: false
+  worm: false
+  retention_days_main: 90
+
+frontend:
+  app: console
+  page: risk_dashboard_mvp        # 见 frontend/dna_frontend_mvp.yaml
+
+depends_on:
+  - shared_platform_baseline
+
+verification_commands:
+  - cmd: "cd diting-src && make test-cryo-guard-mvp"
+    expect_exit: 0
+  - cmd: "cd diting-src && make smoke-cryo-guard-mvp"
+    expect_keywords:
+      - "RiskEvent 写入与读取通过"
+      - "缺 evidence 的 GateRequest 被 reject"
+      - "AuditEntry 已生成"
+
+exit_criteria:
+  - 任意模块的 RiskEvent < 2s 在前端可见
+  - 缺 evidence_ref 的 GateRequest 被 reject 且生成 AuditEntry
+  - 单元 + 集成测试覆盖率 ≥ 70%
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: 回退到最近一次稳定提交并在 04_/极寒防御/01_MVP_*_实践.md "本步骤失败时" 节登记

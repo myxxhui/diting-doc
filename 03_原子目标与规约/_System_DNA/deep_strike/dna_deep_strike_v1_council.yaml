@@ -1,0 +1,65 @@
+# 纵深进攻 V1 多 Agent 议会 · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: deep_strike_v1_council
+pillar: deep_strike
+milestone: v1
+
+design_doc: ../../纵深进攻/05_实施推演_设计.md#三v1完整能力
+l4_doc:    ../../../04_阶段规划与实践/纵深进攻/02_V1_council_本阶段实践与验证.md
+l5_anchor: l5-pillar-deep-v1-council
+
+work_dir: diting-src/diting/deep_strike/council/
+
+services_in_scope:
+  - moe_router
+  - multi_agent_collaboration_with_voting
+  - event_triggered_agenda
+  - user_live_topic_e2e
+  - tool_call_full_trace
+
+moe_router:
+  experts:
+    - { id: claude_sonnet, suited_for: [reasoning_heavy, structured_output] }
+    - { id: gpt_5,         suited_for: [domain_breadth, code_synthesis] }
+    - { id: deepseek_v3,   suited_for: [chinese_corpus, cost_efficient] }
+    - { id: doubao,        suited_for: [chinese_corpus, vendor_diversity] }
+  routing_accuracy_min_pct: 80
+  config_key: deep_strike.council.moe_router
+
+multi_agent_collaboration_with_voting:
+  min_agents: 3
+  voting_strategy: weighted_majority_with_dissent
+  consensus_min_score: 0.6
+  dissent_must_be_recorded: true
+
+event_triggered_agenda:
+  sources: [cryo_guard_risk_events, data_layer_events]
+  webhook_topic: "diting.events.agenda"
+
+user_live_topic_e2e:
+  p50_seconds: 30
+  p99_seconds: 120
+
+tool_call_full_trace:
+  table: tool_calls
+  fields_required: [agent_id, tool_id, args_hash, output_hash, duration_ms, error]
+
+depends_on:
+  - deep_strike_mvp
+
+verification_commands:
+  - cmd: "cd diting-src && make test-deep-strike-council"
+    expect_exit: 0
+  - cmd: "cd diting-src && make e2e-user-live-topic"
+    expect_keywords: ["P50<=30s", "P99<=120s"]
+  - cmd: "cd diting-src && make e2e-event-triggered-agenda"
+    expect_keywords: ["e2e<=60s"]
+
+exit_criteria:
+  - 用户议题响应 P50 < 30s
+  - 3+ Agent 投票 + 共识聚合通过
+  - tool_call 100% 入表
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: Agent 失败 → 转规则路径 + degraded=true

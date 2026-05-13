@@ -1,0 +1,86 @@
+# 共享平台基础 · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: shared_platform_baseline
+pillar: shared_platform
+milestone: mvp
+
+design_doc: ../../_共享规约/README.md
+l4_doc:    ../../../04_阶段规划与实践/共享平台基础/01_本阶段实践与验证.md
+l5_anchor: l5-shared-platform-baseline
+
+work_dir: diting-infra/
+
+services_in_scope:
+  - postgresql_cluster
+  - timescaledb_extension
+  - opensearch_cluster
+  - redis_cluster
+  - kafka_cluster
+  - object_storage   # S3 兼容（阿里云 OSS）
+  - k3s_cluster
+  - hami_gpu_partitioner
+  - inference_gateway_vllm
+  - config_center
+  - api_gateway_with_jwt
+  - mtls_intra_service
+  - cdn_static
+
+stack_versions:
+  postgresql: ">=15.0"
+  timescaledb: ">=2.13"
+  opensearch: ">=2.11"
+  redis: ">=6.2"
+  kafka: ">=3.6"
+  k3s: ">=v1.28"
+  vllm: ">=0.5.0"
+  hami: ">=2.4"
+
+inference_gateway:
+  api: openai_compatible
+  lora_multiplexing: true
+  health_check: required
+  rate_limit: required
+  cost_metering: required
+
+config_center:
+  hot_reload: true
+  versioning: true
+  audit: true
+  hot_reload_p99_seconds: 30
+
+auth_gateway:
+  jwt: required
+  mtls_between_services: required
+  waf: required
+
+cdn:
+  static_assets: required
+
+depends_on: []
+
+verification_commands:
+  - cmd: "cd diting-infra && make smoke-platform"
+    expect_exit: 0
+  - cmd: "cd diting-infra && make smoke-postgres"
+    expect_exit: 0
+  - cmd: "cd diting-infra && make smoke-opensearch"
+    expect_keywords: ["green"]
+  - cmd: "cd diting-infra && make smoke-kafka"
+    expect_exit: 0
+  - cmd: "cd diting-infra && make smoke-inference"
+    expect_keywords: ["model"]
+  - cmd: "cd diting-infra && make smoke-config-center"
+    expect_exit: 0
+  - cmd: "cd diting-infra && make smoke-auth-gateway"
+    expect_exit: 0
+
+exit_criteria:
+  - 所有共享组件健康检查通过
+  - 推理网关可调用并返回响应
+  - 配置中心热更新 < 30s
+  - 鉴权流程通；JWT 可被服务间校验
+  - CDN 缓存命中率统计可见
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: "helm rollback diting-stack <last-stable>；登记 06_/审计；通知架构师"

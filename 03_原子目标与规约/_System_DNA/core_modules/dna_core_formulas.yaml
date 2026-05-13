@@ -1,0 +1,68 @@
+# 跨模块共享公式与常量
+schema_version: "1.0.0"
+
+# 一、议会与候选评分
+council:
+  consensus_score:
+    formula: "weighted_avg(agent_scores, weights=router_weights)"
+    threshold_active: 0.6
+    threshold_promote_to_observation: 0.7
+    threshold_promote_to_active: 0.8
+
+  expectation_gap_score:
+    formula: "alpha * (own_estimate - market_consensus) + (1-alpha) * narrative_momentum"
+    alpha_default: 0.6
+    decay_function: "exp(-lambda * days)"
+    lambda_default: 0.05
+
+# 二、状态机迁移
+state_machine:
+  watch_state_value_score:
+    formula: "thesis_strength * (1 - decay) - risk_offset"
+    decay_function: "linear_after_T_days"
+    T_default_days: 30
+
+# 三、四大退出模型（与战略文档一致）
+exit_models:
+  - id: sli_breaker
+    cn: 逻辑物理证伪（SLI Breaker）
+    trigger: "核心 SLI 指标跌破阈值（订单 / 流量 / 渠道等）"
+    action: "立即标记 instance ARCHIVED + Advisory.exit"
+  - id: valuation_overload
+    cn: Alpha 衰减与情绪过载（Valuation Overload）
+    trigger: "估值分位 > P95 且 RSI > 80 且 expectation_gap_score < 0"
+    action: "Advisory.warning + 拟出 50% 仓位"
+  - id: narrative_drift_corrector
+    cn: 叙事漂移纠察（Narrative Drift Corrector）
+    trigger: "原始叙事关键词消失或与新事件冲突 > 30%"
+    action: "Advisory.review + 触发议会重审"
+  - id: opportunity_cost_router
+    cn: 机会成本重调度（Opportunity Cost Router）
+    trigger: "存在更高 expectation_gap_score 的候选 active 且当前实例 < 阈值"
+    action: "Advisory.rebalance"
+
+# 四、风控（沿用 L1 不可能三角约束）
+risk:
+  single_trade_max_loss_pct: 2
+  reward_to_risk_min: 1.5
+  max_drawdown_pct: 12
+  win_rate_min_pct: 85           # 与 L1 长期目标一致
+
+# 五、AI 推理与成本
+inference:
+  cost_per_1k_tokens_budget_usd:
+    default: 0.01
+    high_priority: 0.05
+  daily_token_budget_per_user:
+    free: 50_000
+    pro: 500_000
+
+# 六、引用关系
+references:
+  l3_specs:
+    - ../../_共享规约/01_核心公式与基础规范.md
+    - ../../_共享规约/06_动态配置中心规约.md
+  l3_pillars:
+    - ../../纵深进攻/04_数据契约_设计.md
+    - ../../状态机监控/04_数据契约_设计.md
+    - ../../超级个体进化/04_数据契约_设计.md

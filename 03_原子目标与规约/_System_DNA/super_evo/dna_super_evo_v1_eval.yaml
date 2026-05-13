@@ -1,0 +1,56 @@
+# 超级个体进化 V1 评测中枢 · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: super_evo_v1_eval
+pillar: super_evo
+milestone: v1
+
+design_doc: ../../超级个体进化/05_实施推演_设计.md#三v1完整能力
+l4_doc:    ../../../04_阶段规划与实践/超级个体进化/02_V1_eval_本阶段实践与验证.md
+l5_anchor: l5-pillar-evo-v1-eval
+
+work_dir: diting-src/diting/super_evo/eval_center/
+
+services_in_scope:
+  - eval_dataset_governance
+  - multi_judge_strategies
+  - eval_report_center
+  - integration_with_deep_strike
+
+eval_dataset_governance:
+  versioning: true
+  signature_required: true
+  cross_leak_detector: true
+
+multi_judge_strategies:
+  - { id: rule,  weight: 0.3 }
+  - { id: llm,   weight: 0.5, judges: [claude_sonnet, gpt_5] }
+  - { id: human, weight: 0.2, sample_pct: 10 }
+
+eval_report_center:
+  ui_path: super_evo_console_evals
+  leaderboard: true
+  diff_compare: true
+
+integration_with_deep_strike:
+  webhook_topic: "diting.events.eval.report"
+  target_dashboard: deep_strike_council_grayscale_dashboard
+
+depends_on:
+  - super_evo_mvp
+
+verification_commands:
+  - cmd: "cd diting-src && make test-eval-center"
+    expect_exit: 0
+  - cmd: "cd diting-src && make eval-pollution-check"
+    expect_keywords: ["no_cross_leak"]
+  - cmd: "cd diting-src && make multi-judge-bench"
+    expect_keywords: ["judges_concurrent_pass"]
+
+exit_criteria:
+  - 数据集签名校验通过
+  - 多评测官并行
+  - 评测报告与议会同步
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: judge 不一致 → 触发人工复评 + 记录 dispute

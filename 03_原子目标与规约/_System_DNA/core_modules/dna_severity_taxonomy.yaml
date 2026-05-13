@@ -1,0 +1,59 @@
+# 全局严重度 / 通知优先级
+schema_version: "1.0.0"
+
+severities:
+  - id: critical
+    cn: 严重
+    color: "#DC2626"     # red-600
+    notification_bypass_budget: true
+    sla_response_minutes: 5
+    escalation_required: true
+    examples:
+      - "决策门禁 reject 出站对象"
+      - "审计链断裂"
+      - "Sandbox 逃逸"
+  - id: high
+    cn: 高
+    color: "#F59E0B"     # amber
+    notification_bypass_budget: false
+    sla_response_minutes: 30
+    examples:
+      - "状态机硬阈值触发"
+      - "推理熔断时长 > 5min"
+  - id: medium
+    cn: 中
+    color: "#EAB308"     # yellow
+    sla_response_minutes: 240
+    examples:
+      - "Advisory.warning"
+      - "议会卡片置信度 < 阈值"
+  - id: low
+    cn: 低
+    color: "#10B981"     # green
+    sla_response_minutes: 1440
+    examples:
+      - "Advisory.notice"
+      - "周期议程产出"
+  - id: info
+    cn: 信息
+    color: "#64748B"     # slate
+    examples:
+      - "状态迁移到 OBSERVATION"
+      - "数据采集完成"
+
+notification_channel_matrix:
+  critical:    [push, sms, email, in_app, audit_log]
+  high:        [push, email, in_app]
+  medium:      [in_app, daily_digest]
+  low:         [daily_digest]
+  info:        [in_app_only]
+
+risk_event_severity_mapping:
+  cryo_guard.audit_chain_break:    critical
+  cryo_guard.sandbox_escape:       critical
+  cryo_guard.gate_reject:          high
+  state_watch.hard_threshold_hit:  high
+  state_watch.advisory_warning:    medium
+  deep_strike.session_failed:      medium
+  super_evo.canary_regression:     high
+  super_evo.online_learning_drift: high

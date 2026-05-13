@@ -80,7 +80,7 @@ Accepted
 ### 决策中枢模块实现
 
 ```python
-# diting-core/diting/gavel/defensive_mode.py
+# diting-src/diting/gavel/defensive_mode.py
 class DefensiveMode:
     def check_defensive_mode(self, current_annual_return: float) -> bool:
         """检查是否触发防御性复利模式"""

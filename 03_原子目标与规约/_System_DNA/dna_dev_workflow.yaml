@@ -1,539 +1,613 @@
-# 开发工作流阶段与模块映射（单轨 Stage1～5）
-# 说明：L4 执行顺序来源于本文件 workflow_stages。
-# 规约文档（AI 可读）：03_原子目标与规约/节奏与交付/01_开发生命周期与实践流程规约.md、03_原子目标与规约/平台与产品/01_需求与产品范围.md
-# 2026-04 重构：历史交易导向阶段收敛为双目标 Stage1～5
+# =============================================================================
+# dna_dev_workflow.yaml — Diting 开发工作流 DNA
+# 版本：v2.0（2026-05-13 重构后）
+# 已移除：stage1~5 旧体系
+# 当前结构：按四大模块 + 前端 + 平台基础组织 workflow_stages
+# 单一真相：本文件为 L4/L5 开发工作流的真相源
+# =============================================================================
+schema_version: "2.0.0"
+project: diting
+last_updated: "2026-05-13"
 
-execution_order:
-  - stage1_01
-  - stage1_02
-  - stage1_03
-  - stage1_04
-  - stage2_01
-  - stage2_02
-  - stage2_03
-  - stage2_04
-  - stage2_05
-  - stage2_06
-  - stage3_01
-  - stage3_02
-  - stage3_03
-  - stage3_04
-  - stage3_05
-  - stage3_06
-  - stage4_01
-  - stage4_02
-  - stage4_03
-  - stage5_01
-  - stage5_02
-  - stage5_03
-  - stage5_04
+# =============================================================================
+# 顶层映射
+# =============================================================================
+deployable_units_ref: global_const.deployable_units
+
+# 每条 workflow_stages 项：
+#   stage_id           ：唯一稳定 ID（用于 L5 行锚 / 索引）
+#   pillar             ：所属抽象模块（cryo_guard / deep_strike / state_watch / super_evo / frontend / shared_platform）
+#   milestone          ：mvp / v1 / v2
+#   title              ：人可读
+#   description        ：1~2 句目标
+#   work_dir           ：工作目录（仓库相对路径）
+#   design_doc         ：L3 设计文档（带锚点）
+#   dna_file           ：步骤级 DNA 文件
+#   delivery_scope     ：本步交付的能力清单
+#   exit_criteria      ：准出标准
+#   verification_commands ：可执行验证命令
+#   l5_stage_anchor    ：L5 02_验收标准 行锚
+#   depends_on         ：前置 stage_id 列表
 
 workflow_stages:
-  # ----- Stage1 仓库与骨架 -----
-  - stage_id: "stage1_01"
-    name: "三位一体仓库初始化"
-    l4_stage_dir: "Stage1_仓库与骨架"
-    l4_step_doc: "01_三位一体仓库_实践.md"
-    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/01_三位一体仓库_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/01_dna_三位一体仓库.yaml"
-    step_count: 1
-    delivery_scope: "三仓目录符合 03_原子目标与规约/_共享规约/02_三位一体仓库规约.md；diting-core 含 Makefile（test 可为占位）；diting-infra 初始化"
-    env_stage: "local"
-    env_minimal_full: "Minimal"
-    entry_criteria: "03_原子目标与规约/ 与 03_原子目标与规约/_System_DNA/ 已定稿"
-    exit_criteria: "三仓存在且目录与 global_const.trinity_repos 一致；diting-core make test 占位通过"
-    test_focus: "bootstrap"
-    deploy_action: "none"
-    l5_validation_ref: "05_成功标识与验证/02_验收标准.md#l5-stage-stage1_01"
-    l5_stage_anchor: "l5-stage-stage1_01"
-    work_dir:
-      type: "parent_path"
-      repo_ref: null
-      description: "新建仓库的父路径（global_const.trinity_repos.parent_path_default）"
+
+  # ===========================================================================
+  # 极寒防御
+  # ===========================================================================
+  - stage_id: cryo_guard_mvp
+    pillar: cryo_guard
+    milestone: mvp
+    title: 极寒防御 MVP
+    description: 风险事件总线 + 决策门禁器（schema/evidence 两层）+ 审计日志（无链式 hash）+ 风险熔断面板 MVP
+    work_dir: diting-src/diting/cryo_guard/
+    design_doc: ../极寒防御/05_实施推演_设计.md#二mvp最小可用产品
+    dna_file: cryo_guard/dna_cryo_guard_mvp.yaml
+    delivery_scope:
+      - proto_v1_minimal: [RiskEvent, GateRequest, GateDecision, AuditEntry]
+      - db_tables: [risk_events, gate_decisions, audit_logs]
+      - service_risk_event_bus_basic
+      - service_decision_gate_layers: [schema, evidence]
+      - service_audit_log_basic
+      - frontend_risk_dashboard_mvp
+    exit_criteria:
+      - 任意模块的 RiskEvent < 2s 在前端可见
+      - 缺 evidence_ref 的 GateRequest 被 reject 且生成 AuditEntry
+      - 单元 + 集成测试覆盖率 ≥ 70%
     verification_commands:
-      - cmd: "make -C diting-core test"
-        cwd_ref: "parent_path"
-        expected_exit: 0
-        expected_outcome: "退出码 0（占位通过）"
-        failure_hint: "检查 diting-core 目录与 Makefile 是否存在"
-    on_failure:
-      retry_max: 3
-      rollback_to: "previous_stage_last_step"
-    five_d_steps: ["Design", "Drive"]
-    consumes: ["03_原子目标与规约 与 _System_DNA 定稿"]
-    artifacts: ["diting-core 目录与 Makefile", "diting-infra 目录"]
+      - { cmd: "cd diting-src && make test-cryo-guard-mvp", expect: "exit 0" }
+      - { cmd: "cd diting-src && make smoke-cryo-guard-mvp", expect: "RiskEvent 写入与读取通过；门禁拒绝示例通过" }
+    l5_stage_anchor: l5-pillar-cryo-mvp
+    depends_on: [shared_platform_baseline]
 
-  - stage_id: "stage1_02"
-    name: "核心接口与Proto占位"
-    l4_stage_dir: "Stage1_仓库与骨架"
-    l4_step_doc: "02_核心接口与Proto_实践.md"
-    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/02_核心接口与Proto_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/02_dna_核心接口与Proto.yaml"
-    delivery_scope: "核心接口、Proto 占位与目录占位实现"
-    env_stage: "local"
-    entry_criteria: "Stage1-01 准出"
-    exit_criteria: "核心接口存在且本地单测通过；目录与占位实现可运行"
-    test_focus: "unit"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
+  - stage_id: cryo_guard_v1
+    pillar: cryo_guard
+    milestone: v1
+    title: 极寒防御 V1
+    description: 完整 5 子模块 + 动态配置中心 + 链式 hash + 签名快照 + OpenSearch 索引
+    work_dir: diting-src/diting/cryo_guard/
+    design_doc: ../极寒防御/05_实施推演_设计.md#三v1完整能力
+    dna_file: cryo_guard/dna_cryo_guard_v1.yaml
+    delivery_scope:
+      - input_sanitizer_full
+      - circuit_breaker_full
+      - decision_gate_layers_full: [schema, evidence, compliance, metric, sanitize, breaker, human]
+      - audit_chain_hash_and_snapshot
+      - opensearch_indexer
+      - dynamic_config_center_integration
+    exit_criteria:
+      - 红队对抗用例 ≥ 50 通过；FPR ≤ 5%、FNR ≤ 1%
+      - 故障注入：服务故障 → 60s 内熔断
+      - 审计链完整性校验定期任务跑通
+      - 检索 P99 < 1s
     verification_commands:
-      - cmd: "make test"
-        cwd_ref: "repo_i"
-        expected_exit: 0
-        expected_outcome: "退出码 0；单测全绿"
-    l5_stage_anchor: "l5-stage-stage1_02"
-    consumes: ["Stage1-01 准出"]
-    artifacts: ["核心接口与占位实现", "本地单测通过"]
+      - { cmd: "cd diting-src && make test-cryo-guard-v1", expect: "exit 0" }
+      - { cmd: "cd diting-src && make redteam-cryo-guard", expect: "通过率 ≥ 95%" }
+      - { cmd: "cd diting-src && make audit-chain-verify", expect: "OK" }
+    l5_stage_anchor: l5-pillar-cryo-v1
+    depends_on: [cryo_guard_mvp]
 
-  - stage_id: "stage1_03"
-    name: "基础设施 ECS 与 K3s 就绪"
-    l4_stage_dir: "Stage1_仓库与骨架"
-    l4_step_doc: "03_基础设施ECS与K3s_实践.md"
-    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/03_基础设施ECS与K3s_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/03_dna_基础设施ECS与K3s.yaml"
-    delivery_scope: "deploy-engine 引用与单一 YAML config 就绪；Up 产出 ECS+K3s；验证后 Down 回收"
-    env_stage: "local"
-    entry_criteria: "Stage1-02 准出"
-    exit_criteria: "Up 成功、KubeConfig 可用、验证通过；准出前已执行 Down 回收"
-    work_dir:
-      type: "repo_a"
-      repo_ref: "repo_a"
-      description: "diting-infra"
+  - stage_id: cryo_guard_v2
+    pillar: cryo_guard
+    milestone: v2
+    title: 极寒防御 V2
+    description: 嵌入式 SDK 全微服务落地 + 自动化合规导出 + 多租户隔离 + chaos engineering
+    work_dir: diting-src/diting/cryo_guard/
+    design_doc: ../极寒防御/05_实施推演_设计.md#四v2生产稳态
+    dna_file: cryo_guard/dna_cryo_guard_v2.yaml
+    delivery_scope:
+      - embedded_breaker_sdk_in_all_services
+      - automated_compliance_export
+      - multi_tenant_isolation
+      - chaos_engineering_suite
+    exit_criteria:
+      - 100% 出站对象走 decision_gate（旁路监测）
+      - 合规导出周期 ≤ 1 周
     verification_commands:
-      - cmd: "deploy-engine Up（或 make deploy）；KUBECONFIG 指向产出；kubectl get nodes 成功"
-        cwd_ref: "repo_a"
-        expected_exit: 0
-        expected_outcome: "集群可用"
-      - cmd: "deploy-engine Down（或 make down）；确认资源释放"
-        cwd_ref: "repo_a"
-        expected_exit: 0
-        expected_outcome: "竞价 ECS 等资源已回收"
-    l5_stage_anchor: "l5-stage-stage1_03"
-    consumes: ["Stage1-02 准出"]
-    artifacts: ["K3s 集群可用（验证后已回收）"]
-    on_failure:
-      retry_max: 3
-      rollback_to: "执行 Down 回收后回退到上一阶段最后一步"
+      - { cmd: "cd diting-src && make audit-coverage-report", expect: "decision_gate 覆盖率 = 100%" }
+      - { cmd: "cd diting-src && make chaos-cryo-guard", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-cryo-v2
+    depends_on: [cryo_guard_v1]
 
-  - stage_id: "stage1_04"
-    name: "密钥与配置模板就绪"
-    l4_stage_dir: "Stage1_仓库与骨架"
-    l4_step_doc: "04_密钥与配置模板_实践.md"
-    design_doc: "03_原子目标与规约/Stage1_仓库与骨架/04_密钥与配置模板_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage1_仓库与骨架/04_dna_密钥与配置模板.yaml"
-    delivery_scope: "Sealed-Secrets 模板或说明；.env.template 双仓占位；config 单一 YAML 模板可用"
-    env_stage: "local"
-    entry_criteria: "Stage1-03 准出"
-    exit_criteria: "secrets/ 含 Sealed-Secrets 模板或说明；config 模板可用；三项验证通过"
-    work_dir:
-      type: "repo_a"
-      repo_ref: "repo_a"
-      description: "diting-infra"
-    l5_stage_anchor: "l5-stage-stage1_04"
-    consumes: ["Stage1-03 准出"]
-    artifacts: ["Sealed-Secrets 模板", "config 模板", ".env.template 双仓"]
-
-  # ----- Stage2 数据采集与存储 -----
-  - stage_id: "stage2_01"
-    name: "基础设施与依赖部署"
-    l4_stage_dir: "Stage2_数据采集与存储"
-    l4_step_doc: "01_基础设施与依赖_实践.md"
-    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/01_基础设施与依赖_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/01_dna_基础设施与依赖.yaml"
-    delivery_scope: "TimescaleDB/Redis/PostgreSQL + init Job + Sealed-Secrets"
-    env_stage: "local"
-    env_minimal_full: "Minimal: 本地或轻量；Full: K3s 全栈"
-    entry_criteria: "Stage1-04 准出"
-    exit_criteria: "TimescaleDB/Redis/PostgreSQL 可用；Schema init Job 成功；下游可添加连接配置并调用表数据（V1～V7 全部符合）"
-    work_dir:
-      type: "repo_a"
-      repo_ref: "repo_a"
-      description: "diting-infra"
-    l5_stage_anchor: "l5-stage-stage2_01"
+  # ===========================================================================
+  # 纵深进攻
+  # ===========================================================================
+  - stage_id: deep_strike_mvp
+    pillar: deep_strike
+    milestone: mvp
+    title: 纵深进攻 MVP
+    description: 议会单 Agent + 候选注册表 + 周期议程 + 基础内容理解 + 与极寒防御门禁对接 + 候选广场 MVP
+    work_dir: diting-src/diting/deep_strike/
+    design_doc: ../纵深进攻/05_实施推演_设计.md#二mvp最小可用产品
+    dna_file: deep_strike/dna_deep_strike_mvp.yaml
+    delivery_scope:
+      - proto_v1: [ResearchCard, Candidate, CouncilSession, AgendaTopic, ToolCall]
+      - db_tables: [research_cards, candidates, council_sessions, agenda_topics, tool_calls, comprehension_*]
+      - content_comprehension_basic
+      - research_council_single_agent
+      - candidate_registry_basic
+      - agenda_orchestrator_periodic
+      - frontend_research_dashboard_mvp
+    exit_criteria:
+      - 周期议程稳定（每日 ≥ 1 议题）
+      - 卡片 100% 含证据链且能被门禁放行
+      - Session transcript 可被回放
     verification_commands:
-      - cmd: "V1～V7 见 01_dna_基础设施与依赖.yaml verification_commands；含 Chart 缓存、DB/Redis/PostgreSQL 可用、init Job 成功、Sealed-Secrets、下游 make verify-db-connection"
-        cwd_ref: "repo_a"
-        expected_exit: 0
-        expected_outcome: "全部验证项符合预期"
-    consumes: ["Stage1-04 准出"]
-    artifacts: ["基础组件 Chart", "Schema init Job 成功", "下游连接配置示例与验证通过"]
+      - { cmd: "cd diting-src && make test-deep-strike-mvp", expect: "exit 0" }
+      - { cmd: "cd diting-src && make smoke-deep-strike-mvp", expect: "周期议程触发 + 候选生成 + 门禁通过" }
+    l5_stage_anchor: l5-pillar-deep-mvp
+    depends_on: [cryo_guard_mvp, shared_platform_baseline]
 
-  - stage_id: "stage2_02"
-    name: "采集逻辑与Dockerfile"
-    l4_stage_dir: "Stage2_数据采集与存储"
-    l4_step_doc: "02_采集逻辑与Dockerfile_实践.md"
-    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/02_采集逻辑与Dockerfile_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/02_dna_采集逻辑与Dockerfile.yaml"
-    delivery_scope: "OHLCV/新闻/行业 全结构；Dockerfile；前期可少存数据"
-    entry_criteria: "Stage2-01 准出"
-    exit_criteria: "采集逻辑实现；make ingest-test 或等价可运行"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
+  - stage_id: deep_strike_v1_council
+    pillar: deep_strike
+    milestone: v1
+    title: 纵深进攻 V1 · 多 Agent 议会
+    description: MoE Router + 多 Agent 协作 + 事件触发议程 + 用户实时议题
+    work_dir: diting-src/diting/deep_strike/council/
+    design_doc: ../纵深进攻/05_实施推演_设计.md#三v1完整能力
+    dna_file: deep_strike/dna_deep_strike_v1_council.yaml
+    delivery_scope:
+      - moe_router
+      - multi_agent_collaboration_with_voting
+      - event_triggered_agenda
+      - user_live_topic_e2e
+    exit_criteria:
+      - 用户议题响应 P50 < 30s
+      - 3+ Agent 投票 → 共识聚合通过端到端测试
     verification_commands:
-      - cmd: "make ingest-test"
-        cwd_ref: "repo_i"
-        expected_exit: 0
-    l5_stage_anchor: "l5-stage-stage2_02"
-    consumes: ["Stage2-01 准出"]
-    artifacts: ["采集任务", "Dockerfile"]
+      - { cmd: "cd diting-src && make test-deep-strike-council", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-deep-v1-council
+    depends_on: [deep_strike_mvp]
 
-  - stage_id: "stage2_03"
-    name: "本地测试与K3s连调"
-    l4_stage_dir: "Stage2_数据采集与存储"
-    l4_step_doc: "03_本地测试与K3s连调_实践.md"
-    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/03_本地测试与K3s连调_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/03_dna_本地测试与K3s连调.yaml"
-    delivery_scope: "本地测试 + K3s 连调；本地进程连 K3s DB（NodePort）"
-    entry_criteria: "Stage2-02 准出"
-    exit_criteria: "本地采集可写 L1；MarketDataFeed 可读取（或单测+记录待补验）；五条 psql 验证与约定一致；回收环境（步骤 6、7、8 必做）"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
+  - stage_id: deep_strike_v1_feature
+    pillar: deep_strike
+    milestone: v1
+    title: 纵深进攻 V1 · 特征工程
+    description: 信号特征工程批 + 流双管道 + 嵌入向量索引 + 预期差量化
+    work_dir: diting-src/diting/deep_strike/feature_engine/
+    design_doc: ../纵深进攻/05_实施推演_设计.md#三v1完整能力
+    dna_file: deep_strike/dna_deep_strike_v1_feature.yaml
+    delivery_scope:
+      - feature_engine_batch
+      - feature_engine_stream
+      - embedding_index
+      - expectation_gap_quantifier
+    exit_criteria:
+      - 每日批跑成功；Feature Store 写入
+      - RAG 检索 P99 < 500ms
     verification_commands:
-      - cmd: "make ingest-test"
-        cwd_ref: "repo_i"
-        expected_exit: 0
-    l5_stage_anchor: "l5-stage-stage2_03"
-    consumes: ["Stage2-02 准出"]
-    artifacts: ["连调路径跑通"]
+      - { cmd: "cd diting-src && make test-feature-engine", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-deep-v1-feature
+    depends_on: [deep_strike_v1_council]
 
-  - stage_id: "stage2_04"
-    name: "镜像打包与ACR推送"
-    l4_stage_dir: "Stage2_数据采集与存储"
-    l4_step_doc: "04_镜像打包与ACR推送_实践.md"
-    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/04_镜像打包与ACR推送_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/04_dna_镜像打包与ACR推送.yaml"
-    delivery_scope: "镜像 tag = 时间+分支+版本号；DoD 含 git SHA、镜像 digest"
-    entry_criteria: "Stage2-03 准出"
-    exit_criteria: "make build 成功；镜像可推送"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
+  - stage_id: deep_strike_v1_eval
+    pillar: deep_strike
+    milestone: v1
+    title: 纵深进攻 V1 · 失败兜底与评测
+    description: 推理熔断时规则路径覆盖 + 评测集自动跑
+    work_dir: diting-src/diting/deep_strike/
+    design_doc: ../纵深进攻/05_实施推演_设计.md#三v1完整能力
+    dna_file: deep_strike/dna_deep_strike_v1_eval.yaml
+    delivery_scope:
+      - fallback_rule_paths
+      - eval_dataset_and_runner
+    exit_criteria:
+      - 推理熔断时 ≥ 95% 议题仍能输出
+      - 每周评测自动跑并报告至超级个体进化
     verification_commands:
-      - cmd: "make build"
-        cwd_ref: "repo_i"
-        expected_exit: 0
-    l5_stage_anchor: "l5-stage-stage2_04"
-    consumes: ["Stage2-03 准出"]
-    artifacts: ["镜像可推送"]
+      - { cmd: "cd diting-src && make test-deep-strike-eval", expect: "exit 0" }
+      - { cmd: "cd diting-src && make redteam-deep-strike-fallback", expect: "覆盖率 ≥ 95%" }
+    l5_stage_anchor: l5-pillar-deep-v1-eval
+    depends_on: [deep_strike_v1_council, super_evo_v1_eval]
 
-  - stage_id: "stage2_05"
-    name: "采集模块部署与验收"
-    l4_stage_dir: "Stage2_数据采集与存储"
-    l4_step_doc: "05_采集模块部署与验收_实践.md"
-    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/05_采集模块部署与验收_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/05_dna_采集模块部署与验收.yaml"
-    delivery_scope: "采集模块部署；真实数据可写入 L1/L2 且可被 Module A/B/C 消费"
-    entry_criteria: "Stage2-04 准出"
-    exit_criteria: "make ingest-test 或 DNA 约定命令退出码 0；写入与读取验证通过"
-    work_dir:
-      type: "repo_a"
-      repo_ref: "repo_a"
-      description: "diting-infra"
+  - stage_id: deep_strike_v2_runtime
+    pillar: deep_strike
+    milestone: v2
+    title: 纵深进攻 V2 · Tool Runtime 与自适应
+    description: browser/computer-use Tool Runtime + 自适应议程 + 跨议题学习 + 多模态证据
+    work_dir: diting-src/diting/deep_strike/
+    design_doc: ../纵深进攻/05_实施推演_设计.md#四v2生产稳态
+    dna_file: deep_strike/dna_deep_strike_v2.yaml
+    delivery_scope:
+      - tool_runtime_browser_and_cu
+      - adaptive_agenda
+      - cross_topic_learning
+      - multimodal_evidence
+    exit_criteria:
+      - Tool Runtime 沙箱安全（无逃逸）
+      - 自适应议程指标可衡量
     verification_commands:
-      - cmd: "make ingest-test"
-        cwd_ref: "repo_i"
-        expected_exit: 0
-    l5_stage_anchor: "l5-stage-stage2_05"
-    consumes: ["Stage2-04 准出"]
-    artifacts: ["采集模块部署成功", "Stage2 准出"]
+      - { cmd: "cd diting-src && make sandbox-escape-tests", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-deep-v2-runtime
+    depends_on: [deep_strike_v1_council, deep_strike_v1_feature]
 
-  - stage_id: "stage2_06"
-    name: "生产级数据要求"
-    l4_stage_dir: "Stage2_数据采集与存储"
-    l4_step_doc: "06_生产级数据要求_实践.md"
-    design_doc: "03_原子目标与规约/Stage2_数据采集与存储/06_生产级数据要求_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage2_数据采集与存储/06_dna_生产级数据要求.yaml"
-    delivery_scope: "生产级数据要求规约与验收就绪；11_ 与 06_ 设计/实践一致"
-    entry_criteria: "Stage2-05 准出"
-    exit_criteria: "06 设计/DNA/实践 1:1:1；11_ 已链 06；L5 stage2_06 已更新；可执行验证（若有）可跑"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
+  # ===========================================================================
+  # 状态机监控
+  # ===========================================================================
+  - stage_id: state_watch_mvp
+    pillar: state_watch
+    milestone: mvp
+    title: 状态机监控 MVP
+    description: 内置 1~2 模板 + 行情探针 + 简单迁移 + Advisory（无门禁）+ 关注列表中心 MVP
+    work_dir: diting-src/diting/state_watch/
+    design_doc: ../状态机监控/05_实施推演_设计.md#二mvp最小可用产品
+    dna_file: state_watch/dna_state_watch_mvp.yaml
+    delivery_scope:
+      - proto_v1: [StateMachineTemplate, StateMachineInstance, ProbeResult, TransitionEvent, Advisory, WatchList]
+      - db_tables: [templates, instances, instance_history, probe_results, transition_events, advisories, watchlists]
+      - templates_seed: 2
+      - probe_quote_5min
+      - transition_evaluator_dsl
+      - advisory_generator_no_gate
+      - notification_push_email
+      - watchlist_crud
+      - frontend_watchlist_center_mvp
+    exit_criteria:
+      - 行情触发的迁移 < 10s 在前端可见
+      - 通知能投递（push/email）
     verification_commands:
-      - cmd: "grep -q '生产级数据要求' 03_原子目标与规约/_共享规约/11_数据采集与输入层规约.md"
-        cwd_ref: "doc_root"
-        description: "检查 11_ 中生产级数据要求小节存在"
-      - cmd: "test -f 03_原子目标与规约/Stage2_数据采集与存储/06_生产级数据要求_设计.md && test -f 04_阶段规划与实践/Stage2_数据采集与存储/06_生产级数据要求_实践.md"
-        cwd_ref: "doc_root"
-        description: "检查 06_ 设计与实践文档存在"
-    l5_stage_anchor: "l5-stage-stage2_06"
-    consumes: ["Stage2-05 准出"]
-    artifacts: ["生产级数据要求验收就绪"]
+      - { cmd: "cd diting-src && make test-state-watch-mvp", expect: "exit 0" }
+      - { cmd: "cd diting-src && make smoke-state-watch-mvp", expect: "实例创建 + 探针 + 迁移 + Advisory 端到端" }
+    l5_stage_anchor: l5-pillar-watch-mvp
+    depends_on: [shared_platform_baseline]
 
-  # ----- Stage3 模块实践（6 步：语义分类器、B模块策略、量化扫描引擎、MoE议会、热路径、全链路验证） -----
-  - stage_id: "stage3_01"
-    name: "语义分类器"
-    l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "01_语义分类器_实践.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/01_语义分类器_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/01_dna_语义分类器.yaml"
-    delivery_scope: "Module A 四项 100%，单模块+联动+全链路验证"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-mod-A"
-    consumes: ["Stage2-05 准出"]
-    artifacts: ["语义分类器实现"]
-
-  - stage_id: "stage3_02"
-    name: "B模块策略设计/实践/验证/优化"
-    l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "02_B模块策略_实践.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/02_B模块策略_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/02_dna_B模块策略.yaml"
-    delivery_scope: "策略规约、scanner_rules schema、Alphalens/Qlib 验证（或占位）"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-stage-stage3_02"
-    consumes: ["Stage3-01 准出"]
-    artifacts: ["策略实现规约", "scanner_rules.yaml 及 schema"]
-
-  - stage_id: "stage3_03"
-    name: "量化扫描引擎"
-    l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "03_量化扫描引擎_实践.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/03_量化扫描引擎_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/03_dna_量化扫描引擎.yaml"
-    delivery_scope: "Module B 四项 100%"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-mod-B"
-    consumes: ["Stage3-02 准出"]
-    artifacts: ["量化扫描引擎实现"]
-
-  - stage_id: "stage3_04"
-    name: "MoE 议会"
-    l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "04_MoE议会_实践.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/04_MoE议会_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/04_dna_MoE议会.yaml"
-    delivery_scope: "Module C 四项 100%"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-mod-C"
-    consumes: ["Stage3-03 准出"]
-    artifacts: ["MoE 议会实现"]
-
-  - stage_id: "stage3_05"
-    name: "热路径决策风控与执行"
-    l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "05_决策风控与动作主链_实践.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/05_决策风控与动作主链_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/05_dna_决策风控与动作主链.yaml"
-    delivery_scope: "热路径 D+E+F 四项 100%；研究到执行主链路验证"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-stage-stage3_05"
-    consumes: ["Stage3-04 准出"]
-    artifacts: ["热路径 D+E+F 实现", "全链路 A→F 验证通过"]
-
-  - stage_id: "stage3_06"
-    name: "全链路验证"
-    l4_stage_dir: "Stage3_模块实践"
-    l4_step_doc: "06_全链路验证_实践.md"
-    design_doc: "03_原子目标与规约/Stage3_模块实践/06_全链路验证_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage3_模块实践/06_dna_全链路验证.yaml"
-    delivery_scope: "A→F 全链路可运行；Mock/Table-Driven 验证通过"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
+  - stage_id: state_watch_v1_probe
+    pillar: state_watch
+    milestone: v1
+    title: 状态机监控 V1 · 多探针与自适应
+    description: 多类探针（行情/新闻/衍生）+ 自适应频率 + 越界保护带
+    work_dir: diting-src/diting/state_watch/probe/
+    design_doc: ../状态机监控/05_实施推演_设计.md#三v1完整能力
+    dna_file: state_watch/dna_state_watch_v1_probe.yaml
+    delivery_scope:
+      - probe_news_realtime
+      - probe_derivative
+      - adaptive_frequency
+      - guards_hard_and_soft
+    exit_criteria:
+      - 实时新闻可触发迁移
+      - 高活跃实例 interval 自动缩短
     verification_commands:
-      - cmd: "make test"
-        cwd_ref: "repo_i"
-        expected_exit: 0
-    l5_stage_anchor: "l5-stage-stage3_06"
-    consumes: ["Stage3-06 准出"]
-    artifacts: ["全链路验证通过", "Stage3 准出"]
+      - { cmd: "cd diting-src && make test-state-watch-probe", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-watch-v1-probe
+    depends_on: [state_watch_mvp]
 
-  # ----- Stage4 MoE 与执行网关 -----
-  - stage_id: "stage4_01"
-    name: "Module C MoE 议会接入"
-    l4_stage_dir: "Stage4_MoE与执行网关"
-    l4_step_doc: "01_ModuleC_MoE议会接入_实践.md"
-    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/01_ModuleC_MoE议会接入_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/01_dna_ModuleC_MoE议会接入.yaml"
-    delivery_scope: "Router 按 Tag 分发，专家意见与 D 对接"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-func-05"
-    consumes: ["Stage3-06 准出"]
-    artifacts: ["MoE 议会接入"]
+  - stage_id: state_watch_v1_gate
+    pillar: state_watch
+    milestone: v1
+    title: 状态机监控 V1 · 与极寒防御联动
+    description: Advisory 必经极寒防御 decision_gate；缺 evidence/fallback 被拒
+    work_dir: diting-src/diting/state_watch/advisory/
+    design_doc: ../状态机监控/05_实施推演_设计.md#三v1完整能力
+    dna_file: state_watch/dna_state_watch_v1_gate.yaml
+    delivery_scope:
+      - advisory_with_evidence_and_fallback
+      - integration_with_cryo_guard_decision_gate
+    exit_criteria:
+      - 缺 evidence 或 fallback 的 Advisory 被门禁 reject
+      - 端到端审计链完整
+    verification_commands:
+      - { cmd: "cd diting-src && make test-state-watch-gate", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-watch-v1-gate
+    depends_on: [state_watch_mvp, cryo_guard_v1]
 
-  - stage_id: "stage4_02"
-    name: "Module F 执行网关接入"
-    l4_stage_dir: "Stage4_MoE与执行网关"
-    l4_step_doc: "02_ModuleF执行网关接入_实践.md"
-    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/02_ModuleF执行网关接入_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/02_dna_ModuleF执行网关接入.yaml"
-    delivery_scope: "Broker 抽象与占位/仿真实现，E→F 衔接"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-func-06"
-    consumes: ["Stage4-01 准出"]
-    artifacts: ["执行网关接入"]
+  - stage_id: state_watch_v1_budget
+    pillar: state_watch
+    milestone: v1
+    title: 状态机监控 V1 · 通知预算
+    description: 通知预算 + digest 策略 + 与纵深进攻候选 active 联动 + SSE + OpenSearch
+    work_dir: diting-src/diting/state_watch/notification/
+    design_doc: ../状态机监控/05_实施推演_设计.md#三v1完整能力
+    dna_file: state_watch/dna_state_watch_v1_budget.yaml
+    delivery_scope:
+      - notification_budget_with_digest
+      - integration_with_deep_strike_candidate_active
+      - sse_realtime
+      - opensearch_indexer
+    exit_criteria:
+      - 单用户单日通知 ≤ 配置上限；超出走 digest
+      - 候选 active → 自动拉起实例
+    verification_commands:
+      - { cmd: "cd diting-src && make test-state-watch-budget", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-watch-v1-budget
+    depends_on: [state_watch_v1_probe, state_watch_v1_gate, deep_strike_mvp]
 
-  - stage_id: "stage4_03"
-    name: "评测或仿真验证"
-    l4_stage_dir: "Stage4_MoE与执行网关"
-    l4_step_doc: "03_评测或仿真验证_实践.md"
-    design_doc: "03_原子目标与规约/Stage4_MoE与执行网关/03_评测或仿真验证_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage4_MoE与执行网关/03_dna_评测或仿真验证.yaml"
-    delivery_scope: "Docker/K3s 下评测或仿真路径跑通"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-func-07"
-    consumes: ["Stage4-02 准出"]
-    artifacts: ["评测/仿真验证", "Stage4 准出"]
+  - stage_id: state_watch_v2_template
+    pillar: state_watch
+    milestone: v2
+    title: 状态机监控 V2 · 模板灰度与自定义探针
+    description: 模板版本灰度 + 实例升级 + 自定义探针（沙箱）+ 跨用户聚合 + 模板市场
+    work_dir: diting-src/diting/state_watch/
+    design_doc: ../状态机监控/05_实施推演_设计.md#四v2生产稳态
+    dna_file: state_watch/dna_state_watch_v2.yaml
+    delivery_scope:
+      - template_canary_rollout
+      - instance_upgrade
+      - custom_probe_in_sandbox
+      - cross_user_aggregation
+      - template_marketplace
+    exit_criteria:
+      - 模板灰度可推进与回滚
+      - 自定义探针沙箱无逃逸
+    verification_commands:
+      - { cmd: "cd diting-src && make sandbox-escape-tests-state-watch", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-watch-v2-template
+    depends_on: [state_watch_v1_budget]
 
-  # ----- Stage5 优化与扩展 -----
-  - stage_id: "stage5_01"
-    name: "可观测性与日志指标"
-    l4_stage_dir: "Stage5_优化与扩展"
-    l4_step_doc: "01_可观测性与日志指标_实践.md"
-    design_doc: "03_原子目标与规约/Stage5_优化与扩展/01_可观测性与日志指标_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/01_dna_可观测性与日志指标.yaml"
-    delivery_scope: "日志/指标/健康检查满足 03_原子目标与规约 中可观测性相关规约（见 design_doc）"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-func-08"
-    consumes: ["Stage4-03 准出"]
-    artifacts: ["可观测性就绪"]
+  # ===========================================================================
+  # 超级个体进化
+  # ===========================================================================
+  - stage_id: super_evo_mvp
+    pillar: super_evo
+    milestone: mvp
+    title: 超级个体进化 MVP
+    description: 反馈采集 + 知识库 + RAG + 外部动作边界（仅通知）+ 版本注册 + 智能记忆栈 MVP
+    work_dir: diting-src/diting/super_evo/
+    design_doc: ../超级个体进化/05_实施推演_设计.md#二mvp最小可用产品
+    dna_file: super_evo/dna_super_evo_mvp.yaml
+    delivery_scope:
+      - proto_v1_minimal: [UserFeedback, ImplicitSignal, KnowledgeEntry, RAGQuery, RAGResult, ExternalActionRequest, ExternalActionResult, VersionEntry]
+      - db_tables: [feedback_explicit, feedback_implicit, knowledge_entries, version_entries, external_action_records]
+      - feedback_collector
+      - knowledge_base_with_rag_pgvector
+      - external_action_boundary_notification_only
+      - version_manager_register_only
+      - frontend_memory_stack_mvp
+    exit_criteria:
+      - 反馈延迟 < 5s
+      - 议会能从 RAG 拉到知识
+      - 通知动作 100% 经门禁
+    verification_commands:
+      - { cmd: "cd diting-src && make test-super-evo-mvp", expect: "exit 0" }
+      - { cmd: "cd diting-src && make smoke-super-evo-mvp", expect: "反馈写入 + RAG 检索 + 通知触发 + 门禁审计 通过" }
+    l5_stage_anchor: l5-pillar-evo-mvp
+    depends_on: [cryo_guard_mvp, shared_platform_baseline]
 
-  - stage_id: "stage5_02"
-    name: "成本治理与Token熔断"
-    l4_stage_dir: "Stage5_优化与扩展"
-    l4_step_doc: "02_成本治理与Token熔断_实践.md"
-    design_doc: "03_原子目标与规约/Stage5_优化与扩展/02_成本治理与Token熔断_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/02_dna_成本治理与Token熔断.yaml"
-    delivery_scope: "Token 预算与熔断逻辑可生效"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-func-09"
-    consumes: ["Stage5-01 准出"]
-    artifacts: ["成本治理"]
+  - stage_id: super_evo_v1_eval
+    pillar: super_evo
+    milestone: v1
+    title: 超级个体进化 V1 · 评测中心
+    description: 评测集 + 任务 + 离线 runner + 报告
+    work_dir: diting-src/diting/super_evo/eval/
+    design_doc: ../超级个体进化/05_实施推演_设计.md#三v1完整能力
+    dna_file: super_evo/dna_super_evo_v1_eval.yaml
+    delivery_scope:
+      - eval_datasets_management
+      - eval_tasks_offline
+      - eval_runner_for_council_advisory_inference
+      - eval_reports
+    exit_criteria:
+      - 离线评测可跑通；评测集变更走审计
+    verification_commands:
+      - { cmd: "cd diting-src && make test-eval-center", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-evo-v1-eval
+    depends_on: [super_evo_mvp]
 
-  - stage_id: "stage5_03"
-    name: "多策略池或配置扩展"
-    l4_stage_dir: "Stage5_优化与扩展"
-    l4_step_doc: "03_多策略池或配置扩展_实践.md"
-    design_doc: "03_原子目标与规约/Stage5_优化与扩展/03_多策略池或配置扩展_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/03_dna_多策略池或配置扩展.yaml"
-    delivery_scope: "按 03_原子目标与规约/_共享规约/09_核心模块架构规约.md 与 03_原子目标与规约/平台与产品/01_需求与产品范围.md 第四节 L1 价值点查漏补缺"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    consumes: ["Stage5-02 准出"]
-    artifacts: ["多策略扩展"]
+  - stage_id: super_evo_v1_retro
+    pillar: super_evo
+    milestone: v1
+    title: 超级个体进化 V1 · 复盘 + 灰度
+    description: 周复盘 + 自动归因 + 版本灰度 + 一键回滚
+    work_dir: diting-src/diting/super_evo/
+    design_doc: ../超级个体进化/05_实施推演_设计.md#三v1完整能力
+    dna_file: super_evo/dna_super_evo_v1_retro.yaml
+    delivery_scope:
+      - retrospective_service_weekly
+      - attribution_analyzer
+      - version_rollout_plan
+      - one_click_rollback
+    exit_criteria:
+      - 每周自动复盘报告生成
+      - rollout 可推进；回滚可一键执行
+    verification_commands:
+      - { cmd: "cd diting-src && make test-retro", expect: "exit 0" }
+      - { cmd: "cd diting-src && make rollout-rollback-drill", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-evo-v1-retro
+    depends_on: [super_evo_v1_eval]
 
-  - stage_id: "stage5_04"
-    name: "Level1 入口与 L5 验收对齐"
-    l4_stage_dir: "Stage5_优化与扩展"
-    l4_step_doc: "04_Level1与L5验收对齐_实践.md"
-    design_doc: "03_原子目标与规约/Stage5_优化与扩展/04_Level1与L5验收对齐_设计.md"
-    dna_file: "03_原子目标与规约/_System_DNA/Stage5_优化与扩展/04_dna_Level1与L5验收对齐.yaml"
-    delivery_scope: "满足三级流水线 Level 1、功能/不可能三角可追溯"
-    work_dir:
-      type: "repo_i"
-      repo_ref: "repo_i"
-      description: "diting-core"
-    l5_stage_anchor: "l5-func-10"
-    consumes: ["Stage5-03 准出"]
-    artifacts: ["Level 1 入口满足", "Stage5 准出"]
+  - stage_id: super_evo_v1_version
+    pillar: super_evo
+    milestone: v1
+    title: 超级个体进化 V1 · 用户档案与反馈派发
+    description: 用户成长档案 + 知识衰减 worker + 反馈派发到评测/知识库 + 状态机长期反馈对接
+    work_dir: diting-src/diting/super_evo/
+    design_doc: ../超级个体进化/05_实施推演_设计.md#三v1完整能力
+    dna_file: super_evo/dna_super_evo_v1_version.yaml
+    delivery_scope:
+      - user_profile_service_with_gdpr
+      - knowledge_decay_worker
+      - feedback_dispatcher_to_eval_and_kb
+      - state_watch_long_term_feedback_integration
+    exit_criteria:
+      - GDPR 导出/删除可执行
+      - 知识衰减跑批；过期 entry 状态变更
+    verification_commands:
+      - { cmd: "cd diting-src && make test-profile-and-decay", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-evo-v1-version
+    depends_on: [super_evo_v1_retro, state_watch_v1_budget]
 
-# 可部署单元与 workflow_stages 映射（方案 B：多服务；热路径 D+E+F 同进程）
-# 与 global_const.deployable_units 一致
-deployable_units:
-  ingestion:
-    name: "数据采集与存储"
-    first_delivery_stage: "stage2_02"
-    first_docker_stage: "stage2_04"
-    first_k3s_stage: "stage2_05"
-  module_a:
-    name: "Module A 语义分类器"
-    first_delivery_stage: "stage3_01"
-    first_docker_stage: "stage3_01"  # 每单元独立构建时指向本单元 build stage
-    first_k3s_stage: "stage2_05"    # 或本单元 deploy stage
-  module_b:
-    name: "Module B 量化扫描引擎"
-    first_delivery_stage: "stage3_03"
-    first_docker_stage: "stage3_03"
-    first_k3s_stage: "stage2_05"
-  module_c:
-    name: "Module C MoE 议会"
-    first_delivery_stage: "stage3_04"
-    first_docker_stage: "stage3_04"
-    first_k3s_stage: "stage2_05"
-  hot_path_def:
-    name: "热路径 D+E+F"
-    first_delivery_stage: "stage3_05"  # 热路径 D+E+F 一步完成，同一镜像
-    first_docker_stage: "stage3_05"     # 热路径镜像在本步构建
-    first_k3s_stage: "stage2_05"
+  - stage_id: super_evo_v2_online
+    pillar: super_evo
+    milestone: v2
+    title: 超级个体进化 V2 · 在线 A/B 与自动归因
+    description: 在线 A/B + canary + 自动归因升级（反事实）+ 跨用户聚合（差分隐私）+ 自定义评测插件
+    work_dir: diting-src/diting/super_evo/
+    design_doc: ../超级个体进化/05_实施推演_设计.md#四v2生产稳态
+    dna_file: super_evo/dna_super_evo_v2.yaml
+    delivery_scope:
+      - online_ab_traffic_split
+      - canary_with_realtime_metrics
+      - counterfactual_attribution
+      - cross_user_aggregation_with_privacy
+      - custom_eval_plugins_in_sandbox
+    exit_criteria:
+      - 在线 A/B 可逆；指标恶化自动收敛
+      - 差分隐私指标达标
+    verification_commands:
+      - { cmd: "cd diting-src && make test-online-ab-and-privacy", expect: "exit 0" }
+    l5_stage_anchor: l5-pillar-evo-v2-online
+    depends_on: [super_evo_v1_version]
 
-# Release bundle：一次发布包含的镜像列表，与 03_原子目标与规约/节奏与交付/02_基础设施与部署规约.md 一致
+  # ===========================================================================
+  # 前端
+  # ===========================================================================
+  - stage_id: frontend_mvp
+    pillar: frontend
+    milestone: mvp
+    title: 前端 MVP
+    description: Monorepo + UI Kit MVP + S1 / S5 / S6 + dashboard/risk/memory BFF + 鉴权
+    work_dir: diting-src/web/
+    design_doc: ../前端工程与服务/05_实施推演_设计.md#二mvp最小可用产品
+    dna_file: frontend/dna_frontend_mvp.yaml
+    delivery_scope:
+      - monorepo_pnpm_turborepo_nextjs
+      - ui_kit_mvp
+      - api_client_codegen
+      - auth_package
+      - dashboard_bff_mvp
+      - risk_bff_mvp
+      - memory_bff_mvp
+      - app_console_s1_s5_s6
+      - playwright_e2e_login_s1_s5
+    exit_criteria:
+      - Lighthouse LCP/INP/CLS 达标
+      - E2E 通过
+    verification_commands:
+      - { cmd: "cd diting-src/web && pnpm install && pnpm lint && pnpm typecheck && pnpm test && pnpm build", expect: "exit 0" }
+      - { cmd: "cd diting-src/web && pnpm e2e", expect: "exit 0" }
+    l5_stage_anchor: l5-frontend-mvp
+    depends_on: [cryo_guard_mvp, super_evo_mvp]
+
+  - stage_id: frontend_v1_full
+    pillar: frontend
+    milestone: v1
+    title: 前端 V1 · 七大场景全量
+    description: S2 / S3 / S4 / S7 完整 + SSE + 灰度 + i18n + A11y/性能 CI 强约束
+    work_dir: diting-src/web/
+    design_doc: ../前端工程与服务/05_实施推演_设计.md#三v1完整能力
+    dna_file: frontend/dna_frontend_v1_full.yaml
+    delivery_scope:
+      - sse_client_package
+      - subject_bff_and_s2
+      - chat_bff_and_s3_with_sse
+      - watchlist_bff_and_s4
+      - admin_bff_and_s7
+      - state_machine_visualization
+      - i18n_full
+      - a11y_and_performance_ci
+      - feature_flag_integration
+    exit_criteria:
+      - 所有场景上线
+      - 性能预算 / A11y 达标（CI 强制）
+    verification_commands:
+      - { cmd: "cd diting-src/web && pnpm lighthouse-ci", expect: "通过预算" }
+      - { cmd: "cd diting-src/web && pnpm a11y-ci", expect: "exit 0" }
+    l5_stage_anchor: l5-frontend-v1-full
+    depends_on: [frontend_mvp, deep_strike_v1_council, state_watch_v1_budget, super_evo_v1_retro]
+
+  - stage_id: frontend_v2_pwa
+    pillar: frontend
+    milestone: v2
+    title: 前端 V2 · PWA 与协作
+    description: 移动端 PWA + 协作（多人同看 / 评论）+ 离线缓存 + 自定义驾驶舱布局
+    work_dir: diting-src/web/
+    design_doc: ../前端工程与服务/05_实施推演_设计.md#四v2生产稳态
+    dna_file: frontend/dna_frontend_v2.yaml
+    delivery_scope:
+      - mobile_pwa_with_push
+      - collab_comments_and_co_view
+      - offline_cache_service_worker
+      - custom_dashboard_layout
+      - multi_theme_market
+    exit_criteria:
+      - PWA 在主流移动浏览器可安装
+      - 离线只读模式可用
+    verification_commands:
+      - { cmd: "cd diting-src/web && pnpm e2e:mobile", expect: "exit 0" }
+    l5_stage_anchor: l5-frontend-v2-pwa
+    depends_on: [frontend_v1_full]
+
+  # ===========================================================================
+  # 共享平台基础（最早就绪）
+  # ===========================================================================
+  - stage_id: shared_platform_baseline
+    pillar: shared_platform
+    milestone: mvp
+    title: 共享平台基础就绪
+    description: PostgreSQL + OpenSearch + Kafka + Redis + K3s + 推理网关 Port + 配置中心 + 鉴权 / API Gateway / 静态资源 CDN
+    work_dir: diting-infra/
+    design_doc: ../_共享规约/README.md
+    dna_file: shared/dna_shared_platform_baseline.yaml
+    delivery_scope:
+      - postgresql_cluster
+      - opensearch_cluster
+      - kafka_cluster
+      - redis_cluster
+      - k3s_or_managed
+      - inference_gateway_port
+      - config_center
+      - auth_and_api_gateway
+      - static_cdn
+    exit_criteria:
+      - 所有共享组件健康检查通过
+      - 推理网关可被调用并返回响应
+    verification_commands:
+      - { cmd: "cd diting-infra && make smoke-platform", expect: "exit 0" }
+    l5_stage_anchor: l5-shared-platform-baseline
+    depends_on: []
+
+# =============================================================================
+# Release bundle 与发布约束
+# =============================================================================
 release_bundle:
-  description: "一次发布使用同一 tag 的全体可部署单元镜像"
-  image_keys: ["ingestion", "module_a", "module_b", "module_c", "hot_path_def"]
-  tag_strategy: "git_sha_or_semver"  # dev: git-sha / latest；prod: SemVer
-  compatibility_ref: "global_const.deployable_units"
+  scope: 全部 deployable_units 同 tag
+  forbid_mixed_tag: true
+  rollback_strategy: blue_green_or_canary
 
-# Module A–F 与 workflow_stages 映射（兼容只读：由 deployable_units 推导；04_阶段规划与实践 可引用；真相源为上方 deployable_units）
-module_to_stages:
-  module_a:
-    name: "Module A 语义分类器"
-    first_delivery_stage: "stage3_01"
-    first_docker_stage: "stage2_04"
-    first_k3s_stage: "stage2_05"
-  module_b:
-    name: "Module B 量化扫描引擎"
-    first_delivery_stage: "stage3_03"
-    first_docker_stage: "stage2_04"
-    first_k3s_stage: "stage2_05"
-  module_c:
-    name: "Module C MoE 议会"
-    first_delivery_stage: "stage3_04"
-    first_docker_stage: "stage2_04"
-    first_k3s_stage: "stage2_05"
-  module_d:
-    name: "Module D 决策中枢（热路径）"
-    first_delivery_stage: "stage3_05"
-    first_docker_stage: "stage3_05"
-    first_k3s_stage: "stage2_05"
-  module_e:
-    name: "Module E 风控盾（热路径）"
-    first_delivery_stage: "stage3_05"
-    first_docker_stage: "stage3_05"
-    first_k3s_stage: "stage2_05"
-  module_f:
-    name: "Module F 执行网关（热路径）"
-    first_delivery_stage: "stage3_05"
-    first_docker_stage: "stage3_05"
-    first_k3s_stage: "stage2_05"
+# =============================================================================
+# L4 / L5 强制约定
+# =============================================================================
+l4_l5_contract:
+  l4_step_must_link_to:
+    - design_doc (with anchor)
+    - dna_file (步骤级)
+    - l5_stage_anchor
+  l5_row_set_equals_workflow_stages_id_set: true
+  failure_protocol:
+    same_problem_retry_max: 2
+    if_exceeded: rollback_or_exit_per_step_doc
+
+# =============================================================================
+# 后续 Phase（可选）
+# =============================================================================
+phases_planned:
+  - id: phase1_mvp_e2e
+    description: 全 5 模块 MVP 串通；首批用户可用
+    contains:
+      - shared_platform_baseline
+      - cryo_guard_mvp
+      - deep_strike_mvp
+      - state_watch_mvp
+      - super_evo_mvp
+      - frontend_mvp
+  - id: phase2_v1_production_grade
+    description: 全 5 模块 V1 上线；生产级稳态
+    contains:
+      - cryo_guard_v1
+      - deep_strike_v1_council
+      - deep_strike_v1_feature
+      - deep_strike_v1_eval
+      - state_watch_v1_probe
+      - state_watch_v1_gate
+      - state_watch_v1_budget
+      - super_evo_v1_eval
+      - super_evo_v1_retro
+      - super_evo_v1_version
+      - frontend_v1_full
+  - id: phase3_v2_evolution
+    description: V2 进化；多端 + 高级能力
+    contains:
+      - cryo_guard_v2
+      - deep_strike_v2_runtime
+      - state_watch_v2_template
+      - super_evo_v2_online
+      - frontend_v2_pwa

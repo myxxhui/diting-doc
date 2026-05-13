@@ -1,0 +1,52 @@
+# 标的 / 行业 / segment 标准枚举
+schema_version: "1.0.0"
+
+subject_types:
+  - id: equity_a
+    cn: A 股
+    code_format: "^[0-9]{6}\\.(SH|SZ|BJ)$"
+  - id: equity_hk
+    cn: 港股
+    code_format: "^[0-9]{5}\\.HK$"
+  - id: equity_us
+    cn: 美股
+    code_format: "^[A-Z.]{1,5}$"
+  - id: etf
+    cn: ETF
+  - id: index
+    cn: 指数
+
+industry_taxonomy:
+  primary: shenwan_l1   # 申万一级（A 股主流）
+  secondary: shenwan_l2
+  cross_market: gics    # 跨市场 fallback
+
+segment_dimensions:
+  - id: tech_chain
+    cn: 技术链条
+    examples: [ai_infra, vector_db, gpu_orchestration, lora_serving]
+  - id: business_model
+    cn: 商业模式
+    examples: [saas, hardware, platform, content]
+  - id: macro_theme
+    cn: 宏观主题
+    examples: [policy_driven, export_chain, reshoring, demographic_shift]
+  - id: regulation_state
+    cn: 监管态势
+    examples: [supportive, neutral, tightening, banned]
+
+evidence_types:
+  - id: filing
+    cn: 公告
+  - id: research_report
+    cn: 研报
+  - id: news
+    cn: 新闻
+  - id: social_signal
+    cn: 社交信号
+  - id: alt_data
+    cn: 另类数据
+  - id: chain_data
+    cn: 产业链数据
+  - id: insider_transcript
+    cn: 业绩会实录
