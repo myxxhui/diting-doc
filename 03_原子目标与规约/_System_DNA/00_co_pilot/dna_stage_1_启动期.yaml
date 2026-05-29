@@ -1,8 +1,8 @@
 # DNA · 维度零·AI 投资副驾驶·启动期
 # 与 L3 设计 1:1:1 对齐：03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/
 
-version: "v1.0"
-last_updated: "2026-05-16"
+version: "v1.1"
+last_updated: "2026-05-29"
 
 dimension:
   id: 0
@@ -56,6 +56,39 @@ deliverables:
       key_outputs: ["SCS 指标", "EV 指标", "8 象限归因", "月报 PDF", "自我熔断"]
       depends_on_events: ["综合所有维度事件"]
       deliver_week: "W7-W8"
+    # ── 波次二：信息架构升级 · 三大工作台（M5/M6/M7）──
+    # 在 M1~M4 最小闭环之上重构前端 IA（7 平铺 → 4+1 导航），把六维度能力按"标的视角 + 决策视角"聚合穿插。
+    # 对应 L3 step_11/12/13；只读聚合已实现后端，缺上游维度以 pending 灰态占位。
+    - id: "M5"
+      name: "持仓监管工作台"
+      l3_step: "step_11_持仓监管工作台.md"
+      key_outputs: ["导航 IA 4+1 重构（持仓管理→持仓监管）", "标的监管驾驶舱卡", "四维扫描聚合（D1极寒防御/D2进攻逻辑/D3逻辑破坏/D3物理量探针）", "行情阶段（D2 Timer 潜伏/主升/撤退）", "操作建议标签 advisory（D4 SP1~SP5 + Timer）", "组合总览条", "监管平台 API sync stub（扩展期）"]
+      depends_on_events: ["events:cryo_guard:reject", "events:cryo_guard:degrade", "thesis_cards.timer_signal", "events:monitor:health_change", "events:exit:sell_signal", "monitor:{symbol}:dict"]
+      reuse: ["step_03 health_records", "step_04 thesis_pool", "step_05 alerts"]
+      permanent_rule: "no-auto-order：仅展示与建议，禁下单按钮/链接"
+    - id: "M6"
+      name: "行情解析与规划工作台"
+      l3_step: "step_12_行情解析与规划工作台.md"
+      key_outputs: ["Campaign 模型（图谱 Part A + 计划 Part B 双层）", "4 视图（🔭行情雷达/📝规划中/🚀执行中/🗓️滚动路线图）", "标的调研档案（位置/阶段/已执行动作/三支柱）", "三支柱监控（moat物理逻辑/catalyst利好/risk风险 定时数据收集）", "利好爆发时间线", "advisory 动作链节点", "关注清单 + 推荐池并入"]
+      data_model: ["campaigns", "campaign_symbols", "campaign_nodes", "campaign_timeline", "monitor_subscriptions", "watchlist"]
+      depends_on_events: ["events:thrust:thesis_proposed", "D2 Sniffer 三源 + Scorer 三维", "monitor:{symbol}:dict（moat）", "events:cryo_guard:* + events:monitor:health_change（risk）"]
+      permanent_rule: "no-auto-execute：动作 execute_mode=advisory + human_confirmation_required；禁 buy/qmt/auto_trade/order_id"
+    - id: "M7"
+      name: "产业图谱关系链研究"
+      l3_step: "step_13_产业图谱关系链研究.md"
+      key_outputs: ["每 Campaign 专属产业知识图谱（Part A）", "node_type concept/entity 两层（概念→标的实体演进）", "confirm_state confirmed/inferred 两态（官方信息=确认，复用 D2 Critic PHYSICAL/SOFT 等级）", "4 视图（生态/机会/风险穿透/危险监控）", "与 M6 计划双向联动", "Cytoscape/vis 可视化"]
+      data_model: ["graph_nodes", "graph_edges"]
+      depends_on_data: ["related_party_graph（D1 340 节点）", "D2 Architect 产业链 + Critic evidence", "D3 P5/P6/P7 + monitor:dict", "D1 关联交易引擎（风险穿透）"]
+      permanent_rule: "no-trade：研究/监控视图，不含下单/执行动作"
+
+# 波次二导航信息架构（IA）：7 平铺项 → 4+1
+navigation_ia_v2:
+  - { nav: "总览驾驶舱",        route: "/",                owner: "M1~M7 汇总" }
+  - { nav: "🛡️ 持仓监管",      route: "/portfolio-guard", owner: "M5（合并 持仓管理+持仓体检+告警）" }
+  - { nav: "📡 行情解析及规划", route: "/planning",        owner: "M6（合并 推荐池+雷达+关注清单）" }
+  - { nav: "🕸️ 产业图谱",      route: "/graph",           owner: "M7" }
+  - { nav: "📒 价值账本",       route: "/value",           owner: "M4（保留）" }
+  - { nav: "⚙️ 系统",          route: "/system",          owner: "健康检查+数据源+告警历史归档+持仓手工CRUD/Excel兜底+监管平台账户绑定" }
 
 excluded_in_stage_1:
   - "反馈闭环 verified（→ 扩展期）"
@@ -109,3 +142,9 @@ cost_budget_monthly:
     wechat_robot: "¥0（企业微信 webhook）"
     telegram_bot: "¥0（Bot API）"
     email: "¥50/月（Resend/Mailgun 免费额度）"
+
+revision:
+  - date: "2026-05-16"
+    note: "初版（M1~M4 最小闭环）"
+  - date: "2026-05-29"
+    note: "v1.1 波次二：新增 M5 持仓监管工作台 / M6 行情解析与规划工作台 / M7 产业图谱关系链研究（对应 L3 step_11/12/13）+ navigation_ia_v2（7→4+1）；只读聚合已实现后端，缺上游 pending；no-auto-order/no-auto-execute/no-trade 永久红线"

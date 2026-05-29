@@ -103,6 +103,22 @@ docker rm diting-redis
 
 ---
 
+## 一-1、波次二：信息架构升级 · 三大工作台（M5/M6/M7）
+
+> **定位**：step_01~10（波次一 · M1~M4）已交付「持仓体检 / 推荐池 / 紧急告警 / 价值账本」最小闭环。**波次二**在其之上**重构前端信息架构**——把 7 个平铺导航项收敛为 **4+1**（`总览驾驶舱 / 🛡️持仓监管 / 📡行情解析及规划 / 🕸️产业图谱 / 📒价值账本 / ⚙️系统`），按「标的视角 + 决策视角」把六维度能力聚合穿插。**只读聚合已实现后端，缺上游维度以 `pending` 灰态占位（位置先规划好）**。导航 IA 见 [04_前端开发与用户体验 §2.1](../04_前端开发与用户体验.md) 与 DNA `navigation_ia_v2`。
+
+| # | Step | 上游 | 关键产出 | 模块 | 文档状态 |
+|---|---|---|---|---|---|
+| 11 | [step_11_持仓监管工作台](./step_11_持仓监管工作台.md) | step_03/04/05 + D1/D2/D3/D4 | 导航 IA 4+1（持仓管理→持仓监管）+ 标的监管驾驶舱卡（四维扫描 + Timer 阶段 + advisory 建议标签）+ 组合总览条 | **M5** | ✅ L3 v1 |
+| 12 | [step_12_行情解析与规划工作台](./step_12_行情解析与规划工作台.md) | step_04/11 + D2/D3 | Campaign 模型（图谱+计划双层）+ 4 视图（雷达/规划中/执行中/路线图）+ 三支柱监控 + advisory 动作链 | **M6** | ✅ L3 v1 |
+| 13 | [step_13_产业图谱关系链研究](./step_13_产业图谱关系链研究.md) | step_12 + D1/D2/D3 | Campaign Part A 产业知识图谱（concept/entity 两层 + confirmed/inferred 两态）+ 4 视图 + 与 M6 双向联动 | **M7** | ✅ L3 v1 |
+
+**波次二永久红线**：M5 `no-auto-order`、M6 `no-auto-execute`（advice 强制 `execute_mode=advisory` + `human_confirmation_required`，禁 `buy/qmt/auto_trade/order_id`）、M7 `no-trade`；与 [14_ §7/§8](../../../../_共享规约/14_六维度启动期统一节奏表.md) 永久契约一致。
+
+**依赖**：step_11 必须在 step_12/13 前（监管卡是建仓后档案延续目标）；step_13 依赖 step_12 的 `campaign_symbols/monitor_subscriptions`。波次二可在 step_10 阶段验收（M1~M4）之后启动，不阻塞波次一收口。
+
+---
+
 ## 二、Cursor 使用方式
 
 ### 方式一：单步执行
@@ -155,6 +171,9 @@ docker rm diting-redis
 | step_08 | 熔断 24h 自动恢复 + 手工 `force_resume`，需 `x-admin-token` |
 | step_09 | testcontainers Redis fixture，CI fallback 到 `REDIS_URL`；**并见** [step_09 §1.1](./step_09_全链路联调.md#l3-step09-tightening) **统一收紧前序 mock/stub** |
 | step_10 | `scripts/validate_stage_1.sh` 6 大类自动化输出 JSON 报告 + 终端 ✅/❌ |
+| step_11 | 只读聚合（不新建采集）；缺上游维度 → `pending` 灰态，禁伪造；导航 7→4+1，旧路由保留跳转 |
+| step_12 | Campaign = 图谱(step_13) + 计划(本步)；概念可先于标的（`campaign_symbols.symbol` 可空）；三支柱缺源 → `pending` |
+| step_13 | `confirmed` 必须有官方源 `evidence_ref`（复用 D2 Critic PHYSICAL/SOFT 等级）；`entity` 节点仅选定标的后挂接 |
 
 ---
 
@@ -184,6 +203,9 @@ docker rm diting-redis
 | step_08 | `实践记录_step_08_月报与熔断.md` |
 | step_09 | `实践记录_step_09_全链路联调.md` |
 | step_10 | `实践记录_step_10_阶段验收.md` + `阶段总结_stage_1_启动期.md` |
+| step_11 | `实践记录_step_11_持仓监管工作台.md` |
+| step_12 | `实践记录_step_12_行情解析与规划工作台.md` |
+| step_13 | `实践记录_step_13_产业图谱关系链研究.md` |
 
 ---
 
@@ -201,3 +223,4 @@ docker rm diting-redis
 | 2026-05-17 | **索引去周次化**：删除 W 跳号说明与日历周列表；**一、** 表仅保留 step 序号与依赖；**五、** 仅 `实践记录_step_NN_*` |
 | 2026-05-17 | 历史上曾对齐 §8.4h 与「周次别名」说明；**即日起本维 steps 以 step_NN 为唯一叙事**，日历节奏见 14_ 共享规约 |
 | 2026-05-17 | **step_08 实施状态 ✅**（月报 PDF 管线、`SelfCircuitBreaker`、`fakeredis` 单测、`copilot.monthly_report` 调度；L4 `实践记录_step_08_月报与熔断.md`） |
+| 2026-05-29 | **新增波次二（信息架构升级 · 三大工作台 M5/M6/M7）**：step_11 持仓监管工作台 / step_12 行情解析与规划工作台 / step_13 产业图谱关系链研究；新增 §一-1 波次二章节、§三 关键决策 3 行、§五 L4 清单 3 行；同步 DNA `dna_stage_1_启动期.yaml` v1.1（M5/M6/M7 + `navigation_ia_v2`）、L5 [05_验收标准](../05_验收标准与检查清单.md) 子模块 5/6/7、[04_前端开发与用户体验](../04_前端开发与用户体验.md) §2.1 IA。波次二只读聚合已实现后端，缺上游 `pending`；no-auto-order/no-auto-execute/no-trade 永久红线 |
