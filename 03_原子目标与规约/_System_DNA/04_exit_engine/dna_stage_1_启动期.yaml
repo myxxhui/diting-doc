@@ -1,0 +1,107 @@
+# DNA · 维度四·卖出决策·启动期
+# 与 L3 设计 1:1:1 对齐：03_原子目标与规约/04_维度四_卖出决策/stages/stage_1_启动期/
+
+version: "v1.0"
+last_updated: "2026-05-16"
+
+dimension:
+  id: 4
+  code: "exit_engine"
+  cn: "卖出决策"
+  philosophy_pillars: ["⑤防御", "⑦节奏"]
+
+stage:
+  id: "stage_1_启动期"
+  duration_weeks: 8
+
+one_line_goal: |
+  用 4 类卖出协议（止损/止盈/Thesis 失效/再平衡）实现纪律性卖出，
+  向维度零推送 sell_signal 事件。
+
+quantitative_goals:
+  - name: "4 类卖出协议上线"
+    value: 4
+  - name: "sell_signal 事件推送延迟"
+    threshold: "< 30s"
+  - name: "协议触发准确率"
+    threshold: ">= 0.95"
+    measure: "回测 100 笔历史"
+
+deliverables:
+  sell_protocols:
+    - id: "SP1"
+      name: "stop_loss"
+      cn: "止损协议"
+      trigger: "current_price / cost_price - 1 <= -0.15"
+      threshold: -0.15  # -15%
+      priority: 1  # 最高
+      buffer_days: 0  # 无缓冲，立即触发
+    - id: "SP2"
+      name: "take_profit"
+      cn: "止盈协议"
+      trigger: "current_price / cost_price - 1 >= 0.30"
+      threshold: 0.30  # +30%（可配置）
+      priority: 2
+      buffer_days: 3  # 3 天缓冲，避免短期波动误触
+    - id: "SP3"
+      name: "thesis_invalid"
+      cn: "Thesis 失效协议"
+      trigger: "维度三 health_change.thesis_status == 'invalid'"
+      priority: 1
+      buffer_days: 0
+      depends_on: "events:monitor:health_change"
+    - id: "SP4"
+      name: "rebalance"
+      cn: "再平衡协议"
+      trigger: "single_position_ratio > 0.25"
+      threshold: 0.25  # 单只 25%
+      priority: 3  # 最低
+      buffer_days: 7
+
+  conflict_resolution:
+    rule: "多协议同时触发时按 priority 升序选择最高优先级"
+    log: "全部触发记录写入审计日志"
+
+  output_event:
+    stream: "events:exit:sell_signal"
+    fields: ["symbol", "signal_type", "trigger_price", "current_price", "protocol", "advice"]
+
+excluded_in_stage_1:
+  - "缓冲期复杂策略（→ 扩展期）"
+  - "卖飞豁免 180 天（→ 扩展期）"
+  - "不正确卖出拦截（→ 完善期）"
+  - "议会模式（→ 完善期）"
+
+tech_stack:
+  rule_engine: "自研规则引擎（基于 Pydantic 配置）"
+  state_machine: "LangGraph 0.1+ (条件分支)"
+  llm: "Qwen2.5-7B（辅助判断，启动期非主路径）"
+  event_bus: "Redis Stream 7.x"
+  service: "FastAPI 0.110+"
+  database: "SQLite 3.40+"
+
+work_dir: "diting-src"
+service_name: "exit-engine"
+
+dependencies:
+  upstream:
+    - "03_holding_watch P0: health_change 事件（用于 SP3 thesis_invalid 触发）"
+    - "维度三 持仓数据 API"
+
+verification_commands:
+  - "kubectl get pods -l app=exit-engine"
+  - "make test-stop-loss"
+  - "make test-take-profit"
+  - "make test-thesis-invalid"
+  - "make test-rebalance"
+  - "make test-sell-signal-event"
+
+exit_criteria:
+  - "4 类卖出协议全部可触发"
+  - "sell_signal 事件可被维度零消费"
+  - "回测 100 笔历史触发准确率 ≥ 95%"
+  - "冲突处理逻辑正确"
+
+l3_design_doc: "03_原子目标与规约/04_维度四_卖出决策/stages/stage_1_启动期/"
+l4_practice_dir: "04_阶段规划与实践/04_维度四_卖出决策/stage_1_启动期/"
+l5_stage_anchor: "l5-stage-d4s1"

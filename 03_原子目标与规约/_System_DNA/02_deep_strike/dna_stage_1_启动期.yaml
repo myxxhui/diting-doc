@@ -1,0 +1,102 @@
+# DNA · 维度二·纵深进攻·启动期
+# 与 L3 设计 1:1:1 对齐：03_原子目标与规约/02_维度二_纵深进攻/stages/stage_1_启动期/
+
+version: "v1.0"
+last_updated: "2026-05-16"
+
+dimension:
+  id: 2
+  code: "deep_strike"
+  cn: "纵深进攻"
+  philosophy_pillars: ["③能力圈", "⑥纵深"]
+
+stage:
+  id: "stage_1_启动期"
+  duration_weeks: 10
+
+one_line_goal: |
+  用 1 个 P0 剧本（利润截留扫描仪）+ thesis 卡片生成器，
+  实现"在能力圈内发现机会并输出结构化投资逻辑"的最小闭环。
+
+quantitative_goals:
+  - name: "P0 剧本上线数"
+    value: 1
+    detail: "利润截留扫描仪"
+  - name: "thesis 卡片 5 必填元素完整率"
+    threshold: "100%"
+  - name: "置信度与人工判断一致率"
+    threshold: ">= 80%"
+  - name: "周输出 thesis 数"
+    threshold: "<= 5"
+  - name: "人工确认率"
+    detail: "建立跟踪统计"
+
+deliverables:
+  playbooks:
+    - id: "PB1"
+      name: "profit_capture_playbook"
+      cn: "利润截留扫描仪"
+      signals:
+        - {name: "gross_margin_qoq_up", weight: 0.30, condition: "gross_margin_qoq > 0.02"}
+        - {name: "cost_growth_below_revenue", weight: 0.25, condition: "cost_growth_yoy < revenue_growth_yoy - 0.05"}
+        - {name: "operating_leverage", weight: 0.25, condition: "net_profit_growth > revenue_growth * 1.3"}
+        - {name: "receivable_turnover_up", weight: 0.10, condition: "receivable_turnover_qoq > 0"}
+        - {name: "inventory_turnover_up", weight: 0.10, condition: "inventory_turnover_qoq > 0"}
+      lora_name: "thesis_lora_v1"
+
+  thesis_card_required_elements:
+    - {id: 1, name: "thesis_summary", cn: "观点摘要", min_chars: 50}
+    - {id: 2, name: "evidence_chain", cn: "证据链", min_count: 3}
+    - {id: 3, name: "risks", cn: "风险清单", min_count: 1}
+    - {id: 4, name: "valuation_anchor", cn: "估值锚点", required_fields: ["method", "target_price"]}
+    - {id: 5, name: "action", cn: "操作建议", enum: ["buy", "add", "watch"]}
+
+  decision_mechanism:
+    propose: {condition: "剧本命中 + 置信度 >= 0.7", action: "输出 thesis → 维度零推荐池"}
+    watch: {condition: "部分命中 + 置信度 0.4-0.7", action: "进入观察池，触发新一轮采集"}
+    discard: {condition: "未命中 / 置信度 < 0.4", action: "写入已研究未持仓日志（负样本）"}
+  permanent_rule: "AI 不可自动建仓，必须经架构师建仓确认"
+
+excluded_in_stage_1:
+  - "2-10 号剧本（→ 扩展期）"
+  - "量价信号（永不做）"
+  - "自动建仓（永不做，L1 禁止）"
+  - "短线交易信号（永不做）"
+  - "沙箱执行（→ 扩展期）"
+
+tech_stack:
+  playbook_engine: "LangGraph 0.1+"
+  data_crawl: "AKShare + httpx"
+  llm: "Qwen2.5-7B + Thesis LoRA v1"
+  inference: "vLLM 0.4+ (与维度一共享)"
+  service: "FastAPI 0.110+"
+  database: "SQLite 3.40+"
+
+work_dir: "diting-src"
+service_name: "deep-strike"
+
+dependencies:
+  upstream:
+    - "05_super_evo P0: Teacher LLM 蒸馏 + LLaMA-Factory（用于 Thesis LoRA 微调）"
+    - "01_cryo_guard P0: PassEvent（关联到 thesis 的 pass_event_id）"
+
+verification_commands:
+  - "kubectl get pods -l app=deep-strike"
+  - "make test-playbook-profit-capture"
+  - "make test-thesis-completeness"
+  - "make test-confidence-consistency"
+
+exit_criteria:
+  - "利润截留扫描仪可运行"
+  - "thesis 5 必填元素完整率 100%"
+  - "置信度与人工判断一致率 ≥ 80%"
+  - "thesis_proposed 事件可被维度零消费"
+  - "周输出 ≤ 5 个 thesis"
+
+l3_design_doc: "03_原子目标与规约/02_维度二_纵深进攻/stages/stage_1_启动期/"
+l4_practice_dir: "04_阶段规划与实践/02_维度二_纵深进攻/stage_1_启动期/"
+l5_stage_anchor: "l5-stage-d2s1"
+
+training_data_scale:
+  thesis_cases: ">= 100"
+  risk_cases: ">= 100"

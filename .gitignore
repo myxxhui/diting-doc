@@ -1,1 +1,7 @@
 # .cursorrules: 允许提交，供本仓 AI 规则共享（见 00_系统规则_通用项目协议.md §十一）
+
+# _drafts/ 临时草稿目录（生命周期受 _drafts/README.md 管控；任务结束即清空）
+# 仅 README.md 允许提交（永久保留），其余 *.md 草稿不入版本库
+_drafts/*
+!_drafts/README.md
+

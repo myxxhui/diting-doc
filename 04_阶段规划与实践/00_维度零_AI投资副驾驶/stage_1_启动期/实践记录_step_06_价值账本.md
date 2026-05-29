@@ -1,0 +1,200 @@
+# 实践记录 · 维度零·AI 投资副驾驶 · 启动期 · step_06 · M4 价值账本
+
+> [!NOTE] **[TRACEBACK] 实践锚点**
+> - **L3 step**: [step_06_价值账本.md](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_06_价值账本.md)
+> - **DNA**: [_System_DNA/00_co_pilot/dna_stage_1_启动期.yaml](../../../03_原子目标与规约/_System_DNA/00_co_pilot/dna_stage_1_启动期.yaml)
+> - **本阶段看板**: [README.md](./README.md)
+
+---
+
+## 一、本步计划（来自 L3）
+
+- **引用**：[step_06_价值账本.md](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_06_价值账本.md)
+- **上游**：step_05 M3 告警（本步复用 `AlertDispatcher`、`alert_logs`；熔断时 `_arch_notifier` 用 `user_id=architect` 派发 DEGRADE，且不触发熔断门禁）
+- **两周拆分（文档口径）**：
+  - **阶段 A（本子步前半）**：用户响应记录器 + 8 象限归因 + SCS/EV 引擎骨架
+  - **阶段 B（本子步后半）**：月报生成（WeasyPrint / HTML 降级）、APScheduler、`/value` 仪表盘、自我熔断与告警暂停
+- **目标**：`pytest tests/copilot/test_ledger.py` **17 passed**（超过 L3 规定的 ≥14）；全量 `tests/copilot/` **48 passed**
+
+---
+
+## 二、实际进展
+
+> **读表说明**：**不是「Redis 仍不可用」或「curl 必然失败」**。本步 **SCS/EV/月报/熔断** 启动期准出以 **17 条 ledger + 全量 48** 与 **TestClient** 为主；真 Redis、`GET /health`、mock 流注入的**共用证据**在 [step_01 实践记录](./实践记录_step_01_后端依赖与服务骨架.md#l4-step01-redis-verify)。**3.17** 若指 L3 里的**长脚本灌数 / 全线 Stream 串联**，按节奏归 **step_09**；不等于本步在 Redis 已起时仍跑不通。
+
+| §3.x / 项 | 状态 | 说明 |
+|---|---|---|
+| 3.1 目录骨架 | ✅ | `services/ledger/*`、`routers/value.py`、`templates/value/*`、`static/css/monthly_report.css` |
+| 3.2 依赖 | ✅ | `pyproject.toml` 增加 `weasyprint`；本会话 `pip install -e .` 成功 |
+| 3.3 `.env.template` + `config.py` | ✅ | `COPILOT_LEDGER_*`、`COPILOT_CIRCUIT_*`、`COPILOT_MONTHLY_CRON_*`、`COPILOT_LEDGER_SCHEDULER_ENABLED` |
+| 3.4 `models.py` | ✅ |四类表：`user_responses` / `attributions` / `monthly_reports` / `circuit_breaker_state`；`init_db` 注册 ledger ORM |
+| 3.5 `response_recorder.py` | ✅ | 推荐 + 告警 upsert |
+| 3.6 `attribution.py` | ✅ | A～H 全覆盖 |
+| 3.7 `scs.py` | ✅ | 基础 50 + ΣΔ − 迟滞罚分，clip [0,100] |
+| 3.8 `ev.py` | ✅ | 避险 C+F、增益 A、卖飞 H |
+| 3.9 `circuit_breaker.py` | ✅ | B+H 窗口占比；`notifier` 通知 |
+| 3.10 `monthly_report.py` | ✅ | Jinja2 + WeasyPrint；异常时 **HTML-only** 降级写入同目录 |
+| 3.11 `scheduler.py` | ✅ | Cron 月报 + `backfill_previous_month_if_missing` |
+| 3.12 `routers/value.py` + `main.py` | ✅ | `/api/value/dashboard`、`/api/value/monthly-report/{YYYY-MM}`、`/value`；模板走 `app.state.templates` |
+| 3.13 模板 + CSS | ✅ | 与 L3 结构一致 |
+| 3.14 `test_ledger.py` | ✅ | **17** 条 |
+| 3.15 curl 冒烟 | ✅ | **启动期准出**：`TestClient` 覆盖 dashboard 与 `/value`（见「三」）。**真机 curl / 月报二进制下载**：先按 step_01 起 Redis（若需与 Stream 联调），`uvicorn` 后用 `curl`（示例见「三-2」注释块）。**不是** 接口在 Redis 已起时仍拒绝 |
+| 3.16 pytest | ✅ | 见「三」 |
+| 3.17 端到端 Redis/灌数 | ✅ | **启动期**：ledger + 熔断与告警暂停由单测覆盖；与本步强相关的 **真 Redis + dispatcher** 可选路径见「三-A」。**L3 长灌数脚本 / 全链路灌数**：按 [step_09 §1.1](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_09_全链路联调.md#l3-step09-tightening) 收口，避免与 step_01 重复堆终端（§8.4g） |
+| 3.18 commit | ⚠️ | **未执行**（用户显式提交规则）；与运行时验证无关 |
+
+### 关键设计决策（与 L3 §4 / step 准出一致）
+
+- **SCS**：基础 50 + Σ`scs_delta` − 迟滞罚分，clip 到 [0,100]；横向可比。
+- **EV**：避险（C+F）+ 增益（A）− 卖飞成本（H）；与 8 象限口径一致。
+- **熔断**：最近 N 条归因中 B+H 占比 ≥ 阈值 → `CircuitBreakerState.paused`；`AlertDispatcher` 注入 `pause_check`，**非** `architect` 用户的告警在熔断暂停时返回 `{"circuit_open": True}` 且不写 `alert_logs`/不发通道。
+- **架构师通知**：熔断触发时 `AlertType.DEGRADE`，`user_id=architect`，可穿透门禁。
+- **月报**：PDF 优先；WeasyPrint 失败则写 `.html` 并仍落库 `pdf_path`。
+- **测试**：`conftest` 默认 `COPILOT_LEDGER_SCHEDULER_ENABLED=false`，避免 APScheduler 后台任务干扰。
+
+---
+
+## 三、测试运行（须含实测证据）
+
+### 命令
+
+```bash
+cd /Users/huishaoqi/Desktop/workspace/diting-src
+python3 -m pip install -e .
+python3 -m pytest tests/copilot/test_ledger.py -v --tb=short
+python3 -m pytest tests/copilot/ -v --tb=short
+```
+
+### 输出（`test_ledger.py`：17 passed）
+
+```
+tests/copilot/test_ledger.py::test_classify_covers_all_octants[...] PASSED ...
+...
+============================== 17 passed in 0.59s ==============================
+```
+
+### 全量回归（`tests/copilot/`：48 passed）
+
+```
+................................................                         [100%]
+48 passed in 1.81s
+```
+
+### TestClient 烟测（dashboard + `/value`）
+
+环境：`COPILOT_ALERT_CONSUMER_ENABLED=false`、`COPILOT_LEDGER_SCHEDULER_ENABLED=false`、独立 SQLite 文件。
+
+```
+dashboard 200 50.0
+value page 200 True
+```
+
+### 执行元信息
+
+- 时间：**2026-05-17**
+- 环境：macOS，Python **3.9.6**；`diting-src` `git`：**455163f**（工作区可能有未提交变更）
+- **Docker / Redis**：以 [step_01 实践记录 · 三-A #l4-step01-redis-verify](./实践记录_step_01_后端依赖与服务骨架.md#l4-step01-redis-verify) 为共用证据；§3.17 长脚本收口 **step_09**
+
+### 结果
+
+- **48/48** `tests/copilot/`；**pytest -q** 约 **1.8s**（无 Redis）/ **~2.3s**（设 `COPILOT_REDIS_URL`，以本机为准）。详情 [step_01 实践记录](./实践记录_step_01_后端依赖与服务骨架.md#l4-step01-redis-verify)。
+
+---
+
+## 三-A、Redis（〇-1）与 step_06（熔断 · 告警暂停）
+
+> **规约**：[steps/README · 〇-1](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/README.md#redis-docker-lifecycle)。**最佳验证**见 [step_01 实践记录 #l4-step01-redis-verify](./实践记录_step_01_后端依赖与服务骨架.md#l4-step01-redis-verify)；维护方式见 [§8.4g #l4-practice-record-best-only](../../../00_系统规则_通用项目协议.md#l4-practice-record-best-only)。
+
+### 本步与 Redis 的交界
+
+| 能力 | 单测默认 | 真 Redis 时 |
+|---|---|---|
+| SCS/EV/月报/熔断状态机 | `COPILOT_ALERT_CONSUMER_ENABLED=false`、`COPILOT_LEDGER_SCHEDULER_ENABLED=false` | 无需 Stream 亦可跑通本步 **17** 条 ledger 用例 |
+| 熔断后 `AlertDispatcher` 暂停非 architect 告警 | mock / stub | 若需观察「Stream → DEGRADE → architect」与 pause 门禁协同，须 **〇-1** + `COPILOT_ALERT_CONSUMER_ENABLED=true`，并由上游流或测试接口产生可派发事件 |
+
+**§3.17（L3 长灌数 / 全线灌数）** 仍归 **step_09**；**Redis 已起时** 本步 API 与单测可照常验证。本文件不另存多轮 Redis 终端全文（§8.4g）。
+
+### 用户本机（可选：熔断 + 真 dispatcher）
+
+1. 〇-1 起停 Redis（**验证后务必 stop+rm**）。
+2. `export COPILOT_REDIS_URL=redis://127.0.0.1:6379/0`，按需 `COPILOT_ALERT_CONSUMER_ENABLED=true`。
+3. 在触发熔断条件后，对照 L3：`user_id=architect` 的 **DEGRADE** 可穿透；普通用户告警在 `paused` 时应被门禁挡住（见 `test_ledger.py` 与 `circuit_breaker.py`）。
+
+---
+
+## 三-2、复验命令（必填）
+
+```bash
+cd /path/to/diting-src
+python3 -m pip install -e .
+
+# 准出：价值账本单测
+python3 -m pytest tests/copilot/test_ledger.py -v --tb=short
+
+# 全量 copilot（须 48 passed）
+python3 -m pytest tests/copilot/ -q
+
+# 表结构（须含 user_responses / attributions / monthly_reports / circuit_breaker_state）
+python3 -c "from apps.copilot.db import database; from apps.copilot.services.ledger import models as m; print('user_responses', 'user_responses' in [t.name for t in database.Base.metadata.tables])"
+
+# TestClient 烟测（关闭 Stream 消费者与月报调度器）
+export COPILOT_ALERT_CONSUMER_ENABLED=false
+export COPILOT_LEDGER_SCHEDULER_ENABLED=false
+export COPILOT_DB_URL=sqlite+aiosqlite:////tmp/copilot_reverify_ledger.db
+python3 -c "
+from fastapi.testclient import TestClient
+from apps.copilot.main import app
+with TestClient(app) as c:
+    r = c.get('/api/value/dashboard?user_id=default')
+    print('dashboard', r.status_code, r.json().get('scs', {}).get('score'))
+    r2 = c.get('/value?user_id=default')
+    print('value page', r2.status_code, ('价值' in r2.text))
+"
+
+# 月报下载（生成 PDF 或 HTML 取决于 WeasyPrint 环境）
+# YEAR=2026; MONTH=05
+# curl -L -o /tmp/report.bin "http://localhost:8080/api/value/monthly-report/\${YEAR}-\${MONTH}?user_id=default&regenerate=true"
+```
+
+---
+
+## 四、偏离与决策
+
+| 偏离 | 原因 | 决策 |
+|---|---|---|
+| L3 `routers/value.py` 自建 `Jinja2Templates(directory=...)` | 与 copilot 其余页面不一致 | 使用 **`request.app.state.templates`** |
+| 熔断门禁与 `dispatch` | L3 要求暂停告警推送 | `AlertDispatcher.set_pause_check(breaker.is_paused)`，`user_id=architect` 豁免 |
+| APScheduler 在 pytest / TestClient | 后台 job 干扰生命周期 | **`COPILOT_LEDGER_SCHEDULER_ENABLED`**，测试 `conftest` 默认 **false** |
+| `monthly_report` CSS `@page` | WeasyPrint 与浏览器对 @page 支持不同 | 保持 L3 样式；HTML 降级文件可直接浏览器打开 |
+
+---
+
+## 五、问题与风险
+
+| 问题 | 影响 | 应对 |
+|---|---|---|
+| `circuit_breaker_state` 全局单行（无 user_id） | 多用户场景会互相覆盖 | 启动期单租户 `default` 可接受；多租户需在后续迭代加 `user_id` 列 |
+| M2 未交付时推荐响应未接线 | `UserResponseRecorder` 仅 API 待用 | step_04 或 step_09 联调接入 |
+
+---
+
+## 六、下一步
+
+- [ ] [step_07_日报周报推送](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_07_日报周报推送.md)
+
+
+---
+
+## 七、部署快照
+
+本 step **无上架**；仅 `diting-src` 与本地 SQLite / `data/reports`。
+
+---
+
+## 八、一致性检查
+
+- [x] L4 含三 / 三-2 与终端摘录
+- [x] stage README、steps README 已更新（实施状态）
+- [x] §8.4g：Redis/`/health` 数字见 step_01 实践记录，本记录不堆叠
+- [x] 全量 pytest 本会话 **48 passed**（`-q` ~1.81s）
+- [x] WeasyPrint：本机安装成功；若 CI 无系统库则依赖 HTML-only 降级（须在 CI 文档注明）

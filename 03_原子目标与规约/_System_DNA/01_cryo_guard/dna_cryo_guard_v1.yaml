@@ -1,0 +1,89 @@
+# 极寒防御 V1 · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: cryo_guard_v1
+pillar: cryo_guard
+milestone: v1
+
+design_doc: ../../极寒防御/05_实施推演_设计.md#三v1完整能力
+l4_doc:    ../../../04_阶段规划与实践/维度一_极寒防御/02_V1_本阶段实践与验证.md
+l5_anchor: l5-pillar-cryo-v1
+
+work_dir: diting-src/diting/cryo_guard/
+
+services_in_scope:
+  - input_sanitizer_full          # 7 类污染检测
+  - circuit_breaker_full          # 嵌入式 SDK + 中心协调
+  - decision_gate_layers_full     # 7 层全开
+  - audit_log_chain_hash_signed
+  - opensearch_indexer
+
+input_sanitizer_full:
+  detectors:
+    - type: prompt_injection
+      pattern_lib: redteam_v1
+    - type: sql_injection
+    - type: pii_leak
+    - type: malicious_url
+    - type: jailbreak_attempt
+    - type: data_exfiltration
+    - type: model_steering
+  redteam_dataset_min: 50
+  fpr_max_pct: 5
+  fnr_max_pct: 1
+
+circuit_breaker_full:
+  embedded_sdk:
+    languages: [python, go, typescript]
+    minimum_version: "1.0.0"
+  coordinator_service:
+    health_window_sec: 60
+    trip_threshold_failures: 3
+    cooldown_sec: 60
+
+decision_gate_layers_full:
+  - { layer: schema, enabled: true }
+  - { layer: evidence, enabled: true }
+  - { layer: compliance, enabled: true }
+  - { layer: metric, enabled: true }
+  - { layer: sanitize, enabled: true }
+  - { layer: breaker, enabled: true }
+  - { layer: human, enabled: true, mode: optional_async }
+
+audit_log_chain_hash_and_snapshot:
+  chain_hash: true
+  signature_snapshot: true
+  worm: true
+  retention_days_main: 365
+  integrity_verify_cron: "0 */6 * * *"
+
+opensearch_indexer:
+  index_targets: [risk_events, gate_decisions, audit_logs]
+  retention_days: 180
+  search_p99_ms: 1000
+
+dynamic_config_integration: true   # 接入配置中心；规则热更 < 30s
+
+depends_on:
+  - cryo_guard_mvp
+
+verification_commands:
+  - cmd: "cd diting-src && make test-cryo-guard-v1"
+    expect_exit: 0
+  - cmd: "cd diting-src && make redteam-cryo-guard"
+    expect_keywords: ["pass>=95", "FPR<=5", "FNR<=1"]
+  - cmd: "cd diting-src && make audit-chain-verify"
+    expect_keywords: ["OK"]
+  - cmd: "cd diting-src && make breaker-failure-injection"
+    expect_keywords: ["tripped within 60s"]
+  - cmd: "cd diting-src && make config-hotreload"
+    expect_keywords: ["applied within 30s"]
+
+exit_criteria:
+  - 红队对抗 ≥ 50 用例通过；FPR/FNR 达标
+  - 故障注入：服务故障 → 60s 内熔断
+  - 审计链完整性校验定期任务跑通
+  - OpenSearch 检索 P99 < 1s
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: 通过配置中心回滚到上一规则版本；登记 06_/审计

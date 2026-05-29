@@ -1,0 +1,59 @@
+# 前端工程 V2 PWA + 协同 · 步骤级 DNA
+schema_version: "1.0.0"
+stage_id: frontend_v2_pwa
+pillar: frontend
+milestone: v2
+
+design_doc: ../../前端工程与服务/05_实施推演_设计.md#四v2生产稳态
+l4_doc:    ../../../04_阶段规划与实践/维度零_AI投资副驾驶/03_V2_pwa_本阶段实践与验证.md
+l5_anchor: l5-frontend-v2-pwa
+
+work_dir: diting-src/web/
+
+pwa_offline:
+  manifest_required: true
+  service_worker: true
+  cache_strategy: [stale_while_revalidate, network_first]
+  push_notification: true
+
+mobile_pwa_capacitor_or_native_shell:
+  approach: capacitor   # 可替换为纯 PWA 或 React Native shell
+  ios: true
+  android: true
+
+desktop_tauri:
+  bundle_targets: [macos, windows, linux]
+
+realtime_collaboration_yjs:
+  enabled: true
+  rooms:
+    - council_view
+    - watchlist_board
+  conflict_free_test_required: true
+
+bff_multi_cluster_with_edge:
+  edge_runtime: cloudflare_workers_or_aliyun_edge
+  region_routing: true
+  edge_cache_ttl_seconds: 30
+
+depends_on:
+  - frontend_v1_full
+
+verification_commands:
+  - cmd: "cd diting-src/web && pnpm pwa:audit"
+    expect_keywords: ["pwa_score>=100"]
+  - cmd: "cd diting-src/web && pnpm e2e:offline"
+    expect_keywords: ["offline_browse_pass", "reconcile_pass"]
+  - cmd: "cd diting-src/web && pnpm collab:bench"
+    expect_keywords: ["no_conflict"]
+  - cmd: "cd diting-src/web && pnpm edge-bff:smoke"
+    expect_exit: 0
+
+exit_criteria:
+  - PWA 评分达标
+  - 离线提交对账无丢失
+  - 协作无冲突
+
+failure_protocol:
+  same_problem_retry_max: 2
+  if_exceeded: 离线对账冲突 → 提示用户人工合并 + 不丢失数据

@@ -1,0 +1,119 @@
+# DNA · 维度五·演进飞轮·启动期
+# 与 L3 设计 1:1:1 对齐：03_原子目标与规约/05_维度五_演进飞轮/stages/stage_1_启动期/
+
+version: "v1.0"
+last_updated: "2026-05-16"
+
+dimension:
+  id: 5
+  code: "super_evo"
+  cn: "演进飞轮"
+  philosophy_pillars: ["⑨自我演化", "⑩双盲校准"]
+
+stage:
+  id: "stage_1_启动期"
+  duration_weeks: 10
+
+one_line_goal: |
+  用 4 P0 组件（Teacher 蒸馏 + Label Studio + LLaMA-Factory + 双盲 Kappa），
+  搭建 AI 模型自我进化基础设施，向各维度提供 LoRA 训练能力。
+
+quantitative_goals:
+  - name: "P0 组件数"
+    value: 4
+  - name: "首次 LoRA 训练成功"
+    measure: "至少一维度的 LoRA Holdout 通过"
+  - name: "Kappa 双盲一致性"
+    threshold: ">= 0.80"
+  - name: "Teacher 蒸馏吞吐"
+    threshold: ">= 500 条/天"
+
+deliverables:
+  components:
+    - id: "C1"
+      name: "teacher_llm_distill"
+      cn: "Teacher LLM 蒸馏器"
+      teacher_model: "Claude-3.5-Sonnet"
+      output_format: "JSONL（含 instruction/input/output/metadata）"
+      throughput: ">= 500 条/天"
+    - id: "C2"
+      name: "label_studio"
+      cn: "Label Studio 人工标注"
+      version: "1.10+"
+      用途: "蒸馏数据 verified"
+    - id: "C3"
+      name: "llama_factory_trainer"
+      cn: "LLaMA-Factory LoRA 训练器"
+      version: "0.8+"
+      supported_models: ["Qwen2.5-7B-Instruct"]
+      fine_tune_methods: ["LoRA (rank=16/32)", "QLoRA"]
+    - id: "C4"
+      name: "double_blind_kappa_calibration"
+      cn: "双盲 Kappa 校准"
+      kappa_threshold: ">= 0.80"
+      用途: "数据标注质量控制"
+
+  lora_gatekeeper:
+    holdout_required: true
+    metrics: ["recall", "precision", "f1"]
+    regression_block: "任一指标退化 > 5% → CI Block"
+
+  output_event:
+    stream: "events:flywheel:lora_updated"
+    fields: ["lora_name", "version", "old_version", "metrics", "improvement", "trigger"]
+
+  release_pipeline:
+    stages: ["train", "evaluate", "manual_gate", "deploy", "monitor"]
+    deploy_strategy: "手动灰度发布（启动期）"
+
+excluded_in_stage_1:
+  - "8 象限路由器（→ 扩展期）"
+  - "议会模式（→ 完善期）"
+  - "自动灰度发布（→ 扩展期）"
+  - "在线学习（→ 完善期）"
+  - "DPO 偏好对齐（→ 扩展期）"
+
+tech_stack:
+  trainer: "LLaMA-Factory 0.8+"
+  annotation: "Label Studio 1.10+"
+  inference: "vLLM 0.4+"
+  experiment_tracking: "WandB"
+  storage: "MinIO（蒸馏 JSONL + 模型权重）"
+  version_control: "DVC（数据版本化）"
+  service: "FastAPI 0.110+"
+
+work_dir: "diting-src"
+service_name: "super-evo"
+
+dependencies:
+  upstream:
+    - "无（最上游基础设施）"
+
+provides_to_downstream:
+  - "01_cryo_guard: 3 P0 引擎的 LoRA"
+  - "02_deep_strike: Thesis LoRA"
+  - "03_holding_watch: 叙事一致性 NLI LoRA"
+
+verification_commands:
+  - "kubectl get pods -l app=super-evo"
+  - "make test-teacher-distill"
+  - "make test-llama-factory-train"
+  - "make test-kappa-calibration"
+  - "make test-lora-updated-event"
+
+exit_criteria:
+  - "4 P0 组件全部可运行"
+  - "首次 LoRA 训练成功（任一维度）"
+  - "双盲 Kappa ≥ 0.80"
+  - "lora_updated 事件可发布"
+
+l3_design_doc: "03_原子目标与规约/05_维度五_演进飞轮/stages/stage_1_启动期/"
+l4_practice_dir: "04_阶段规划与实践/05_维度五_演进飞轮/stage_1_启动期/"
+l5_stage_anchor: "l5-stage-d5s1"
+
+holdout_management:
+  policy: "永久锁库，禁止用于训练"
+  cases_per_dimension:
+    cryo_guard: 50
+    deep_strike: "TBD"
+    holding_watch: "TBD"

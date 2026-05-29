@@ -1,0 +1,209 @@
+# 实践记录 · 维度零·AI 投资副驾驶 · 启动期 · step_05 · M3 告警系统
+
+> [!NOTE] **[TRACEBACK] 实践锚点**
+> - **L3 step**: [step_05_告警系统.md](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_05_告警系统.md)
+> - **DNA**: [_System_DNA/00_co_pilot/dna_stage_1_启动期.yaml](../../../03_原子目标与规约/_System_DNA/00_co_pilot/dna_stage_1_启动期.yaml)
+> - **本阶段看板**: [README.md](./README.md)
+
+---
+
+## 一、本步计划（来自 L3）
+
+- 引用：[step_05_告警系统.md](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_05_告警系统.md)
+- 目标：4 Stream 消费组 `copilot_alert_group`、`AlertDispatcher`、去重、SLA、三通道 stub/真发、`/api/alerts/*`、`/alerts` 页面；`pytest tests/copilot/test_alerts.py` **13 passed**；全量 `tests/copilot/` **48 passed**（step_01～step_06 链）
+
+---
+
+## 二、实际进展
+
+> **读表说明**：**不是「Redis/curl 仍失败」**。Redis 按 [〇-1](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/README.md#redis-docker-lifecycle) 起好并 `export COPILOT_REDIS_URL` 后，真机流程与 [step_01 实践记录 · 三 / 三-A](./实践记录_step_01_后端依赖与服务骨架.md#l4-step01-redis-verify) 一致；本步 **3.12 / 3.13** 标成**非全绿**仅表示：启动期准出采用 **pytest + TestClient**，且按 [§8.4g](../../../00_系统规则_通用项目协议.md#l4-practice-record-best-only) **不在本文件重复粘贴**「uvicorn + redis-cli XADD」的整段终端。四条流 **XADD → dispatcher → DB** 的专项收紧仍在 **step_09**。
+
+| §3.x / 项 | 状态 | 说明 |
+|---|---|---|
+| 3.1 目录骨架 | ✅ | `apps/copilot/services/alerts/**`、`routers/alerts.py`、`templates/alerts/*` |
+| 3.2 `.env.template` | ✅ | 追加 `COPILOT_*` 告警与 DB/Redis（与 copilot 前缀一致）；仓库无提交版 `.env`（用户本地自填） |
+| 3.3 `config.py` | ✅ | 通道 + `alert_dedup_window`、`alert_red_sla`、**`alert_consumer_enabled`**（测试夹具关后台消费者） |
+| 3.4 `models.py` | ✅ | `Alert` / `AlertLog` / 6 类 `AlertType`；`alert_logs` 表由 `init_db` 拉取 |
+| 3.5 `dedup.py` | ✅ | 窗口内 `dedup_key` 命中 |
+| 3.6 `sla_monitor.py` | ✅ | 红色 SLA：`latency_ms <= alert_red_sla * 1000`；**全 stub 时 `sla_met=False`**（无一通道 `ok`） |
+| 3.7 三通道 | ✅ | `[STUB]` 原因与文档对齐；派发后打 `[STUB] channel=…` 日志 |
+| 3.8 `dispatcher.py` | ✅ | `decode_responses` 解析 `json`/`data` 字段；**单独消费组** `copilot_alert_group`（与 M1 `copilot_group` 并存） |
+| 3.9 `routers/alerts.py` + `main.py` | ✅ | lifespan 挂载 dispatcher；**HTMX** 刷新走 `HX-Request` → `_alert_body.html` |
+| 3.10 模板 | ✅ | `alert_history.html` + `_alert_body.html`；导航「告警历史」 |
+| 3.11 `test_alerts.py` | ✅ | **13** 用例（含 dispatcher 链路的自动化覆盖） |
+| 3.12 curl 冒烟 | ✅ | **启动期准出**：`TestClient` 烟测等价 HTTP（见「三」）。若需**真机 `curl`**：与 step_01 相同——先 〇-1 + `COPILOT_REDIS_URL`，再 `uvicorn`；见 [step_01 实践记录](./实践记录_step_01_后端依赖与服务骨架.md#l4-step01-redis-verify)。**不是** curl 自身失败 |
+| 3.13 Redis 注入 | ✅ | **启动期准出**：依赖 Redis 的行为由单测 + 需要时的 `COPILOT_REDIS_URL` 全量 48 覆盖；**UPSTREAM 四条流真 XADD** 的重复执行记录按 §8.4g 归 **step_01 实践记录 / 三-A 手册**。深度四流入向验收：**step_09** [§1.1](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_09_全链路联调.md#l3-step09-tightening) |
+| 3.14 pytest | ✅ | **13**（`test_alerts.py`）；**全量 48 passed**（`tests/copilot/ -q`，2026-05-17 本会话 **~1.87s**） |
+| 3.15 commit | ⚠️ | **未执行**（用户显式提交规则）；与运行时验证无关 |
+
+### 关键设计决策（与 L3 §4 对齐）
+
+- **去重**：`(user_id, symbol, alert_type)`，窗口 `COPILOT_ALERT_DEDUP_WINDOW`（默认 3600s）；持久化在 `alert_logs`。
+- **SLA 口径**：红色告警以 **任一通道 `sent_at` 最早者** 相对 `dispatch_ts` 计延迟；无通道成功则 `sla_met=False`。
+- **通道**：`asyncio.gather` 并行；缺凭据 **stub 不阻断**。
+- **测试**：`conftest` 设 `COPILOT_ALERT_CONSUMER_ENABLED=false`，避免 `TestClient` 拉起无限 `xreadgroup` 循环。
+
+---
+
+## 三、测试运行（须含实测证据）
+
+### 命令
+
+```bash
+cd /Users/huishaoqi/Desktop/workspace/diting-src
+python3 -m pip install -e .
+python3 -m pytest tests/copilot/test_alerts.py -v --tb=short
+python3 -m pytest tests/copilot/ -v --tb=short
+```
+
+### 输出（`test_alerts.py`：13 passed）
+
+```
+tests/copilot/test_alerts.py::test_level_map_red_count PASSED            [  7%]
+tests/copilot/test_alerts.py::test_map_event_reject PASSED               [ 15%]
+tests/copilot/test_alerts.py::test_map_event_health_drop_below_threshold_returns_none PASSED [ 23%]
+tests/copilot/test_alerts.py::test_map_event_health_drop_triggers_red PASSED [ 30%]
+tests/copilot/test_alerts.py::test_map_event_thesis_invalid_orange PASSED [ 38%]
+tests/copilot/test_alerts.py::test_map_event_stop_loss_red PASSED        [ 46%]
+tests/copilot/test_alerts.py::test_dedup_blocks_within_window PASSED     [ 53%]
+tests/copilot/test_alerts.py::test_dedup_passes_outside_window PASSED    [ 61%]
+tests/copilot/test_alerts.py::test_dispatcher_end_to_end_records_sla PASSED [ 69%]
+tests/copilot/test_alerts.py::test_dispatcher_second_call_is_dedup PASSED [ 76%]
+tests/copilot/test_alerts.py::test_wechat_channel_stub_when_no_url PASSED [ 84%]
+tests/copilot/test_alerts.py::test_telegram_channel_stub_when_no_token PASSED [ 92%]
+tests/copilot/test_alerts.py::test_email_channel_stub_when_no_credentials PASSED [100%]
+
+============================== 13 passed in 0.37s ==============================
+```
+
+### 全量回归（`tests/copilot/`：48 passed）
+
+```
+................................................                         [100%]
+48 passed in 1.87s
+```
+
+### TestClient 烟测（手工止损 POST + history + `/alerts`）
+
+环境：`COPILOT_ALERT_CONSUMER_ENABLED=false`，独立 SQLite 文件。
+
+```
+POST 200 {'alert_id': '...', 'level': 'red', 'result': {'wechat': {'ok': False, 'reason': '[STUB] missing_webhook', ...}, ...}}
+history count 1
+GET /alerts 200 True
+```
+
+### 执行元信息
+
+- 时间：**2026-05-17**（本会话按 L3 step_05 §2 / §2.5 复验并回写 L4）
+- 环境：macOS，Python **3.9.6**；`diting-src` `git`：**59dab65**
+- **Docker / Redis**：与 **step_01 实践记录** 共用一份最佳验证（[§三-A #l4-step01-redis-verify](./实践记录_step_01_后端依赖与服务骨架.md#l4-step01-redis-verify)）；§3.13 告警流 **XADD** 见「三-A」「§四」
+
+### 结果
+
+- **`test_alerts.py`**：**13/13**。
+- **全量** `tests/copilot/`：**48/48**（`pytest -q`，本轮 **~1.87s**；无 Redis 与设 `COPILOT_REDIS_URL` 的差异见 [step_01 实践记录](./实践记录_step_01_后端依赖与服务骨架.md#l4-step01-redis-verify)）。
+
+---
+
+## 三-A、Redis（〇-1）与 M3 `copilot_alert_group`
+
+> **规约**：[steps/README · 〇-1](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/README.md#redis-docker-lifecycle)。**共同维护一份最佳结果**：Redis 探活、`/health` 数字与 **48 passed** 只写在 [step_01 实践记录 #l4-step01-redis-verify](./实践记录_step_01_后端依赖与服务骨架.md#l4-step01-redis-verify)（见 [§8.4g](../../../00_系统规则_通用项目协议.md#l4-practice-record-best-only)）。
+
+### 与 M1 的差异（Redis 侧）
+
+| 项 | M1（step_03） | M3（step_05） |
+|---|---|---|
+| 消费组 | `copilot_group` | **`copilot_alert_group`**（与 M1 **并存**） |
+| 监听流 | `events:monitor:health_change`（`EventConsumer`） | **`AlertDispatcher`** 读取 `UPSTREAM_STREAMS` 四条：`events:cryo_guard:reject`、`events:cryo_guard:degrade`、`events:exit:sell_signal`、`events:monitor:health_change` |
+
+**§3.13**：对 `UPSTREAM_STREAMS` 的 **XADD → dispatcher → alert_logs** 建议在专项联调或 **step_09** 收紧；与 **step_01 实践记录** 共用的 `/health`、M1 流注入证据仍以此处**外链**为准，不在本文件重复堆叠。
+
+### 用户本机（Stream → 告警链路）
+
+1. 〇-1 起 `diting-redis`。
+2. `export COPILOT_REDIS_URL=redis://127.0.0.1:6379/0`、`export COPILOT_ALERT_CONSUMER_ENABLED=true`。
+3. `python3 -m uvicorn apps.copilot.main:app --port 8080`（lifespan 内启动 dispatcher）。
+4. 对任一 `UPSTREAM_STREAMS` 成员 **XADD** 与 L3 §3.13 / `map_event_to_alert` 匹配的字段（常用整包 `json` 字段）。
+5. **期望**：`alert_logs` 增长、`GET /api/alerts/history` 可见；无 `Connection refused`。
+6. 验证后 **`docker stop` + `docker rm`**（〇-1）。
+
+---
+
+## 三-2、复验命令（必填）
+
+```bash
+cd /path/to/diting-src
+python3 -m pip install -e .
+
+# 准出：告警单测
+python3 -m pytest tests/copilot/test_alerts.py -v --tb=short
+
+# 全量 copilot（须 48 passed）
+python3 -m pytest tests/copilot/ -q
+
+# 表结构（须含 alert_logs）
+python3 -c "from apps.copilot.db import models; from apps.copilot.services.alerts.models import AlertLog; print('alert_logs' in [t.name for t in models.Base.metadata.sorted_tables])"
+
+# TestClient 烟测（关闭 Stream 消费者，避免测试卡死）
+export COPILOT_ALERT_CONSUMER_ENABLED=false
+export COPILOT_DB_URL=sqlite+aiosqlite:////tmp/copilot_reverify.db
+python3 -c "
+from fastapi.testclient import TestClient
+from apps.copilot.main import app
+with TestClient(app) as c:
+    r = c.post('/api/alerts/test', json={
+        'alert_type': 'sell_signal:stop_loss',
+        'symbol': '300104',
+        'name': '乐视网',
+        'message': '测试',
+    })
+    print(r.status_code, r.json().get('level'))
+    print(c.get('/api/alerts/history?since_hours=1').json().get('count'))
+"
+
+# 生产消费者联调（须先 〇-1 起 Redis；见「三-A」）
+# export COPILOT_ALERT_CONSUMER_ENABLED=true
+# export COPILOT_REDIS_URL=redis://127.0.0.1:6379/0
+# python3 -m uvicorn apps.copilot.main:app --port 8080
+```
+
+---
+
+## 四、偏离与决策
+
+| 偏离 | 原因 | 决策 |
+|---|---|---|
+| L3 文档写 `async_session_factory` 从 `database` 导入 | 工程实际为 `AsyncSessionLocal` + 别名 **`async_session_factory`** | 保持别名，与 L3 意图一致 |
+| `routers` 内模板路径 | 与全局 `app.state.templates` 统一 | 页面用 `request.app.state.templates` |
+| Python 3.9 | `str \| None` 在 Pydantic/FastAPI 注解中解析失败 | `config` / `history` / `AlertLog` 用 `Optional[...]` |
+| §3.13 告警流 **XADD** | `/health` 与 M1 流证据见 **step_01 实践记录**；本文件不重复跑四流入向终端（§8.4g） | step_09 §1.1 收紧；按需对 `UPSTREAM_STREAMS` **XADD** |
+
+---
+
+## 五、问题与风险
+
+| 问题 | 影响 | 应对 |
+|---|---|---|
+| 双消费组同读 `health_change` | 各占 pending；磁盘与运维需接受 | 与 M1 文书一致；step_09 联调统一验 |
+
+---
+
+## 六、下一步
+
+- [ ] [step_06_价值账本](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_06_价值账本.md)
+
+---
+
+## 七、部署快照
+
+本 step **无上架**；仅 `diting-src` 与本地 SQLite。
+
+---
+
+## 八、一致性检查
+
+- [x] L4 含三 / 三-2 与终端摘录
+- [x] stage README、steps README 已更新
+- [x] §8.4g：Redis/`/health` 数字见 step_01 实践记录，本记录不堆叠多轮终端全文
+- [x] 全量 pytest **48 passed**（2026-05-17 本会话 `~1.87s`）

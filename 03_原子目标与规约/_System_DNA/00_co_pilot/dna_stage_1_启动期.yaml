@@ -1,0 +1,111 @@
+# DNA · 维度零·AI 投资副驾驶·启动期
+# 与 L3 设计 1:1:1 对齐：03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/
+
+version: "v1.0"
+last_updated: "2026-05-16"
+
+dimension:
+  id: 0
+  code: "co_pilot"
+  cn: "AI 投资副驾驶"
+  philosophy_pillars: ["①资产保值", "②复利", "⑧归因闭环"]
+
+stage:
+  id: "stage_1_启动期"
+  duration_weeks: 12
+  product_mode: "观察者模式"  # 系统建议 → 用户自主决定 → 系统记录
+
+one_line_goal: |
+  用 4 个子模块拼出 AI 投资副驾驶的最小产品闭环，
+  让 50 万本金的个人投资者第一天打开就有用、3 个月后能感知到避险与收益价值。
+
+quantitative_goals:
+  - name: "产品模块上线数"
+    value: 4
+    detail: "持仓体检 / 推荐池 / 紧急告警 / 价值账本"
+  - name: "首屏加载时间"
+    threshold: "< 1s"
+  - name: "红色告警 5 分钟到达率"
+    threshold: ">= 99.5%"
+  - name: "月报准时率"
+    threshold: "100%"
+  - name: "用户连续 12 周活跃"
+    threshold: "不放弃使用"
+  - name: "月度避险价值"
+    threshold: ">= ¥3000"
+
+deliverables:
+  modules:
+    - id: "M1"
+      name: "持仓体检报告"
+      key_outputs: ["首屏 4 色卡片", "单持仓详情页", "节点 4 态展示", "30 天健康度曲线"]
+      depends_on_events: ["events:monitor:health_change"]
+      deliver_week: "W4"
+    - id: "M2"
+      name: "推荐池与 thesis 卡"
+      key_outputs: ["推荐池页", "thesis 卡详情（5 必填）", "3 操作按钮", "PDF 导出"]
+      depends_on_events: ["events:thrust:thesis_proposed"]
+      deliver_week: "W5"
+    - id: "M3"
+      name: "紧急告警系统"
+      key_outputs: ["4 红 + 2 橙告警", "微信/Telegram/邮件三通道"]
+      depends_on_events: ["events:cryo_guard:reject", "events:exit:sell_signal", "events:monitor:health_change"]
+      deliver_week: "W6"
+    - id: "M4"
+      name: "价值账本"
+      key_outputs: ["SCS 指标", "EV 指标", "8 象限归因", "月报 PDF", "自我熔断"]
+      depends_on_events: ["综合所有维度事件"]
+      deliver_week: "W7-W8"
+
+excluded_in_stage_1:
+  - "反馈闭环 verified（→ 扩展期）"
+  - "券商 API 自动同步（→ 扩展期）"
+  - "电话告警（→ 完善期）"
+  - "自动驾驶限额（→ 完善期）"
+  - "议会模式 UI（→ 完善期）"
+
+tech_stack:
+  backend: "FastAPI 0.110+"
+  frontend: "HTMX 1.9 + Alpine.js 3.x"
+  template: "Jinja2 3.x"
+  database: "SQLite 3.40+"
+  cache_stream: "Redis 7.x"
+  scheduler: "APScheduler 3.x"
+  pdf: "WeasyPrint 60+"
+
+work_dir: "diting-src"
+service_name: "copilot"
+
+dependencies:
+  upstream:
+    - "01_cryo_guard P0: 3 引擎 + reject/degrade/pass 事件流就绪"
+    - "02_deep_strike P0: thesis_proposed 事件流就绪"
+    - "03_holding_watch P0: health_change 事件流 + 节点 4 态 API 就绪"
+    - "04_exit_engine P0: sell_signal 事件流就绪"
+    - "05_super_evo P0: 4 组件就绪"
+
+verification_commands:
+  - "make health-check"
+  - "make test-copilot"
+  - "make test-e2e"
+
+exit_criteria:
+  - "4 子模块全部 K8s Pod Running"
+  - "首屏加载 < 1s（Lighthouse 验证）"
+  - "红色告警 5 分钟到达率 ≥ 99.5%（SLA 监控）"
+  - "月报 T+1 准时率 100%"
+  - "用户连续 12 周活跃"
+  - "架构师签字"
+
+l3_design_doc: "03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/"
+l4_practice_dir: "04_阶段规划与实践/00_维度零_AI投资副驾驶/stage_1_启动期/"
+l5_stage_anchor: "l5-stage-d0s1"
+
+cost_budget_monthly:
+  total: "≤ ¥50"
+  breakdown:
+    web_service: "¥0（本地部署）"
+    database: "¥0（SQLite）"
+    wechat_robot: "¥0（企业微信 webhook）"
+    telegram_bot: "¥0（Bot API）"
+    email: "¥50/月（Resend/Mailgun 免费额度）"

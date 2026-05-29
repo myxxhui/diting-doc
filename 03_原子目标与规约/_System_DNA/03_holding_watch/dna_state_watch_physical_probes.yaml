@@ -1,0 +1,223 @@
+# DNA Y03 · 物理量探针 P5/P6/P7 配置（D3 持仓监控 · Lighthouse-Alpha）
+# Lighthouse-Alpha 物理量探针 DNA · 与 L2 D3 §6A + L3 step_03 + L1 §7.2 严格对齐
+# 版本：v1.0 · 2026-05-21 首版
+# 路径：diting-doc/03_原子目标与规约/_System_DNA/03_holding_watch/dna_state_watch_physical_probes.yaml
+
+physical_probes:
+  version: "v1.0"
+  upstream_l1: "06_投资哲学体系总纲.md#基石-持仓监控哲学边界维度三持仓监控"
+  upstream_l2: "02_战略维度/03_维度三_持仓监控/04_持仓策略与战场分配实践规划.md#六a-lighthouse-alpha-物理量探针接入承接-l1-72a-物理量探针读数哲学边界"
+  upstream_l3: "03_原子目标与规约/03_维度三_持仓监控/stages/stage_1_启动期/steps/step_03_价格与事件探针.md"
+  upstream_prd: "_drafts/lighthouse_alpha_PRD.md (§3 阶段三 + §4.2)"
+  shared_spec:
+    - "18_动态采集流水线规约.md"
+    - "20_监控字典规约.md"
+
+  # =========================================================================
+  # 三探针总览（PRD §3 阶段三 监控字典消费端）
+  # =========================================================================
+  probes:
+    # ---------------------------------------------------------------------
+    # P5 政府招标物理量探针
+    # ---------------------------------------------------------------------
+    P5:
+      enabled: true
+      name: "政府招标物理量探针"
+      data_source_type: "WEB_SCRAPING"
+      preferred_sources:
+        - name: "中国政府采购网"
+          url: "https://www.ccgp.gov.cn"
+          qps_max: 0.3                  # 共享规约 18 §六 反爬上限
+          ua_pool_size: 5
+        - name: "三大运营商电子采购平台"
+          url_pattern: "https://b2b.{operator}.com.cn"
+          operators: ["10086", "10010", "10000"]
+      polling_frequency: "daily"
+      polling_time_cron: "0 9 * * *"   # 每天 9 点
+      mapped_logic_chain_nodes: ["node_supply_demand_mismatch", "node_capacity_elasticity"]
+      mapped_thesis_logic_pattern: "thesis 卡 logic_chain.nodes[供需错配/订单兑现]"
+
+      alert_thresholds:
+        bid_amount_surge:               # PRD §3.3 液冷案例
+          condition: "近 30 天累计中标金额 ≥ 上一年度总营收 20%"
+          alert_threshold_struct:
+            operator: "sum_pct"
+            value: 0.20
+            window_days: 30
+          alert_level: "GREEN"          # 利好确认
+          d4_action: "trigger_d4_sp3_add_position_weight_plus_1_5_sigma"
+        bid_amount_collapse:
+          condition: "近 30 天中标金额环比骤降 ≥ 60%"
+          alert_threshold_struct:
+            operator: "mom_pct"
+            value: -0.60
+            window_days: 30
+          alert_level: "RED"            # 逻辑链破裂
+          d4_action: "trigger_d4_sp3_node_broken_and_review"
+
+      degradation:
+        on_qps_throttle: "back_off_5x_then_rotate_ua"
+        on_5_consecutive_failures: "mark_source_degraded_alert_no_block"
+
+    # ---------------------------------------------------------------------
+    # P6 海关 HS Code 出口量探针
+    # ---------------------------------------------------------------------
+    P6:
+      enabled: true
+      name: "海关 HS Code 出口量探针"
+      data_source_type: "STRUCT_DATA_API"
+      preferred_sources:
+        - name: "AkShare 海关"
+          api: "akshare.macro_china_customs()"
+          rate_limit: "natural"
+        - name: "Tushare 海关备份"
+          api: "tushare.macro_china_customs()"
+          rate_limit: "200/min"
+      polling_frequency: "monthly_after_release"
+      polling_time_cron: "0 12 20 * *"  # 每月 20 日 12 点（海关数据发布后 1 小时）
+      mapped_logic_chain_nodes: ["node_overseas_demand", "node_supply_demand_mismatch"]
+      mapped_thesis_logic_pattern: "thesis 卡 logic_chain.nodes[出海/海外业务兑现]"
+
+      alert_thresholds:
+        export_surge:                   # PRD §3.3 中际旭创案例
+          condition: "月度环比增长 > 30% 且单价同比 ≥ +10%"
+          alert_threshold_struct:
+            operator: "mom_pct"
+            value: 0.30
+            window_days: 30
+            and_yoy_unit_price_pct: 0.10
+          alert_level: "GREEN"
+          d4_action: "trigger_d4_sp3_add_position_weight_plus_1_5_sigma"
+        export_shrink:
+          condition: "月度环比 < -20% 且 连续 2 月"
+          alert_threshold_struct:
+            operator: "mom_pct"
+            value: -0.20
+            window_days: 30
+            consecutive_months: 2
+          alert_level: "RED"
+          d4_action: "trigger_d4_sp3_node_broken"
+
+      forbidden:
+        - rule: "禁止 Playwright 直连 stats.customs.gov.cn"
+          enforcement: "make audit-no-customs-direct-scrape (共享规约 18 §十 V1)"
+
+    # ---------------------------------------------------------------------
+    # P7 产业产能利用率探针
+    # ---------------------------------------------------------------------
+    P7:
+      enabled: true
+      name: "产业产能利用率探针"
+      data_source_type: "STRUCT_DATA_API"
+      preferred_sources:
+        - name: "AkShare 国家统计局"
+          api: "akshare.macro_china_capacity_utilization()"
+        - name: "国家统计局直采"
+          url: "https://data.stats.gov.cn"
+          qps_max: 0.5
+      polling_frequency: "monthly_after_release"
+      polling_time_cron: "0 14 15 * *"  # 每月 15 日 14 点
+      mapped_logic_chain_nodes: ["node_capacity_bottleneck", "node_capacity_elasticity"]
+
+      alert_thresholds:
+        utilization_high:
+          condition: "行业产能利用率 ≥ 85% 且 在线扩产周期 ≥ 6 个月"
+          alert_threshold_struct:
+            operator: "gt"
+            value: 0.85
+            window_days: 90
+            and_expansion_cycle_months_min: 6
+          alert_level: "GREEN"
+          d4_action: "trigger_d4_sp3_node_confirmed"
+        utilization_low:
+          condition: "行业产能利用率连续 3 月 < 65%"
+          alert_threshold_struct:
+            operator: "lt"
+            value: 0.65
+            window_days: 90
+            consecutive_months: 3
+          alert_level: "YELLOW"
+          d4_action: "trigger_d4_sp1_or_sp3_node_weakened"
+
+  # =========================================================================
+  # 监控字典消费契约（共享规约 20 §五 MC1~MC5）
+  # =========================================================================
+  monitor_dict_consumer:
+    redis_namespace: "monitor:{symbol}:dict:{field_id}"
+    meta_namespace: "monitor:{symbol}:dict:_meta"
+    must_read_meta_first: true            # MC1
+    polling_strict_per_field: true        # MC2
+    update_last_hit_on_alert: true        # MC3
+    alert_event_includes_evidence_ref: true   # MC4 → 含 monitor_field_id
+    field_semantics_read_only: true       # MC5（仅 last_hit_at 可写）
+
+  # =========================================================================
+  # 死字段 GC（共享规约 20 §七）
+  # =========================================================================
+  stale_gc:
+    enabled: true
+    schedule_cron: "0 2 1 * *"            # 每月 1 日 02:00
+    stale_age_days: 90
+    on_stale_action:
+      - "mark_status_stale"
+      - "feedback_to_d5_flywheel"          # → The Architect 字典生成质量训练
+      - "notify_architect_for_review"
+    architect_review_sla_days_startup: 30
+    architect_review_sla_days_extension: 7
+
+  # =========================================================================
+  # 质量度量门槛（共享规约 20 §八）
+  # =========================================================================
+  quality_metrics:
+    active_coverage_min_pct: 0.80         # 启动期门槛
+    stale_ratio_max_pct: 0.20
+    hit_rate_30d_min_pct: 0.50
+    architect_jsonschema_success_min_pct: 0.95
+    architect_cost_max_yuan_per_month: 150
+
+  # =========================================================================
+  # 与 D4 SP3/SP5 协作（D4 step_05 SP5 协议）
+  # =========================================================================
+  d4_collaboration:
+    sp3_event_topic: "events:monitor:health_change"
+    sp5_event_topic: "events:deep_strike:timer_signal"   # 不在本 DNA 产生，由 D2 step_05 Timer 产
+    alert_event_schema:
+      symbol: "str"
+      probe_id: "str (P5/P6/P7)"
+      monitor_field_id: "str"
+      alert_level: "GREEN | YELLOW | RED"
+      alert_threshold_struct: "object"
+      observed_value: "float"
+      evidence_ref: "str (含 monitor_field_id + 调用 source 的请求 ID)"
+      timestamp: "datetime"
+
+  # =========================================================================
+  # 永久规则（与 D4 step_05 §11 PRD §5 翻译契约一致）
+  # =========================================================================
+  no_auto_execute_permanent_rule: |
+    P5/P6/P7 探针触发 alert 仅产 events:monitor:health_change 事件；
+    **永久禁止** 探针 alert 字段含 buy / qmt / auto_trade / order_id；
+    用户最终决策须在 QMT/PTrade 手动下单；详见 D4 step_05 §11 PRD §5 翻译契约。
+
+  # =========================================================================
+  # L5 验收锚点
+  # =========================================================================
+  l5_anchors:
+    stage_1_p5: "l5-stage-stage1-d3-step03-probe-p5-bidding"
+    stage_1_p6: "l5-stage-stage1-d3-step03-probe-p6-customs"
+    stage_1_p7: "l5-stage-stage1-d3-step03-probe-p7-capacity"
+
+# =========================================================================
+# 修订记录
+# =========================================================================
+revisions:
+  - date: "2026-05-21"
+    trigger: "Lighthouse-Alpha 物理量探针 P5/P6/P7 DNA 缺失"
+    content: >
+      首版 v1.0：①P5 政府招标（ccgp + 三大运营商 / 每天 9 点 / sum_pct 20% GREEN + mom_pct -60%
+      RED）；②P6 海关 HS Code（AkShare 主 / Tushare 备 / 每月 20 日 12 点 / mom_pct 30%+yoy 10%
+      GREEN + 连续 2 月 -20% RED / 禁直爬 stats.customs.gov.cn）；③P7 产能利用率（AkShare 国统局
+      / 每月 15 日 14 点 / >85% + 扩产 ≥ 6 个月 GREEN + 连续 3 月 <65% YELLOW）；④监控字典消费 MC1~MC5；
+      ⑤死字段 GC（90d / 月度 cron / 启动期复审 SLA 30d）；⑥质量度量（覆盖 ≥80% / 死字段 ≤20% /
+      命中率 ≥50%）；⑦D4 SP3/SP5 协作 alert schema；⑧永久 no-auto-execute 规则；⑨L5 锚点；
+      与 L1 §7.2 + L2 D3 §6A + L3 step_03 + 共享规约 18/20 + PRD §3.3 + §4.2 严格对齐。

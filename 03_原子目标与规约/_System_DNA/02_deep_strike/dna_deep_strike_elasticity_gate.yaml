@@ -1,0 +1,145 @@
+# DNA Y02 · The Mapper 业绩弹性闸门配置
+# Lighthouse-Alpha 标的映射防稀释 DNA · 与 L2 D2 §8A.3 + L3 step_04 + L1 §6.3 严格对齐
+# 版本：v1.0 · 2026-05-21 首版
+# 路径：diting-doc/03_原子目标与规约/_System_DNA/02_deep_strike/dna_deep_strike_elasticity_gate.yaml
+
+elasticity_gate:
+  version: "v1.0"
+  upstream_l1: "06_投资哲学体系总纲.md#基石-进攻哲学边界维度二纵深进攻"
+  upstream_l2: "02_战略维度/02_维度二_纵深进攻/04_进攻实践策略规划.md#八a-lighthouse-alpha-进攻能力补强承接-l1-63-物理证伪--财务证伪"
+  upstream_l3: "03_原子目标与规约/02_维度二_纵深进攻/stages/stage_1_启动期/steps/step_04_利润截留扫描仪剧本.md"
+  upstream_prd: "_drafts/lighthouse_alpha_PRD.md (§3 阶段二 The Mapper)"
+
+  # =========================================================================
+  # The Mapper 核心规则（PRD §3 阶段二 · 承接 L2 §8A.3 P03）
+  # =========================================================================
+  mapper:
+    enabled: true
+
+    # ---------------------------------------------------------------------
+    # 规则一：营收基数稀释门禁（4 档）—— L2 §8A.3 P03
+    # 哲学：基石⑥ "产能弹性优先于营收弹性" + ❌ "被营收基数稀释的大盘组装厂"
+    # ---------------------------------------------------------------------
+    revenue_base_dilution:
+      # 业务定义：题材业务"预测年化营收增量" / 标的"上一年总营收"
+      formula: "predicted_topic_revenue_delta / total_revenue_last_year"
+
+      # 4 档判定（与 L1 §6.3 哲学边界 + L2 §8A.3 严格对齐）
+      tiers:
+        - tier: "diluted_largecap"        # 大盘组装厂强排雷
+          condition:                       # 营收 ≥ 1000 亿 且 题材增量贡献 < 5%
+            total_revenue_last_year_min_yuan: 100_000_000_000   # 1000 亿
+            topic_contribution_pct_max: 0.05
+          action: "hard_reject"            # 强制拒绝该标的本题材推荐
+          tag: "largecap_diluted"
+
+        - tier: "diluted"                  # 已稀释
+          condition:                       # 题材增量贡献 < 15%
+            topic_contribution_pct_max: 0.15
+          action: "soft_reject"            # 入"已稀释名单"
+          confidence_cap: 0.45             # 置信度上限降权
+          tag: "revenue_diluted"
+
+        - tier: "qualified"                # 合格
+          condition:
+            topic_contribution_pct_min: 0.15
+          action: "pass"
+          confidence_cap: 0.70
+
+        - tier: "elite_segment"            # 细分龙头加权
+          condition:                       # 营收 < 300 亿 且 题材增量贡献 ≥ 30%
+            total_revenue_last_year_max_yuan: 30_000_000_000    # 300 亿
+            topic_contribution_pct_min: 0.30
+          action: "promote"
+          confidence_cap: 0.85             # 上限放宽
+          tag: "elite_segment_leader"
+
+    # ---------------------------------------------------------------------
+    # 规则二：业绩弹性最低增益 —— L2 §8A.3 P03
+    # ---------------------------------------------------------------------
+    profit_elasticity:
+      formula: "topic_business_gross_margin_minus_total_gross_margin >= 5pp"
+      gross_margin_threshold_pp: 5.0      # 5 个百分点
+      below_threshold_tag: "gross_margin_drag"
+      below_threshold_confidence_cap: 0.55
+
+    # ---------------------------------------------------------------------
+    # 规则三：单题材簇推荐数量上限 —— L2 §8A.3 P03
+    # ---------------------------------------------------------------------
+    recommendation_limit:
+      max_symbols_per_cluster: 3
+      sort_by: "elasticity_ratio"          # 业绩弹性比降序
+      truncate_action: "keep_top_3_save_rest_for_recheck"
+
+    # ---------------------------------------------------------------------
+    # 综合输出
+    # ---------------------------------------------------------------------
+    output_schema:
+      thesis_card_id: "str"
+      cluster_id: "str"
+      symbol: "str"
+      tier: "diluted_largecap | diluted | qualified | elite_segment"
+      tags: "list[str]"
+      revenue_base_dilution_pct: "float"
+      profit_elasticity_pp: "float"
+      confidence_cap: "float"
+      action: "hard_reject | soft_reject | pass | promote"
+      reasoning: "str (中文，引用 PRD §3 阶段二原文)"
+
+    # ---------------------------------------------------------------------
+    # 实战示例（PRD §3 阶段二 · 液冷案例）
+    # ---------------------------------------------------------------------
+    examples:
+      - name: "PRD 液冷 · 英维克 vs 工业富联"
+        cluster_topic: "智算中心液冷"
+        candidates:
+          - symbol: "002837"     # 英维克
+            total_revenue_last_year_yuan: 4_200_000_000        # ~42 亿
+            predicted_topic_revenue_delta_yuan: 6_000_000_000  # ~60 亿（订单翻倍）
+            topic_contribution_pct: 1.43
+            topic_gross_margin: 0.30
+            total_gross_margin: 0.22
+            expected_tier: "elite_segment"
+            expected_action: "promote"
+            expected_confidence_cap: 0.85
+          - symbol: "601138"     # 工业富联
+            total_revenue_last_year_yuan: 480_000_000_000      # 4800 亿（组装厂）
+            predicted_topic_revenue_delta_yuan: 8_000_000_000  # ~80 亿
+            topic_contribution_pct: 0.017                       # 仅 1.7%
+            topic_gross_margin: 0.08
+            total_gross_margin: 0.075
+            expected_tier: "diluted_largecap"
+            expected_action: "hard_reject"
+            expected_tag: "largecap_diluted"
+
+  # =========================================================================
+  # critic 的 Mapper 配合（mapper 仅消费 critic 已 pass 的 cluster）
+  # =========================================================================
+  upstream_dependency:
+    consume_only_critic_passed: true       # critic.physical_gate=pass 才入 mapper
+    critic_dna_ref: "dna_deep_strike_theme_sniffer.yaml::theme_sniffer.critic"
+
+  # =========================================================================
+  # 路由与成本
+  # =========================================================================
+  routing: "local_qwen"                    # 规则计算为主，小模型辅助解析财报字段
+  cost_per_cluster_max_yuan: 0.10          # 仅规则 + 小模型，成本远低于 Scorer
+
+  # =========================================================================
+  # L5 验收锚点
+  # =========================================================================
+  l5_anchors:
+    stage_1_mapper: "l5-stage-stage1-d2-step04-mapper-elasticity-gate"
+
+# =========================================================================
+# 修订记录
+# =========================================================================
+revisions:
+  - date: "2026-05-21"
+    trigger: "Lighthouse-Alpha The Mapper 业绩弹性闸门 DNA 缺失"
+    content: >
+      首版 v1.0：①营收基数稀释 4 档（diluted_largecap 1000 亿+5% / diluted 15% / qualified 15%+
+      / elite_segment 300 亿+30%）；②业绩弹性最低增益（毛利率 ≥ +5pp）；③单题材簇推荐上限 3 个；
+      ④综合输出 schema；⑤PRD 液冷案例（英维克 elite_segment / 工业富联 diluted_largecap）；
+      ⑥仅消费 critic 已 pass 的 cluster；⑦路由本地小模型；⑧L5 锚点；与 L1 §6.3 + L2 §8A.3 +
+      L3 step_04 + PRD §3 阶段二严格对齐。

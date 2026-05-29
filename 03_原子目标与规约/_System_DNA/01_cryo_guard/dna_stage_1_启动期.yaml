@@ -1,0 +1,150 @@
+# DNA · 维度一·极寒防御·启动期
+# 与 L3 设计 1:1:1 对齐：03_原子目标与规约/01_维度一_极寒防御/stages/stage_1_启动期/
+
+version: "v1.0"
+last_updated: "2026-05-16"
+
+dimension:
+  id: 1
+  code: "cryo_guard"
+  cn: "极寒防御"
+  philosophy_pillars: ["⑤防御（一票否决）", "④八象限（F vs B 归因）"]
+
+stage:
+  id: "stage_1_启动期"
+  duration_weeks: 10
+
+one_line_goal: |
+  用 3 个 P0 引擎 + decision_gate 实现"任何对外输出必须先过防御门禁"的最小闭环。
+
+quantitative_goals:
+  - name: "P0 引擎上线数"
+    value: 3
+    detail: "财务测谎 + 大股东诚信 + 关联交易"
+  - name: "综合 Recall"
+    threshold: ">= 0.90"
+    measure: "50 案例 Holdout"
+  - name: "综合 Precision"
+    threshold: ">= 0.70"
+    measure: "50 案例 Holdout"
+  - name: "decision_gate 漏判高风险"
+    threshold: "= 0"
+  - name: "单日可用性"
+    threshold: ">= 99.5%"
+
+deliverables:
+  engines:
+    - id: "E1"
+      name: "financial_fraud_engine"
+      cn: "财务造假测谎"
+      lora_name: "financial_fraud_lora_v1"
+      lora_rank: 16
+      base_model: "Qwen2.5-7B-Instruct"
+      holdout_recall_threshold: ">= 0.95"
+      holdout_precision_threshold: ">= 0.70"
+      detection_categories: 6  # 6 类典型粉饰特征
+      agents: ["field_extractor", "feature_calculator", "time_series_comparator", "peer_comparator", "llm_interrogator"]
+    - id: "E2"
+      name: "shareholder_integrity_engine"
+      cn: "大股东诚信验尸"
+      lora_name: "shareholder_lora_v1"
+      lora_rank: 16
+      base_model: "Qwen2.5-7B-Instruct"
+      holdout_recall_threshold: ">= 0.90"
+      holdout_precision_threshold: ">= 0.70"
+      detection_categories: 5  # 5 类言行不一
+      agents: ["commitment_extractor_rag", "behavior_extractor", "nli_comparator", "llm_scorer"]
+    - id: "E3"
+      name: "related_party_engine"
+      cn: "关联交易/明股实债识别"
+      lora_name: "related_party_lora_v1"
+      lora_rank: 16
+      base_model: "Qwen2.5-7B-Instruct"
+      holdout_recall_threshold: ">= 0.85"
+      holdout_precision_threshold: ">= 0.70"
+      detection_categories: 4  # 4 类典型特征
+      agents: ["equity_penetrator", "note_parser", "graph_builder", "cycle_detector", "debt_equity_detector", "llm_aggregator"]
+
+  decision_gate:
+    aggregation_rule: "任意 1 个 reject → reject；任意 2 个 degrade → 升级 reject；全部 pass → 放行"
+    reject_thresholds:
+      financial_fraud: 0.85
+      shareholder_integrity: 0.80
+      related_party: 0.80
+    degrade_thresholds:
+      financial_fraud: 0.60
+      shareholder_integrity: 0.55
+      related_party: 0.55
+
+  holdout:
+    total_cases: 50
+    distribution:
+      financial_fraud: 30  # 10 现金 + 10 营收 + 10 综合
+      shareholder_integrity: 10
+      related_party: 10
+    rule: "永久锁库，禁止用于训练"
+
+  audit_log:
+    table: "cryo_guard.audit_log"
+    fields: ["symbol", "decision_at", "engine_scores", "aggregation", "evidence"]
+    retention: "永久"
+
+excluded_in_stage_1:
+  - "DPO 偏好对齐（→ 扩展期）"
+  - "多 LoRA 行业细分（→ 扩展期）"
+  - "议会模式（→ 完善期）"
+  - "4-10 号引擎（→ 扩展期/完善期）"
+  - "reject 配额管理（→ 扩展期）"
+  - "5 维认知边界完整检查（→ 扩展期）"
+
+tech_stack:
+  base_model: "Qwen2.5-7B-Instruct"
+  fine_tune: "LoRA rank=16 (LLaMA-Factory 0.8+)"
+  inference: "vLLM 0.4+ (multi-lora)"
+  agent: "LangGraph 0.1+"
+  vector_db: "Milvus Standalone 2.3+"
+  graph_db: "Neo4j Community 5.x"
+  service: "FastAPI 0.110+"
+  database: "SQLite 3.40+ (Stage 1) → PostgreSQL (Stage 2)"
+  orchestration: "K3s 1.28+"
+
+hardware_requirements:
+  gpu: "RTX 4090 24GB × 1"
+  cpu: "8 核（推荐 16）"
+  memory: "64GB（推荐 128）"
+  storage: "500GB SSD（推荐 1TB NVMe）"
+
+work_dir: "diting-src"
+service_name: "cryo-guard"
+
+dependencies:
+  upstream:
+    - "05_super_evo P0: Teacher LLM 蒸馏 + LLaMA-Factory（用于引擎微调）"
+    - "平台与产品: K3s + vLLM + Milvus + Neo4j（基础设施）"
+
+verification_commands:
+  - "kubectl get pods -l app=cryo-guard"
+  - "curl http://localhost:8080/api/decision-gate/health"
+  - "python training/scripts/evaluate_holdout.py --output-dir output/eval_reports/"
+  - "make test-cryo-guard-integration"
+
+exit_criteria:
+  - "3 P0 引擎全部 K8s Pod Running"
+  - "Holdout 综合 Recall ≥ 0.90 且 Precision ≥ 0.70"
+  - "decision_gate 漏判高风险 = 0"
+  - "审计日志完整可查"
+  - "架构师签字"
+
+l3_design_doc: "03_原子目标与规约/01_维度一_极寒防御/stages/stage_1_启动期/"
+l4_practice_dir: "04_阶段规划与实践/01_维度一_极寒防御/stage_1_启动期/"
+l5_stage_anchor: "l5-stage-d1s1"
+
+training_data_scale:
+  teacher_distill:
+    financial_fraud: 1500
+    shareholder_integrity: 1000
+    related_party: 1000
+  verified_min:
+    financial_fraud: 1000
+    shareholder_integrity: 800
+    related_party: 800

@@ -1,0 +1,281 @@
+# DNA Y01 · The Sniffer / The Scorer / The Critic / The Architect / The Timer 配置
+# Lighthouse-Alpha 进攻能力 5 大模型共享 DNA · 与 L2 D2 §8A + L3 step_02/03/04/05/07 + 共享规约 18/19/20 严格对齐
+# 版本：v1.0 · 2026-05-21 首版
+# 路径：diting-doc/03_原子目标与规约/_System_DNA/02_deep_strike/dna_deep_strike_theme_sniffer.yaml
+
+theme_sniffer:
+  version: "v1.1"
+  upstream_l1: "06_投资哲学体系总纲.md#基石-进攻哲学边界维度二纵深进攻"
+  upstream_l2: "02_战略维度/02_维度二_纵深进攻/04_进攻实践策略规划.md#八a-lighthouse-alpha-进攻能力补强承接-l1-63-物理证伪--财务证伪"
+  upstream_prd: "_drafts/lighthouse_alpha_PRD.md (§2 + §3)"
+
+  # =========================================================================
+  # 远程大模型统一配置（Lighthouse-Alpha · 全替 Opus 4.7 · 2026-05-22）
+  # =========================================================================
+  remote_large_model:
+    provider: anthropic
+    model_display: "Claude Opus 4.7"
+    model_id: "claude-opus-4-7"
+    api_model_id: "claude-opus-4-6"          # 2026-05-23 实测可用 slug；claude-opus-4-20250514 已 404
+    env_credential: ANTHROPIC_API_KEY
+    single_vendor_only: true                 # Lighthouse 五场景禁止路由 OpenAI
+    replaces: ["gpt-4o", "claude-3-5-sonnet"]
+    daily_call_cap:
+      startup: 200
+      extension: 400
+    timeout_s: 90
+    cost_per_call_estimate_yuan: [0.25, 1.20]
+
+  # =========================================================================
+  # The Sniffer 主动嗅探层（NLP 聚类 + 三源采集 · 承接 PRD §2.1 + §2.2）
+  # =========================================================================
+  sniffer:
+    sources:
+      research:                    # 卖方研报首发库
+        enabled: true
+        targets: ["天风证券", "国泰君安", "中信证券", "中信建投", "华泰证券"]
+        sensitive_keywords:        # PRD §2.1 提取关键锚点
+          - "拐点"
+          - "破局"
+          - "元年"
+          - "0到1"
+          - "供需错配"
+          - "国产替代"
+        qps_max: 1.0
+      policy:                      # 顶层政策定调网
+        enabled: true
+        targets: ["发改委", "工信部", "国家能源局"]
+        sensitive_keywords:
+          - "三年行动计划"
+          - "指导意见"
+          - "重点扶持"
+        qps_max: 0.5
+      overseas:                    # 海外科技映射雷达
+        enabled: true
+        targets: ["arxiv", "us_stock_top10_sectors", "msft_press", "nvda_press", "openai_press"]
+        qps_max: 1.0
+
+    clustering:
+      method: "tf_idf + textrank"
+      surge_threshold_pct: 3.0     # PRD §2.2 24h 词频 / 30d 历史基准 ≥ 300%
+      surge_window_hours: 24
+      baseline_window_days: 30
+      max_clusters_per_day: 20     # L2 §8A.1 每日上限
+      dedup_window_days: 14        # L2 §8A.1 同题材 14 天内不重复
+
+  # =========================================================================
+  # The Scorer 三维评分（严格对齐 Lighthouse-Alpha PRD §2.3 · 政策/产业空间/A股映射度）
+  # =========================================================================
+  scorer:
+    enabled: true
+    upstream_l3: "03_原子目标与规约/02_维度二_纵深进攻/stages/stage_1_启动期/steps/step_07_置信度评分器.md#35-数据质量验收矩阵置信度输出--仅启动期"
+
+    three_dim:                     # PRD §2.3 严格命名
+      policy_tier:
+        weight: 0.35
+        scale: [1, 10]
+        rubric:
+          "10": "国家级三年行动计划"
+          "7": "部委级专项"
+          "4": "地方级规划"
+          "1": "无政策背书"
+      industry_space:
+        weight: 0.35
+        scale: [1, 10]
+        rubric:
+          "10": "千亿级 + 5 年复合增长 ≥ 30%"
+          "7": "百亿级"
+          "4": "十亿级"
+          "1": "数据未确认"
+      a_share_mapping:
+        weight: 0.30
+        scale: [1, 10]
+        rubric:
+          "10": "3+ 实锤标的且营收占比 ≥ 30%"
+          "7": "1~2 个实锤"
+          "4": "仅有大盘组装厂"
+          "1": "无映射"
+
+    composite_thresholds:          # L2 §8A.4 三档阈值（0~10 域）
+      propose_min: 8.0             # ≥ 8.0 入推荐池，置信上限 0.85
+      watch_min: 7.0               # 7.0~7.9 入候选库 watch，置信上限 0.70
+      discard_max: 6.99            # < 7.0 当日不入推荐池
+
+    routing:                       # 与共享规约 19 §三 异构调度对齐 · Opus 4.7 全替
+      policy_tier: "remote_large"  # Claude Opus 4.7（须政治体制知识）
+      industry_space: "local_qwen" # 小模型（规则映射）
+      a_share_mapping: "remote_large"  # Claude Opus 4.7（A股标的知识）
+
+    cost_per_cluster_max_yuan: 0.75          # Opus 4.7 全替后上调（原 0.30）
+    degrade_to_policy_only_on_budget_exceed: true   # 超额仅算 policy_tier + 标 partial
+
+    audit:
+      log_prompt_template_id: true
+      log_source_urls: true
+      missing_source_downgrade_one_tier: true       # 缺 source 自动降一档
+      retention_days: 90                            # 共享规约 19 §六
+
+  # =========================================================================
+  # The Critic 物理证伪门禁（PRD §3 阶段一 · 承接 L2 §8A.2）
+  # =========================================================================
+  critic:
+    enabled: true
+    upstream_l3: "03_原子目标与规约/02_维度二_纵深进攻/stages/stage_1_启动期/steps/step_03_证据链构建器.md"
+
+    gates:
+      physical_floor:              # 物理底线判据
+        required: true
+        evidence_required: ["physical_quantity_name", "unit", "boundary_value", "source_url"]
+        fail_action: "hard_reject"
+        fail_tag: "physical_floor_missing"
+      supply_elasticity:           # 产能弹性判据
+        required: true
+        evidence_required: ["barrier_type", "barrier_duration_months", "source_url"]
+        fail_action: "soft_reject"
+        fail_tag: "supply_elasticity_unclear"
+        soft_reject_confidence_cap: 0.55
+
+    combined_matrix:               # L2 §8A.2 双判据合规矩阵
+      both_pass: "promote_to_mapper"
+      floor_pass_elasticity_fail: "softgate_no_supply"
+      floor_fail_elasticity_pass: "hard_reject"
+      both_fail: "reject_and_recheck_in_30d"
+
+    routing: "remote_large"        # Claude Opus 4.7 · 物理证伪需通识
+
+    audit:
+      structured_json_response_required: true
+      no_source_force_hard_reject: true
+
+  # =========================================================================
+  # The Mapper 业绩弹性闸门（PRD §3 阶段二 · 承接 L2 §8A.3）
+  # 注：完整 Mapper 配置见 Y02 elasticity_gate.yaml；此处仅声明引用
+  # =========================================================================
+  mapper:
+    reference: "dna_deep_strike_elasticity_gate.yaml"
+    routing: "local_qwen"          # 规则计算为主，小模型辅助
+    upstream_l3: "03_原子目标与规约/02_维度二_纵深进攻/stages/stage_1_启动期/steps/step_04_利润截留扫描仪剧本.md"
+
+  # =========================================================================
+  # The Architect 监控字典生成（PRD §3 阶段三 · 承接共享规约 20）
+  # =========================================================================
+  architect:
+    enabled: true
+    upstream_l3: "03_原子目标与规约/02_维度二_纵深进攻/stages/stage_1_启动期/steps/step_02_数据采集.md#355-lighthouse-alpha-the-architect-监控字典-json-schema严格对齐-prd-33"
+    schema_reference: "diting-src/data/sniffer/schemas/monitor_matrix.schema.yaml"
+    shared_spec: "20_监控字典规约.md"
+
+    prompt_template_id: "the_architect_v1"
+    routing: "remote_large"        # Claude Opus 4.7（HS Code/URL/字典推理）
+
+    output:
+      max_fields_per_thesis: 10
+      min_fields_per_thesis: 1
+      probe_id_allowed: [P5, P6, P7]
+      data_source_type_allowed: [STRUCT_DATA_API, WEB_SCRAPING]
+      polling_frequency_allowed: [daily, monthly_after_release, weekly]
+
+    hard_constraints:              # 共享规约 20 §四 MA1~MA6
+      ma1_jsonschema_validate: true
+      ma2_dual_form_threshold: true
+      ma3_probe_id_enum_check: true
+      ma4_url_or_keywords_or_hs_required: true
+      ma5_mapped_logic_chain_nodes_non_empty: true
+      ma6_initial_status: "active"
+
+    cost_per_dict_max_yuan: 1.25             # Opus 4.7 全替后上调（原 0.50）
+    cost_monthly_max_yuan: 375               # Opus 4.7 全替后上调（原 150）
+
+  # =========================================================================
+  # The Timer 三段时间窗口（PRD §3 阶段四 · 承接 L3 step_05 §3.5.4 TM1~TM7）
+  # 生产端归属 D2 step_05 thesis 卡片生成器；消费端在 D4 step_05 SP5
+  # =========================================================================
+  timer:
+    enabled: true
+    upstream_l3_generator: "03_原子目标与规约/02_维度二_纵深进攻/stages/stage_1_启动期/steps/step_05_thesis卡片生成器.md#354-lighthouse-alpha-the-timer-三段时间窗口预测生产端--严格对齐-prd-34"
+    downstream_l3_consumer: "03_原子目标与规约/04_维度四_卖出决策/stages/stage_1_启动期/steps/step_05_SP3_Thesis失效协议.md"
+
+    prompt_template_id: "the_timer_v1"
+    routing: "remote_large"        # Claude Opus 4.7（须 A 股交易日历 + 财报节奏综合判断）
+
+    a_share_calendar:              # PRD §3.4 阶段四规则
+      pre_announce_h1: "07-01..07-15"        # 中报预告期 7 月上旬
+      h1_release: "08-01..08-31"             # 中报披露期 8 月
+      pre_announce_q3: "10-01..10-15"        # 三季报预告期 10 月上旬
+      q3_release: "10-15..10-31"
+      annual_pre_announce: "01-15..01-31"
+      annual_release: "04-01..04-30"
+
+    three_phases_schema:
+      incubation:                  # 潜伏窗口
+        action_hint_allowed: ["watch", "gradual_build"]
+      main_surge:                  # 主升浪窗口
+        action_hint_allowed: ["hold", "add"]
+      retreat:                     # 撤退窗口
+        action_hint_allowed: ["begin_exit"]
+
+    cycle_anchors_required_min: 1
+    cycle_type_allowed:
+      - pre_announce_h1
+      - h1_release
+      - pre_announce_q3
+      - q3_release
+      - annual_pre_announce
+      - annual_release
+
+    hard_constraints:              # L3 step_05 §3.5.4 TM1~TM7
+      tm1_three_phases_non_empty: true
+      tm2_window_ordering: true    # incubation.end ≤ main_surge.start ≤ main_surge.end ≤ retreat.start
+      tm3_at_least_one_cycle_anchor: true
+      tm4_aligned_with_monitor_dict: true
+      tm5_aligned_with_d4_sp5_enum: true
+      tm6_permanent_no_auto_execute: true   # 不可关闭
+      tm7_prompt_logged: true
+
+    no_auto_execute_permanent_rule: |
+      The Timer 输出仅是建议；
+      **永久禁止** timer_signal 嵌入 buy / qmt / auto_trade / order_id / webhook_target 字段；
+      违反此规则的代码或文档（含 PRD §5 描述的"自动建仓 / 加仓 / 清仓"）须按
+      L3 step_05 (D4) §11 PRD §5 永久翻译契约 翻译为 advice + 人工执行。
+
+    cost_per_thesis_max_yuan: 0.75           # Opus 4.7 全替后上调（原 0.30）
+
+  # =========================================================================
+  # 异常与失败动作汇总（与 §11 依赖/失败时一致）
+  # =========================================================================
+  failure_actions:
+    scorer_budget_exceeded: "degrade_to_policy_tier_only_partial"
+    critic_no_source: "hard_reject"
+    architect_jsonschema_fail: "dlq_and_alert"
+    timer_three_phases_incomplete: "reject_and_alert"
+    any_no_auto_execute_violation: "hard_block_at_startup"
+
+  # =========================================================================
+  # 与 L5 验收锚点
+  # =========================================================================
+  l5_anchors:
+    stage_1_scorer: "l5-stage-stage1-d2-step07-scorer-three-dim"
+    stage_1_critic: "l5-stage-stage1-d2-step03-critic-physical-gate"
+    stage_1_architect: "l5-stage-stage1-d2-step02-architect-monitor-dict"
+    stage_1_timer: "l5-stage-stage1-d2-step05-timer-three-phases"
+
+# =========================================================================
+# 修订记录
+# =========================================================================
+revisions:
+  - date: "2026-05-22"
+    trigger: "架构师决策：Lighthouse 远程大模型全替 Claude Opus 4.7"
+    content: >
+      v1.1：新增 remote_large_model 统一配置块（Anthropic 单 vendor + daily_call_cap 200/400）；
+      Scorer cost_per_cluster 0.30→0.75；Architect cost 0.50/150→1.25/375；Timer cost 0.30→0.75；
+      五场景 routing 注释全改 Opus 4.7；与共享规约 19 v1.1 同步。
+  - date: "2026-05-21"
+    trigger: "Lighthouse-Alpha 进攻能力 5 大模型共享 DNA 缺失"
+    content: >
+      首版 v1.0：①The Sniffer（三源 + NLP 聚类 + 300% 暴增 + dedup 14d）；
+      ②The Scorer 三维评分严格对齐 PRD §2.3（policy_tier 0.35 + industry_space 0.35 +
+      a_share_mapping 0.30；阈值 8.0/7.0；混合路由）；③The Critic（物理底线 + 产能弹性
+      双判据 + 4 格矩阵）；④The Mapper 引用 Y02；⑤The Architect（schema 引共享规约 20；
+      6 条硬约束 MA1~MA6；成本上限 ¥150/月）；⑥The Timer（A 股财报日历 + 三段窗口 + 7
+      硬约束 TM1~TM7 + 永久 no-auto-execute 规则）；⑦异常与失败动作；⑧L5 锚点；与 L2 §8A
+      + L3 step_02/03/04/05/07 + 共享规约 18/19/20 严格对齐。

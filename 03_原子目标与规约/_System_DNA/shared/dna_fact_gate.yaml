@@ -1,0 +1,106 @@
+# 事实交叉验证与防幻觉 · 共享 DNA（v1.0）
+# 与 _共享规约/22_事实交叉验证与防幻觉规约.md 1:1
+
+schema_version: "1.0.0"
+pillar: shared
+module: fact_gate
+design_doc: ../../_共享规约/22_事实交叉验证与防幻觉规约.md
+l3_anchor: shared-fact-gate
+l5_anchor: l5-shared-fact-gate
+
+work_dir: diting-src/
+
+# =====================================================================
+# 5 类触发场景
+# =====================================================================
+trigger_scenarios:
+  - { id: holding_relation, name: 持股/关联关系, example: "X 持有 Y 股权", historic_failure: "利欧持宇树（伪相关）" }
+  - { id: market_share, name: 市占率/渗透率, example: "Z 浸没式液冷市占率 50%", historic_failure: "缺 as_of_date" }
+  - { id: physical_causality, name: 物理因果, example: "夏季高温倒逼液冷", historic_failure: "真因为功耗密度" }
+  - { id: industry_generalization, name: 行业普遍性结论, example: "To-B 硬件 Q1 必惨淡", historic_failure: "需公司级合同负债" }
+  - { id: policy_hs_label, name: 政策/HS Code/标签, example: "HS 85176239 光模块对美", historic_failure: "缺 verified_at" }
+
+# =====================================================================
+# 4 档处理矩阵
+# =====================================================================
+verification_matrix:
+  - { tier: 1, status: verified_strong, condition: ">=2 sources independence>=0.7 + raw_excerpt", confidence_cap: 1.0, action: "write_db + thesis 可引" }
+  - { tier: 2, status: verified_weak, condition: "1 primary OR 2 同集团", confidence_cap: 0.55, action: "write_db + thesis valuation_anchor 不可引" }
+  - { tier: 3, status: pending_more_evidence, condition: "0 primary OR LLM 无 URL", confidence_cap: 0.20, action: "fact_claims_pending + 24h 重爬" }
+  - { tier: 4, status: dlq_rejected, condition: "多源矛盾 OR URL 404", confidence_cap: 0.0, action: "fact_claims_dlq + alert" }
+
+# =====================================================================
+# 独立性评分库（独立性图谱初始化）
+# =====================================================================
+independence_score_rules:
+  - { relation: same_publisher, score: 0.0 }
+  - { relation: same_group, score: 0.3, examples: ["人民日报系", "财联社系", "同花顺系"] }
+  - { relation: primary_secondary_pair, score: 0.7 }
+  - { relation: two_independent_primary, score: 1.0 }
+  - { relation: primary_plus_llm_with_url, score: 0.4 }
+
+# =====================================================================
+# 时效管理
+# =====================================================================
+expiry_policy:
+  - { claim_type: holding_relation, default_ttl_days: -1, renewal_trigger: "季报 / 重大资产重组" }
+  - { claim_type: hs_code_policy, default_ttl_days: 365, renewal_trigger: "HS 版本更新（5 年）" }
+  - { claim_type: market_share, default_ttl_days: 90, renewal_trigger: "季报 / 行业研究院" }
+  - { claim_type: physical_metric, default_ttl_days: 90, renewal_trigger: "公司业绩说明会 / IR" }
+  - { claim_type: consensus_estimate, default_ttl_days: 14, renewal_trigger: "券商研报更新" }
+
+# =====================================================================
+# 反模式拦截
+# =====================================================================
+anti_patterns:
+  - { id: R1, name: "持股关联无 primary", verdict: dlq_rejected }
+  - { id: R2, name: "物理因果 LLM 编造", verdict: dlq_rejected }
+  - { id: R3, name: "市占率无 as_of_date", verdict: verified_weak, tag: as_of_date_missing }
+  - { id: R4, name: "行业结论推到具体公司", verdict: pending_more_evidence }
+
+# =====================================================================
+# 实施要点（A~G 与 §6 一致）
+# =====================================================================
+implementation_points:
+  - { id: A, item: FactClaim_schema, location: "apps/shared/fact_gate/schemas.py" }
+  - { id: B, item: verifier, location: "apps/shared/fact_gate/verifier.py" }
+  - { id: C, item: independence_calculator, location: "apps/shared/fact_gate/independence.py" }
+  - { id: D, item: dlq_tables, location: "fact_claims_dlq + fact_claims_pending" }
+  - { id: E, item: runtime_guard, location: "thesis_generator / monitor_dict / market_phase write 前" }
+  - { id: F, item: ci_grep, command: "make audit-fact-gate-bypass" }
+  - { id: G, item: publisher_independence_graph, location: "configs/publisher_independence_graph.yaml" }
+
+# =====================================================================
+# 准出标准
+# =====================================================================
+exit_criteria:
+  - "FactClaim Pydantic 通过 jsonschema"
+  - "4 档矩阵单测全过 + R1~R4 反模式拦截"
+  - "fact_claims_dlq DDL ok + publisher 库 >=100 条"
+  - "D2 step_03 / step_05 / step_11 + D3 step_09 全部接入"
+  - "make audit-fact-gate-bypass 0 命中"
+  - "L4 实践记录含 >=3 个真实持仓走过 gate"
+
+# =====================================================================
+# 验证命令
+# =====================================================================
+verification_commands:
+  - "cd diting-src && make fact-gate-test"
+  - "cd diting-src && make audit-fact-gate-bypass"
+  - "cd diting-src && pytest apps/shared/fact_gate -q"
+
+# =====================================================================
+# 跨维度消费者
+# =====================================================================
+downstream_consumers:
+  - { dimension: D2, step: step_03, usage: "evidence_chain 每条 evidence 走 fact_gate.verify" }
+  - { dimension: D2, step: step_05, usage: "thesis 5 必填 + break_signals[] + 4 新字段断言前走 gate" }
+  - { dimension: D2, step: step_11, usage: "valuation_dynamics P/E 历史分位数据点写 gate（防止过期数据被引）" }
+  - { dimension: D3, step: step_09, usage: "market_phase 分类结果若被 LLM 生成 → 走 gate" }
+  - { dimension: D2, step_07_design, usage: "The Architect monitor_dict alert_threshold 写前走 gate（HS Code / source_url）" }
+
+# =====================================================================
+# 修订
+# =====================================================================
+revision:
+  - { date: "2026-05-27", change: "v1.0 初版：从 Gemini 对话 12 处事实漏洞抽象出 5 类 + 4 档矩阵 + 时效 + 反模式" }

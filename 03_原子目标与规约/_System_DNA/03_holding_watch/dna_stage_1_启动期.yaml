@@ -1,0 +1,101 @@
+# DNA · 维度三·持仓监控·启动期
+# 与 L3 设计 1:1:1 对齐：03_原子目标与规约/03_维度三_持仓监控/stages/stage_1_启动期/
+
+version: "v1.0"
+last_updated: "2026-05-16"
+
+dimension:
+  id: 3
+  code: "holding_watch"
+  cn: "持仓监控"
+  philosophy_pillars: ["⑦节奏（节点 4 态）", "⑧归因闭环"]
+
+stage:
+  id: "stage_1_启动期"
+  duration_weeks: 8
+
+one_line_goal: |
+  用节点 4 态状态机 + SLI 探针 + 叙事一致性，
+  实现"持仓实时健康度监控并向维度零输出 health_change 事件"的最小闭环。
+
+quantitative_goals:
+  - name: "节点 4 态状态机"
+    states: ["growing", "stable", "warning", "exit"]
+  - name: "健康度计算"
+    formula: "0.5 × SLI + 0.3 × narrative_consistency + 0.2 × timeliness"
+  - name: "health_change 事件推送延迟"
+    threshold: "< 30s"
+  - name: "叙事一致性 NLI 准确率"
+    threshold: ">= 0.85"
+  - name: "状态切换准确率"
+    threshold: ">= 0.90"
+    measure: "10 持仓模拟测试"
+
+deliverables:
+  state_machine:
+    states: ["growing", "stable", "warning", "exit"]
+    transitions:
+      - {from: "growing", to: "stable", condition: "持仓时长 > 6 月 + thesis 仍成立"}
+      - {from: "growing", to: "warning", condition: "健康度 < 60"}
+      - {from: "stable", to: "warning", condition: "健康度 < 60 or 叙事一致性断裂"}
+      - {from: "stable", to: "exit", condition: "thesis 完全失效"}
+      - {from: "warning", to: "stable", condition: "健康度恢复 > 75 持续 7 天"}
+      - {from: "warning", to: "exit", condition: "健康度 < 30 or thesis 失效"}
+
+  sli_probes:
+    - {id: "P1", category: "financial", cn: "财务探针", interval_hours: 24, sources: ["财报", "公告"]}
+    - {id: "P2", category: "news", cn: "新闻探针", interval_hours: 1, sources: ["新闻", "公告"]}
+    - {id: "P3", category: "price", cn: "价格探针", interval_hours: 0.5, sources: ["行情"]}
+    - {id: "P4", category: "event", cn: "事件探针", interval_hours: 6, sources: ["公告", "招股书"]}
+
+  narrative_consistency:
+    model: "narrative_nli_lora_v1"
+    base_model: "Qwen2.5-7B-Instruct"
+    lora_rank: 16
+    accuracy_threshold: ">= 0.85"
+
+  health_score:
+    range: [0, 100]
+    push_level_mapping:
+      "0-29": 3   # 红色
+      "30-59": 2  # 橙色
+      "60-79": 1  # 黄色
+      "80-100": 0 # 绿色
+
+excluded_in_stage_1:
+  - "4×4 调仓矩阵（→ 扩展期）"
+  - "战场审计（→ 扩展期）"
+  - "议会模式（→ 完善期）"
+  - "完整 SLI 多源融合（→ 扩展期）"
+
+tech_stack:
+  state_machine: "LangGraph 0.1+"
+  llm: "Qwen2.5-7B + 叙事一致性 NLI LoRA v1"
+  event_bus: "Redis Stream 7.x"
+  service: "FastAPI 0.110+"
+  database: "SQLite 3.40+"
+  scheduler: "APScheduler 3.x（探针调度）"
+
+work_dir: "diting-src"
+service_name: "state-watch"
+
+dependencies:
+  upstream:
+    - "05_super_evo P0: 叙事一致性 LoRA 训练"
+    - "02_deep_strike P0: thesis_proposed 事件（监控对象）"
+
+verification_commands:
+  - "kubectl get pods -l app=state-watch"
+  - "make test-state-machine"
+  - "make test-narrative-nli"
+  - "make test-health-change-event"
+
+exit_criteria:
+  - "节点 4 态状态机可运行"
+  - "health_change 事件可被维度零消费"
+  - "叙事一致性 NLI 准确率 ≥ 0.85"
+  - "10 持仓模拟测试通过"
+
+l3_design_doc: "03_原子目标与规约/03_维度三_持仓监控/stages/stage_1_启动期/"
+l4_practice_dir: "04_阶段规划与实践/03_维度三_持仓监控/stage_1_启动期/"
+l5_stage_anchor: "l5-stage-d3s1"

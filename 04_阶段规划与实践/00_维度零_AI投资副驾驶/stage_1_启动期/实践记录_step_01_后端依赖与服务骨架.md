@@ -1,0 +1,164 @@
+# 实践记录 · 维度零·AI 投资副驾驶 · 启动期 · step_01 · 后端依赖与服务骨架
+
+> [!NOTE] **[TRACEBACK] 实践锚点**
+> - **L3 阶段设计**: [step_01](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_01_后端依赖与服务骨架.md)
+> - **DNA**: [_System_DNA/00_co_pilot/dna_stage_1_启动期.yaml](../../../03_原子目标与规约/_System_DNA/00_co_pilot/dna_stage_1_启动期.yaml)（`tech_stack`、`service_name`、`dependencies.upstream`）
+> - **本阶段看板**: [README.md](./README.md)
+> - **实践记录维护**：见 [00_系统规则 §8.4g](../../../00_系统规则_通用项目协议.md#l4-practice-record-best-only)；本文只保留**当前**可复现的最佳验证结论，不在文末堆叠多轮会话全文。
+
+---
+
+## 一、本步计划（来自 L3）
+
+### 来自 L3 stage 设计
+
+- 引用：[step_01_后端依赖与服务骨架.md](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_01_后端依赖与服务骨架.md)
+- 引用 DNA：[_System_DNA/00_co_pilot/dna_stage_1_启动期.yaml](../../../03_原子目标与规约/_System_DNA/00_co_pilot/dna_stage_1_启动期.yaml)
+
+### 本步目标（3-5 项可验证子目标）
+
+- [x] `apps/copilot/` 目录与 FastAPI 入口、`/health`、7 条上游 Stream 状态聚合
+- [x] `pyproject.toml` 增加 fastapi / uvicorn / redis / sqlalchemy / aiosqlite / jinja2 / httpx / pydantic-settings / apscheduler / python-multipart
+- [x] `pytest tests/copilot/test_health.py` 通过
+- [x] 按 **〇-1** 启动 Docker 中 `diting-redis` 并导出 `COPILOT_REDIS_URL` 后，`uvicorn` + `curl /health` 与下节「三」一致（连上 Redis 后上游为 **mock mode** 或 **length**，而非 **Connection refused**）
+
+---
+
+## 二、实际进展
+
+| §3.x 子步骤 | 状态 | 说明 |
+|---|---|---|
+| 3.1 目录与占位文件 | ✅ | `apps/copilot/{routers,services,models,templates,static}` + `tests/copilot` 已建 |
+| 3.2 依赖与安装 | ✅ | `pyproject.toml` 已追加；本机 `python3 -m pip install -e .` 成功（Python 3.9.6） |
+| 3.3 config.py | ✅ | `CopilotSettings` + `COPILOT_` 前缀与 7 条 `upstream_streams` |
+| 3.4 main.py | ✅ | FastAPI + lifespan Redis 客户端 + `/health` |
+| 3.5 test_health.py | ✅ | 断言 200、`upstream` 含 7 键 |
+| 3.6 启动与 curl | ✅ | **前提**：Docker Desktop 运行中；按 [〇-1](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/README.md#redis-docker-lifecycle) 起 `diting-redis`；终端 `export COPILOT_REDIS_URL=redis://127.0.0.1:6379/0`；再 `uvicorn` + `curl`（见「三」）。**未**起 Redis 或未 export 时出现 `Connection refused` 是环境未就绪，不是接口缺陷 |
+| 3.7 pytest | ✅ | 全量 **`tests/copilot/` 70 passed, 3 skipped**（2026-05-17 复验；随 step_02～06 用例扩展较历史 48 增长） |
+| 3.8 提交代码 | ⚠️ | 以仓库 `main` 上最近一次合入为准；**本文档不追踪每次 AI 会话的 commit 状态** |
+
+### 关键代码变更
+
+- 工作目录：`diting-src`
+- 变更：`pyproject.toml`（依赖 + `include = ["diting*", "apps*"]`）；新增 `apps/copilot/*`、`tests/copilot/*`
+- Commit：**以 `diting-src` `main` 上记录为准**（执行本记录中的命令可独立验证，不依赖某次 hash）
+
+---
+
+## 三、当前最佳验证结果（覆盖即真理）
+
+**工作目录**：`diting-src`。Redis 命名与端口见 **〇-1**（`diting-redis`，`127.0.0.1:6379`）。
+
+### 命令（复制即用）
+
+```bash
+cd diting-src
+python3 -m pip install -e .
+
+# 单文件
+python3 -m pytest tests/copilot/test_health.py -v
+
+# 全量（可不加 Redis；加 URL 则与 Stream 探活一致）
+export COPILOT_REDIS_URL=redis://127.0.0.1:6379/0   # 仅当本机已按 〇-1 起容器时
+python3 -m pytest tests/copilot/ -q
+```
+
+### pytest（摘录）
+
+```
+tests/copilot/test_health.py::test_health_returns_ok PASSED
+============================== 1 passed ...
+```
+
+```
+................................................                         [100%]
+70 passed, 3 skipped in ~3s    # 2026-05-17 全量复验（随 co_pilot 模块扩展）
+# 无 Redis      → 仍可 70 passed, 3 skipped
+```
+
+### 启动与 `curl /health`（真 Redis）
+
+```bash
+# 1) 按 〇-1：docker run … redis:7-alpine，ping → PONG
+export COPILOT_REDIS_URL=redis://127.0.0.1:6379/0
+python3 -m uvicorn apps.copilot.main:app --host 127.0.0.1 --port 8080
+# 另终端
+curl -s http://127.0.0.1:8080/health | python3 -m json.tool
+```
+
+**期望（流尚未创建）**：`status: ok`；各 `upstream` 的 `reason` 为 **`stream not found (mock mode)`**，**不应**再出现 **`Connection refused`**（若仍拒绝连接 → 检查容器是否起、`6379` 是否映射、`COPILOT_REDIS_URL` 是否已 export）。
+
+> **未就绪环境**：未起 `diting-redis` 或未设置 `COPILOT_REDIS_URL` 时，`upstream` 会出现 **`Error … connecting to localhost:6379. Connection refused.`**；服务级仍可 `status: ok`。准出以本节前段「真 Redis」流程为准。
+
+---
+
+<a id="l4-step01-redis-verify"></a>
+
+## 三-A、Redis（〇-1）与 Stream 摘录（与「三」同源）
+
+> **规约**：[steps/README · 〇-1](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/README.md#redis-docker-lifecycle)。验证后执行 **`docker stop diting-redis && docker rm diting-redis`**。
+
+| 检查项 | 当前结论 |
+|---|---|
+| `redis-cli ping`（容器内） | **PONG** |
+| 全量 pytest + `COPILOT_REDIS_URL` | **70 passed, 3 skipped**（示例耗时 **~3s**） |
+| `GET /health` 中 `events:monitor:health_change`（尚无消息体时） | **`stream not found (mock mode)`** |
+| `python3 scripts/inject_mock_health_change.py 600519 -5 2` 后 `XLEN events:monitor:health_change` | **≥1**；`/health` 该项为 **`"ok": true`, `"length": 1`**（或随队列增长） |
+| 备注 | 拉起全应用时若出现 **WeasyPrint / libgobject** 日志，属 PDF 依赖告警，**与** `/health`/pytest **结论无关**；**PDF 产品准出**见 L3 [step_04](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_04_推荐池模块.md) §3.10 |
+
+---
+
+## 四、偏离与决策
+
+| 偏离 | 原因 | 决策 | 决策人 |
+|---|---|---|---|
+| L3 step 写明 `requires-python >=3.10` 类建议与本仓初值 | 本机仅有或曾用 Python 3.9.6 | **`pyproject.toml` 维持 `requires-python = ">=3.9"`**，以实测通过为准 | 维护者 |
+| 未 commit | 由仓库流程决定 | 以 `diting-src` **main** 合入记录为准；本文件不堆叠「某次未提交」会话段落 | — |
+
+---
+
+## 五、问题与风险
+
+| 问题 | 影响 | 应对 | 负责人 |
+|---|---|---|---|
+| 无 | — | — | — |
+
+---
+
+## 六、下一步
+
+- [ ] [step_02_Web骨架与SQLite](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/step_02_Web骨架与SQLite.md)
+
+---
+
+## 七、部署快照（本 step 占位）
+
+**本 step 无上架，仅 `diting-src` 本地验证**；未构建推 ACR、未改 Helm Chart。
+
+| 项 | 本 step |
+|---|---|
+| Chart / `diting-infra` | **不改** |
+| **deploy-engine** | 未涉及；禁止在 `diting-infra/deploy-engine/` 拷贝内开发 |
+| 镜像仓（ACR） | **ACR tag：—**（无推送） |
+| **helm release** | **—** |
+| 运行面 | 目标运行时仍为 ECS+K3s（真流见共享规约节奏表）；本步仅本地 uvicorn |
+
+详见：[16 · 阿里云 ECS+K3s+Helm+ACR](../../../03_原子目标与规约/_共享规约/16_阿里云ECS_K3s_ACR_Helm部署与deploy-engine链路.md)
+
+---
+
+## 八、引用
+
+- L3 设计：[01_实践目标与策略.md](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/01_实践目标与策略.md) · [02_技术方案与代码架构.md](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/02_技术方案与代码架构.md)
+- DNA：[dna_stage_1_启动期.yaml](../../../03_原子目标与规约/_System_DNA/00_co_pilot/dna_stage_1_启动期.yaml)
+- 时序与节奏：[13_六维度启动期集成与时序.md](../../../03_原子目标与规约/_共享规约/13_六维度启动期集成与时序.md) · [14_六维度启动期统一节奏表.md](../../../03_原子目标与规约/_共享规约/14_六维度启动期统一节奏表.md)
+- **代码工作目录**：`diting-src`
+
+---
+
+## 九、一致性检查表（L4 step 回写自检）
+
+- [x] §2 准出可核验（代码树、依赖、uvicorn/curl、pytest、部署占位）
+- [x] L4 本文件已写入；验证段落为**单一最佳结果**（[#l4-practice-record-best-only](../../../00_系统规则_通用项目协议.md#l4-practice-record-best-only)）
+- [x] [stage_1_启动期 README](./README.md) 实践记录索引与周看板已更新
+- [x] [steps/README.md](../../../03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/steps/README.md) 中 step_01 实施状态已更新为 ✅

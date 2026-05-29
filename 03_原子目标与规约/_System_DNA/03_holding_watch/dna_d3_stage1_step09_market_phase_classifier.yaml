@@ -1,0 +1,158 @@
+# D3 Stage1 Step09 · 市场阶段分类器 MVP DNA（v1.0）
+# 与 03_维度三_持仓监控/stages/stage_1_启动期/steps/step_09_市场阶段分类器MVP.md 1:1
+
+schema_version: "1.0.0"
+stage_id: d3_stage1_step09
+pillar: holding_watch
+milestone: mvp
+
+design_doc: ../../03_维度三_持仓监控/stages/stage_1_启动期/steps/step_09_市场阶段分类器MVP.md
+l4_doc: ../../../04_阶段规划与实践/03_维度三_持仓监控/stage_1_启动期/实践记录_step_09_市场阶段分类器MVP.md
+l5_anchor: l5-stage-d3s1-step09
+
+work_dir: diting-src/
+
+service_name: state-watch  # 复用 D3 服务
+port: 8003
+package_path: apps/state_watch/market_phase/
+
+depends_on:
+  - d3_stage1_step03  # P3 价格探针 + P4 事件探针
+  - d3_stage1_step06  # health 公式（可选拼入）
+  - d3_stage1_step07  # health_change 事件流（schema 升级）
+  - shared_22_fact_gate  # 扩展期 LoRA 版必走
+
+# =====================================================================
+# 4 档 market_phase 判定规则（按用户 q2 决策：合并 verification 进 realization）
+# =====================================================================
+market_phases:
+  - { phase: concept, order: 1, meaning: "仅概念叙事，资金未实质进场" }
+  - { phase: expectation, order: 2, meaning: "资金博弈预期，等公告兑现" }
+  - { phase: realization, order: 3, meaning: "公告已兑现，主升浪共振（含 verification + realization）" }
+  - { phase: exhaustion, order: 4, meaning: "量能放大但价格滞涨 / 媒体高潮，资金出货" }
+
+classification_rules:
+  - phase: concept
+    conditions: ["pct_chg_60d < 20%", "volume_ratio_5d < 1.5", "phys_probe_alerts_active = 0", "no_announcement_positive"]
+  - phase: expectation
+    conditions: ["(phys_probe_alerts_active >= 1 OR pct_chg_30d > 30%)", "no_announcement_realized", "volume_ratio_5d > 1.5"]
+  - phase: realization
+    conditions: ["(has_q_report_released OR has_pre_announce OR has_major_contract) within(-3, +5 trading_days)"]
+  - phase: exhaustion
+    conditions:
+      - "(pct_chg_60d > 80% AND volume_ratio_5d > 2.5 AND pct_chg_5d < 0)"
+      - "OR (media_news_count_7d > 30 AND pct_chg_3d < 0 AND price < MA10)"
+      - "OR (post_realization_10d AND no_new_positive AND pct_chg_5d < -5%)"
+
+priority_and_mutex:
+  - { id: P1, rule: 4 档互斥同一时刻只一档 }
+  - { id: P2, rule: 判定顺序 exhaustion → realization → expectation → concept }
+  - { id: P3, rule: "置信度档位：齐全=0.85 / 缺一其他强=0.65 / 强行=0.45" }
+  - { id: P4, rule: 同日切换>=2次 → tag phase_unstable + 多数票 }
+
+# =====================================================================
+# 数据质量验收矩阵（启动期 16 项）
+# =====================================================================
+quality_matrix:
+  classification_rules:
+    - { id: MP1, phase: concept }
+    - { id: MP2, phase: expectation }
+    - { id: MP3, phase: realization }
+    - { id: MP4, phase: exhaustion }
+  priority:
+    - { id: P1, item: mutex }
+    - { id: P2, item: priority_order }
+    - { id: P3, item: confidence_levels }
+    - { id: P4, item: stability_smoothing }
+  cross_dim_contracts:
+    - { id: C1, item: health_change_payload_includes_phase, requirement: "step_07 升级" }
+    - { id: C2, item: d4_sp6_candidate_event, requirement: "exhaustion + conf>=0.7 → 候选事件（不下单）" }
+    - { id: C3, item: d2_timer_cross_check, requirement: "与 timer_signal.current_phase 一致性审计" }
+    - { id: C4, item: fact_gate_integration, requirement: "LoRA 版媒体情感走 gate（启动期 nullable）" }
+  data_completeness:
+    - { id: D1, requirement: "P3 价格探针就绪" }
+    - { id: D2, requirement: "P4 事件探针就绪" }
+    - { id: D3, requirement: "物理量探针 P5/P6/P7 可缺，缺时 conf 上限 0.65" }
+    - { id: D4, requirement: "D2 timer_signal 可缺" }
+
+# =====================================================================
+# 实施要点 A~I
+# =====================================================================
+implementation_points:
+  - { id: A, item: MarketPhase_schema, location: "apps/state_watch/market_phase/schemas.py" }
+  - { id: B, item: rule_classifier_v1, location: "apps/state_watch/market_phase/rule_classifier_v1.py" }
+  - { id: C, item: orchestrator, location: "apps/state_watch/market_phase/orchestrator.py" }
+  - { id: D, item: db_models, location: "data/models/market_phase_records.py + ALTER holdings" }
+  - { id: E, item: health_change_integration, location: "升级 D3 step_07 publisher schema" }
+  - { id: F, item: d2_timer_cross_check, location: "apps/state_watch/market_phase/cross_check_timer.py" }
+  - { id: G, item: api_routes, location: "apps/state_watch/api/routes/market_phase.py" }
+  - { id: H, item: d0_distribution_chart, location: "副驾驶 mini-chart 联调" }
+  - { id: I, item: unit_tests, location: "tests/state_watch/test_market_phase_*.py", count: 15 }
+
+# =====================================================================
+# Makefile 合约
+# =====================================================================
+makefile_targets:
+  - { name: watch-step09-prep, purpose: "step_03/07 ✅ + akshare 公告可达" }
+  - { name: watch-step09-classify-all, purpose: "全 active 当日分类" }
+  - { name: watch-step09-distribution, purpose: "4 档分布输出" }
+  - { name: watch-step09-cross-check-timer, purpose: "与 D2 timer 一致性审计" }
+  - { name: watch-step09-quality-check, purpose: "16 项矩阵" }
+  - { name: watch-step09-test, purpose: "pytest >=15" }
+  - { name: watch-step09-all, purpose: "端到端" }
+  - { name: watch-step09-status, purpose: "覆盖率/4 档分布/不一致数" }
+  - { name: watch-step09-clean, purpose: "dev only" }
+
+# =====================================================================
+# 准出标准
+# =====================================================================
+exit_criteria:
+  - "§3.5 16 项全过"
+  - "active 持仓 100% 当日有 market_phase_records"
+  - "抽检 20 只一致率 >=80%"
+  - "4 档分布不畸形（任一档 ∈ [5%, 70%]）"
+  - "make watch-step09-all exit 0"
+  - "D3 step_07 health_change schema 升级完成"
+  - "L4 实践记录 + commit + 同会话 pytest"
+
+# =====================================================================
+# 验证命令
+# =====================================================================
+verification_commands:
+  - "cd diting-src && make watch-step09-test"
+  - "cd diting-src && make watch-step09-quality-check"
+  - "cd diting-src && make watch-step09-distribution"
+
+# =====================================================================
+# 部署节奏
+# =====================================================================
+deployment_tiers:
+  - { tier: tier-1, env: local, required: true }
+  - { tier: P-track-DB, env: TimescaleDB NodePort 30001, required: recommended }
+  - { tier: P-track-Redis, env: Redis Stream（D3 step_07 共用）, required: true }
+  - { tier: stage-2, env: LoRA + D4 SP6 正式协议, required: false }
+
+# =====================================================================
+# 扩展期升级路径
+# =====================================================================
+upgrade_path_stage_2:
+  - "本步规则版分类结果作为标签源，积累 >=500 条 (symbol, date, phase, conf, human_label)"
+  - "训练 LoRA 微调版（复用 D3 step_05 NLI 训练栈）"
+  - "增加 verification 第 5 档（4→5），早期识别期望兑现过渡期"
+  - "D4 SP6 正式协议落地（market_phase_exhaustion = p1 + buf 3d）"
+
+# =====================================================================
+# 风险
+# =====================================================================
+risks:
+  - { trigger: 4 档分布畸形, action: 重审规则阈值 }
+  - { trigger: phase 切换抖动, action: 启用 P4 多数票 + ADR }
+  - { trigger: 物理量探针长期空, action: expectation 置信度上限 0.65 }
+  - { trigger: D2 timer 不一致率_gt_30pct, action: L4 复盘 }
+  - { trigger: 同问题_gte_2次, action: 回收/退出 }
+
+# =====================================================================
+# 修订
+# =====================================================================
+revision:
+  - { date: "2026-05-27", change: "v1.0 初版（本轮关键重构 §4.5）：从 Gemini 对话『炒概念/炒预期/炒业绩/利好出尽』5 档抽象 market_phase 正交轴；按用户 q2 合并 verification 进 realization → 4 档；纯规则启动期 + LoRA 扩展期；与 D2 timer / D3 step_06/07 / D4 SP6 全集成" }

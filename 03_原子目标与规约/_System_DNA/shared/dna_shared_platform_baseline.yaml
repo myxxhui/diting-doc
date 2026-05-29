@@ -1,86 +1,515 @@
-# 共享平台基础 · 步骤级 DNA
-schema_version: "1.0.0"
+# 共享平台基础 · 步骤级 DNA（P 轨 · v2）
+schema_version: "2.0.0"  # 2026-05-24 v2 重大修正：香港+4 chart+3 stack+三档释放+随用随起+网络/数据永驻
 stage_id: shared_platform_baseline
 pillar: shared_platform
 milestone: mvp
 
-design_doc: ../../_共享规约/README.md
-l4_doc:    ../../../04_阶段规划与实践/共享平台基础/01_本阶段实践与验证.md
+design_doc: ../../共享平台基础/README.md
+l4_doc: ../../../04_阶段规划与实践/共享平台基础/01_本阶段实践与验证.md
+l4_doc_stage_1: ../../../04_阶段规划与实践/共享平台基础/stage_1_启动期/README.md
 l5_anchor: l5-shared-platform-baseline
+l5_step_anchors:
+  - l5-shared-platform-baseline-step01
+  - l5-shared-platform-baseline-step02
+  - l5-shared-platform-baseline-step03
+  - l5-shared-platform-baseline-step04
+  - l5-shared-platform-baseline-step05
+  - l5-shared-platform-baseline-step06
+  - l5-shared-platform-baseline-step07
 
 work_dir: diting-infra/
 
-services_in_scope:
-  - postgresql_cluster
-  - timescaledb_extension
-  - opensearch_cluster
-  - redis_cluster
-  - kafka_cluster
-  - object_storage   # S3 兼容（阿里云 OSS）
-  - k3s_cluster
-  - hami_gpu_partitioner
-  - inference_gateway_vllm
-  - config_center
-  - api_gateway_with_jwt
-  - mtls_intra_service
-  - cdn_static
+depends_on: []
 
+# =====================================================================
+# 长期数据 + 网络永驻资源（仅 FULL_DESTROY=1 二次确认可销）
+# 与数据同级永驻：VPC + 安全组 + 路由 + 网关（0 成本 · 重建贵）
+# =====================================================================
+perpetual_resources:
+  network:
+    - { type: vpc, id: "vpc-j6cuhmska9vfwqa6my16q", reason: "0 成本 · 重建需重配所有白名单" }
+    - { type: vswitch, id: "vsw-j6ct3ymab1lxeqz38lbwi", cidr: "10.0.1.0/24" }
+    - { type: security_group, id: "sg-j6cizfabvego0nem81c2", reason: "重建会失效所有白名单" }
+    - { type: route_table_and_gateway, reason: "随 VPC 自动 · 0 成本" }
+  data:
+    - { type: nas_file_system, id: "12db2e48f90", mount_domain: "12db2e48f90-hpy48.cn-hongkong.nas.aliyuncs.com", access_group: "deploy-engine_nas_group_prod", reason: "LoRA + datasets + checkpoints 跨节点共享" }
+    - { type: essd_disk, id: "d-j6cc6ew2bqkfdlwaavit", size_gb: 100, delete_with_instance: false, reason: "postgres 持久 · base ECS 重启重挂同盘" }
+    - { type: oss_bucket, name: "deploy-engine-k3s-storage", reason: "wal / init-scripts / 备份" }
+  registry:
+    - { type: acr_repo, url: "crpi-7vifw4ok9jkcxr60.cn-hongkong.personal.cr.aliyuncs.com/titan-core/", reason: "业务镜像 · 不在 TF 管 · 阿里云控制台手销" }
+
+# =====================================================================
+# 地域 / 节点规格（v2：香港 · 与现有 tfvars 一致）
+# =====================================================================
+region:
+  cloud: aliyun
+  region_id: cn-hongkong
+  zone_primary: cn-hongkong-c  # 与现有 vsw zone 一致
+  zone_gpu_fallback: [cn-hongkong-b, cn-hongkong-a]
+
+# =====================================================================
+# 4 Chart 定义（v2 核心架构）
+# =====================================================================
+charts:
+  - name: diting-platform-base
+    layer: L0_cluster_infra
+    chart_path: charts/diting-platform-base
+    release_name: diting-platform-base
+    namespace: ""   # cluster-scoped（创建 platform/train/infer 三 ns）
+    lifecycle: install_once_long_persist
+    delivery:
+      - namespace_platform
+      - namespace_train
+      - namespace_infer
+      - acr_pull_secret_copy_to_3_ns
+      - nvidia_device_plugin_daemonset
+      - nvidia_runtime_class
+      - storageclass_nas
+    triggered_node_selector: null   # DaemonSet 跟节点
+
+  - name: diting-stack
+    layer: L1_cpu_business
+    chart_path: charts/diting-stack
+    release_name: diting-stack
+    namespace: platform
+    lifecycle: business_rolling
+    delivery:
+      - module_a
+      - ingest
+      - schema_init
+      - pv_pvc_data_disk_and_nas_subpath
+    triggered_node_selector:
+      stack.diting/node: base
+    stack_id: base
+
+  - name: diting-training
+    layer: L2_gpu_training_job
+    chart_path: charts/diting-training
+    release_name_pattern: diting-train-<dim>  # 可多 release 并行（cryo/thrust/narrative）
+    namespace: train
+    lifecycle: oneshot_job
+    delivery:
+      - lora_job_template
+      - configmap_train
+      - secret_wandb
+      - pvc_nas_lora_rw
+    triggered_node_selector:
+      stack.diting/node: train
+      nvidia.com/gpu: present
+    stack_id: train
+
+  - name: diting-vllm
+    layer: L3_gpu_inference_service
+    chart_path: charts/diting-vllm
+    release_name: diting-infer
+    namespace: infer
+    lifecycle: long_service_in_evaluation_window
+    delivery:
+      - vllm_deployment_multi_lora
+      - vllm_service_clusterip
+      - configmap_vllm
+      - pvc_nas_lora_ro
+      - secret_hf_token
+    triggered_node_selector:
+      stack.diting/node: infer
+      nvidia.com/gpu: present
+    stack_id: infer
+
+# =====================================================================
+# 3 Stack 定义（v2 · 全部随用随起 · 0 节点常态）
+# =====================================================================
+stacks:
+  - id: base
+    instance_type: ecs.u1-c1m4.xlarge  # 4c16g
+    spot_strategy: SpotAsPriceGo
+    spot_price_limit_cny_per_hour: 0.6
+    image_family: ubuntu_22_04
+    system_disk_gb: 60
+    system_disk_category: cloud_essd
+    attach_data_disk: true   # 唯一挂独立数据盘的 stack
+    data_disk_id_ref: perpetual_resources.data[1].id  # d-j6cc6ew2bqkfdlwaavit
+    k3s_role: server   # K3s master
+    node_labels:
+      stack.diting/node: base
+    chart_name: diting-stack
+    runtime_lifecycle: on_demand   # 用户决策 v2：不再 24/7
+    expected_runtime_hours_per_week: 28   # 4h/day × 7
+
+  - id: train
+    instance_type: ecs.gn6i-c4g1.xlarge  # T4 16G · 4c15g
+    spot_strategy: SpotAsPriceGo
+    spot_price_limit_cny_per_hour: 3.0
+    image_family: ubuntu_22_04_gpu  # ubuntu_22_04_x64_100G_with_gpu_driver_and_cuda_alibase_*
+    system_disk_gb: 100   # GPU 镜像本身 ~40GB
+    system_disk_category: cloud_essd
+    attach_data_disk: false   # 不挂独立数据盘 · 数据全在 NAS
+    k3s_role: agent
+    node_labels:
+      stack.diting/node: train
+      nvidia.com/gpu: present
+    chart_name: diting-training
+    runtime_lifecycle: on_demand
+    expected_runtime_hours_per_run: 5
+    triggered_by:
+      - D5 verified ≥100/dim
+      - 冲 ★M2 sanity-train
+
+  - id: infer
+    instance_type: ecs.gn6i-c4g1.xlarge  # T4 16G
+    spot_strategy: SpotAsPriceGo
+    spot_price_limit_cny_per_hour: 3.0
+    image_family: ubuntu_22_04_gpu
+    system_disk_gb: 100
+    system_disk_category: cloud_essd
+    attach_data_disk: false
+    k3s_role: agent
+    node_labels:
+      stack.diting/node: infer
+      nvidia.com/gpu: present
+    chart_name: diting-vllm
+    runtime_lifecycle: on_demand
+    expected_runtime_hours_per_run: 3
+    keep_node_for_multi_dim: true   # 用户决策：连跑多 dim 时保留节点 · 省 5min × N 启动
+    triggered_by:
+      - step_04 训完出至少 1 LoRA 权重
+      - D1 step_07 三引擎部署（★M5）
+
+# =====================================================================
+# GPU 镜像（v2 · 阿里云公共镜像 · 开箱即用）
+# =====================================================================
+gpu_image:
+  family: ubuntu_22_04_gpu
+  name_regex: "^ubuntu_22_04_x64_100G_with_gpu_driver_and_cuda_alibase"
+  most_recent: true
+  preinstalled:
+    nvidia_driver: "580.126.09"
+    cuda_default: "12.8"
+    cuda_secondary: "13.0"
+    cudnn: "9.8.0.87"
+    docker: true
+    nvidia_container_toolkit: true
+    docker_libnvidia_mirror: "aliyun_internal"  # 拉镜像快
+  supported_instance_families: [gn7e, gn7s, gn7i, gn6v, gn6i, gn6e, gn5, gn5i]
+  fallback_image_family: ubuntu_22_04  # 若 GPU 镜像不可用 · 手装驱动
+
+# =====================================================================
+# 三档释放纪律（v2 · 核心 · 命令统一用 chart 名 · 网络与数据永驻）
+# =====================================================================
+lifecycle_tiers:
+  tier_1_single_chart:
+    command: "make down-stack <chart-name>"
+    examples:
+      - "make down-stack diting-stack       # 销 base ECS"
+      - "make down-stack diting-training    # 销 train ECS"
+      - "make down-stack diting-vllm        # 销 infer ECS"
+    behavior:
+      - helm uninstall <chart 对应 release> -n <chart 对应 ns>
+      - terraform destroy -target='module.ecs["<stack_id>"]' -target='module.eip["<stack_id>"]'
+    destroys: [stack ECS, EIP, 系统盘, 该 chart 的 K8s 资源]
+    preserves: [namespace, ACR secret, device-plugin, VPC, 安全组, 路由, 网关, NAS, 独立数据盘, OSS, ACR, 其他 stack]
+    frequency: daily_multiple
+
+  tier_2_platform_base:
+    command: "make down-platform-base"
+    behavior:
+      - helm uninstall 所有业务 release
+      - helm uninstall diting-platform-base
+      - terraform destroy -target='module.ecs' -target='module.eip'  # 销所有残留 ECS
+    destroys: [namespace, 集群级 K8s 资源, 所有残留 ECS, EIP]
+    preserves: [🟢 VPC, 🟢 安全组, 🟢 路由, 🟢 网关, 🟢 NAS, 🟢 独立数据盘, 🟢 OSS, 🟢 ACR]
+    frequency: monthly_or_long_pause
+
+  tier_3_full_destroy:
+    command: "make down-all FULL_DESTROY=1"
+    confirmation: "用户须二次输入 DESTROY-DATA 字符串"
+    behavior:
+      - 上述全部
+      - terraform destroy（含 module.vpc / module.security / module.nas / module.oss / alicloud_disk.prod_data）
+    destroys: [VPC, 安全组, 路由, 网关, NAS, 独立数据盘, OSS]
+    preserves: [ACR（阿里云控制台手销）]
+    frequency: yearly_or_permanent_exit
+
+# =====================================================================
+# 月度成本预估（v2 · 随用随起 · 仅实际跑时收费）
+# =====================================================================
+cost_estimate_cny_per_month:
+  base_on_demand: 90      # 28h/week × 4.3week × ¥0.5/h ≈ ¥60-120
+  gpu_train_w4_to_w5: 60  # 20h × ¥3/h
+  gpu_infer_w5_plus: 30   # 10h × ¥3/h
+  perpetual_resources: 60 # NAS 100Gi (~¥30) + 独立 ESSD 100G (~¥20) + OSS + EIP + 流量
+  total_min: 140
+  total_max: 310
+  savings_vs_v1_24x7: "~60%"  # v1: ¥400-600/月
+
+# =====================================================================
+# Helm 版本约束
+# =====================================================================
 stack_versions:
   postgresql: ">=15.0"
   timescaledb: ">=2.13"
-  opensearch: ">=2.11"
   redis: ">=6.2"
-  kafka: ">=3.6"
   k3s: ">=v1.28"
   vllm: ">=0.5.0"
-  hami: ">=2.4"
+  helm: ">=3.13"
+  terraform: ">=1.5"
 
-inference_gateway:
-  api: openai_compatible
-  lora_multiplexing: true
-  health_check: required
-  rate_limit: required
-  cost_metering: required
-
-config_center:
-  hot_reload: true
-  versioning: true
-  audit: true
-  hot_reload_p99_seconds: 30
-
-auth_gateway:
-  jwt: required
-  mtls_between_services: required
-  waf: required
-
-cdn:
-  static_assets: required
-
-depends_on: []
-
+# =====================================================================
+# 阶段级 verification（保留 · 与 step 级验证互补）
+# =====================================================================
 verification_commands:
-  - cmd: "cd diting-infra && make smoke-platform"
-    expect_exit: 0
-  - cmd: "cd diting-infra && make smoke-postgres"
-    expect_exit: 0
-  - cmd: "cd diting-infra && make smoke-opensearch"
-    expect_keywords: ["green"]
-  - cmd: "cd diting-infra && make smoke-kafka"
-    expect_exit: 0
-  - cmd: "cd diting-infra && make smoke-inference"
-    expect_keywords: ["model"]
-  - cmd: "cd diting-infra && make smoke-config-center"
-    expect_exit: 0
-  - cmd: "cd diting-infra && make smoke-auth-gateway"
-    expect_exit: 0
+  - { cmd: "cd diting-infra && make platform-status", expect_exit: 0 }
+  - { cmd: "kubectl get nodes -L stack.diting/node,nvidia.com/gpu", expect_exit: 0 }
+  - { cmd: "helm list -A | grep -E 'diting-(platform-base|stack|train|infer)'", expect_exit: 0 }
 
 exit_criteria:
-  - 所有共享组件健康检查通过
-  - 推理网关可调用并返回响应
-  - 配置中心热更新 < 30s
-  - 鉴权流程通；JWT 可被服务间校验
-  - CDN 缓存命中率统计可见
+  - 4 chart 全部可独立 helm install/uninstall
+  - 3 stack 全部可独立 make up-stack <chart> / make down-stack <chart>
+  - make down-platform-base 仅销 ECS + 集群级 K8s · 保留 VPC + 数据
+  - FULL_DESTROY=1 二次确认生效
+  - 永驻资源 10 项任何 down 都不动
 
 failure_protocol:
   same_problem_retry_max: 2
-  if_exceeded: "helm rollback diting-stack <last-stable>；登记 06_/审计；通知架构师"
+  if_exceeded: "helm rollback <release> <last-stable>；登记 06_/审计；通知架构师"
+
+# =====================================================================
+# v2 P 轨七步骤（按用户校正：chart 名 + 网络永驻）
+# =====================================================================
+steps:
+  - step_id: p_step_01
+    title: 现状盘点与凭证复用
+    l3_doc: ../../共享平台基础/stages/stage_1_启动期/steps/step_01_现状盘点与凭证复用.md
+    l4_doc: ../../../04_阶段规划与实践/共享平台基础/stage_1_启动期/实践记录_step_01_现状盘点与凭证.md
+    l5_stage_anchor: l5-shared-platform-baseline-step01
+    work_dir: diting-infra/
+    necessity: required
+    creates_cloud_resources: false
+    estimated_minutes: 30
+    delivery_scope:
+      - 现状资源盘点（VPC/VSwitch/SG/NAS/独立盘/OSS/ACR 全部 ID 核对 ✅）
+      - deploy-engine 子模块更新到独立仓最新（git submodule update --init --remote）
+      - .env 含 ALIYUN_AK / SK / TF_VAR_instance_password / ACR_USER / ACR_PASSWORD（不入仓）
+      - 本地工具链就绪（terraform / helm / kubectl / yq）
+      - ACR docker login 通过
+    verification_commands:
+      - { cmd: "cd diting-infra && cat config/terraform-diting-prod.tfvars | grep -E '^(vpc_existing_id|nas_existing_file_system_id|use_existing_data_disk_id)'", expect_exit: 0 }
+      - { cmd: "cd diting-infra && make update-deploy-engine", expect_exit: 0 }
+      - { cmd: "cd diting-infra && which terraform helm kubectl yq", expect_exit: 0 }
+      - { cmd: "docker login $ACR_REGISTRY -u $ACR_USER -p $ACR_PASSWORD", expect_keywords: ["Login Succeeded"] }
+    exit_criteria:
+      - 现状 10 项永驻资源 ID 全部核对一致
+      - deploy-engine 子模块为最新 main
+      - .env 已加 .gitignore（gitignore grep 通过）
+      - 工具链就绪
+    decision_pending: []  # 无 · 现状已就绪
+
+  - step_id: p_step_02_design
+    title: deploy-engine 扩展规约（设计 · 实现在外仓）
+    l3_doc: ../../共享平台基础/stages/stage_1_启动期/02_deploy-engine扩展规约.md
+    l4_doc: ../../../04_阶段规划与实践/共享平台基础/stage_1_启动期/实践记录_step_02_deploy_engine扩展.md
+    l5_stage_anchor: l5-shared-platform-baseline-step02
+    work_dir: deploy-engine/  # 平级独立仓库
+    necessity: required
+    creates_cloud_resources: false
+    estimated_hours: 4   # 0.5 day
+    delivery_scope:
+      - Terraform module.ecs 改 for_each = var.stacks（按 stack_id 分组）
+      - 新增 module.eip for_each
+      - GPU 镜像支持（image_family=ubuntu_22_04_gpu 时选 GPU 镜像）
+      - user-data 模板支持 --node-label 注入
+      - Makefile 新 target：up-stack/down-stack（chart 名参数）/ up-platform-base / down-platform-base / down-all
+      - 三档 destroy 实现（target 精确化 · 永驻资源排除）
+      - data_disk_id 仅挂 attach_data_disk=true 的 stack
+      - 集成测试（pytest + terraform plan 校验）
+    verification_commands:
+      - { cmd: "cd ../deploy-engine && make test-stacks-for-each", expect_exit: 0 }
+      - { cmd: "cd ../deploy-engine && make test-lifecycle-tiers", expect_exit: 0 }
+      - { cmd: "cd diting-infra && make update-deploy-engine", expect_exit: 0 }
+      - { cmd: "cd diting-infra && make help | grep -E '(up-stack|down-stack|down-platform-base|down-all)'", expect_exit: 0 }
+    exit_criteria:
+      - deploy-engine 主仓 commit 含上述 8 项 delivery
+      - diting-infra make help 输出含新 target
+      - 三档 destroy terraform plan 校验通过
+    decision_pending: []
+    workflow_note: |
+      实现在 deploy-engine **平级独立仓库** 修改 → git add/commit/push GitHub →
+      在 diting-infra 执行 make update-deploy-engine 同步子模块。
+      禁止在 diting-infra/deploy-engine/ 子模块内做任何写操作（含 git stash · 见 .cursorrules §十一）。
+
+  - step_id: p_step_03
+    title: CPU stack 首次 Up · platform-base + diting-stack
+    l3_doc: ../../共享平台基础/stages/stage_1_启动期/steps/step_03_CPU_Stack_按需Up.md
+    l4_doc: ../../../04_阶段规划与实践/共享平台基础/stage_1_启动期/实践记录_step_03_CPU_Stack_按需Up.md
+    l5_stage_anchor: l5-shared-platform-baseline-step03
+    work_dir: diting-infra/
+    necessity: required
+    creates_cloud_resources: true   # 起 base ECS · 永驻 VPC 已有
+    cost_per_run_cny_estimate: 0.6
+    delivery_scope:
+      - make up-stack diting-stack（起 base ECS + 挂数据盘 + K3s server 起 + label=base）
+      - helm install diting-platform-base（创建 3 namespace + ACR secret + device-plugin + runtimeClass + storageclass-nas）
+      - helm install diting-stack -n platform（业务 · 含 module_a + ingest + schema-init + 数据库 PV/PVC）
+      - 三档释放纪律演练（make down-stack diting-stack 后数据继承验证）
+    verification_commands:
+      - { cmd: "cd diting-infra && make up-stack diting-stack", expect_exit: 0 }
+      - { cmd: "helm install diting-platform-base charts/diting-platform-base", expect_exit: 0 }
+      - { cmd: "helm install diting-stack charts/diting-stack -n platform --create-namespace=false", expect_exit: 0 }
+      - { cmd: "kubectl get nodes -L stack.diting/node | grep base", expect_exit: 0 }
+      - { cmd: "kubectl get ns | grep -E '(platform|train|infer)'", expect_exit: 0 }
+      - { cmd: "kubectl get pvc -n platform | grep Bound", expect_exit: 0 }
+      - { cmd: "cd diting-infra && make platform-step03-test-persist ROUNDS=3", expect_exit: 0 }
+    exit_criteria:
+      - base ECS 起 · K3s server 就绪 · label=base
+      - platform-base 已装 · 3 ns + ACR secret + device-plugin（GPU 节点未起时 device-plugin 0 实例 OK）
+      - diting-stack 已装 · TimescaleDB / PG-L2 / module_a / ingest 全 Running
+      - 三轮数据继承（down-stack → up-stack）数据无丢失
+    decision_pending: []
+
+  - step_id: p_step_04
+    title: GPU 训练组按需 Up · diting-training chart
+    l3_doc: ../../共享平台基础/stages/stage_1_启动期/steps/step_04_GPU训练组按需Up.md
+    l4_doc: ../../../04_阶段规划与实践/共享平台基础/stage_1_启动期/实践记录_step_04_GPU训练组.md
+    l5_stage_anchor: l5-shared-platform-baseline-step04
+    work_dir: diting-infra/
+    necessity: optional
+    creates_cloud_resources: true
+    cost_per_run_cny_estimate: 15
+    triggered_by:
+      - D5 verified ≥100/dim
+      - 冲 ★M2 sanity-train
+    delivery_scope:
+      - charts/diting-training（Helm chart · LoRA Job + ConfigMap + Secret + PVC NAS）
+      - make up-stack diting-training（起 GPU train ECS · 自动 join K3s · label=train · device-plugin 自动生效）
+      - helm install diting-train-<dim>（可多 dim 并行 release）
+      - LoRA 训完 weights 写 NAS /lora/<dim>/<ts>/
+      - 训完 helm uninstall + make down-stack diting-training（保留 NAS LoRA + 网络）
+    verification_commands:
+      - { cmd: "cd diting-infra && make up-stack diting-training", expect_exit: 0 }
+      - { cmd: "kubectl describe node -l stack.diting/node=train | grep nvidia.com/gpu", expect_keywords: ["nvidia.com/gpu"] }
+      - { cmd: "helm install diting-train-cryo charts/diting-training -n train --set training.dim=cryo --set training.maxSteps=50", expect_exit: 0 }
+      - { cmd: "kubectl wait --for=condition=complete job/diting-train-cryo -n train --timeout=2h", expect_exit: 0 }
+      - { cmd: "ls /mnt/nas/lora/cryo/ | head", expect_exit: 0 }
+      - { cmd: "helm uninstall diting-train-cryo -n train && cd diting-infra && make down-stack diting-training", expect_exit: 0 }
+    exit_criteria:
+      - train ECS 起 · GPU 可调度（kubectl describe node 含 nvidia.com/gpu: 1）
+      - 至少 1 dim sanity-train 或真训完
+      - LoRA 权重落 NAS · ls 可见
+      - down-stack 后 train ECS 销 · NAS 权重保留 · 网络保留
+    decision_pending:
+      - "WandB online/offline（启动期默认 offline）"
+      - "多卡训练（启动期 1 卡）"
+    blocked_paths:
+      - { code: "BLOCKED(gpu_unavailable)", action: "退 sanity-train（CPU 也可 · 标 L4 BLOCKED）" }
+      - { code: "BLOCKED(verified<100)", action: "退 sanity-train + 回 D5 step_02/03 扩样本" }
+      - { code: "BLOCKED(spot_inventory_zero)", action: "换 cn-hongkong-b/a · 再不行临时按量 ≤¥10/h ≤2h" }
+      - { code: "BLOCKED(deploy_engine_lifecycle_missing)", action: "若 P-step_02 未完成 deploy-engine 扩展 · 退到 make deploy diting prod 整体 Up（CPU+GPU 一起）" }
+
+  - step_id: p_step_05
+    title: GPU 推理组按需 Up · diting-vllm chart
+    l3_doc: ../../共享平台基础/stages/stage_1_启动期/steps/step_05_GPU推理组按需Up.md
+    l4_doc: ../../../04_阶段规划与实践/共享平台基础/stage_1_启动期/实践记录_step_05_GPU推理组.md
+    l5_stage_anchor: l5-shared-platform-baseline-step05
+    work_dir: diting-infra/
+    necessity: optional
+    creates_cloud_resources: true
+    cost_per_run_cny_estimate: 9
+    triggered_by:
+      - step_04 训完出至少 1 LoRA 权重
+      - D1 step_07 三引擎部署（★M5）
+    delivery_scope:
+      - charts/diting-vllm（Helm chart · Deployment + Service + ConfigMap + PVC NAS RO + Secret）
+      - make up-stack diting-vllm（起 GPU infer ECS · 自动 join K3s · label=infer）
+      - helm install diting-infer -n infer（vLLM Deployment 加载 multi-LoRA · /v1/models 含 base + adapters）
+      - 多 dim 连跑 Holdout 评测（节点保留 · INFERENCE_MODE=vllm）
+      - 评完 helm uninstall + make down-stack diting-vllm
+    verification_commands:
+      - { cmd: "cd diting-infra && make up-stack diting-vllm", expect_exit: 0 }
+      - { cmd: "helm install diting-infer charts/diting-vllm -n infer --set vllm.loraList='cryo,thrust,narrative'", expect_exit: 0 }
+      - { cmd: "kubectl wait --for=condition=available deployment/diting-infer -n infer --timeout=10m", expect_exit: 0 }
+      - { cmd: "kubectl exec -n infer deploy/diting-infer -- curl -s localhost:8000/v1/models", expect_keywords: ["data"] }
+      - { cmd: "cd diting-infra && for d in cryo thrust narrative; do make holdout DIM=$d BACKEND=vllm; done", expect_exit: 0 }
+      - { cmd: "helm uninstall diting-infer -n infer && cd diting-infra && make down-stack diting-vllm", expect_exit: 0 }
+    exit_criteria:
+      - infer ECS 起 · GPU 可调度
+      - diting-infer Deployment Ready · /v1/models 含 ≥1 adapter
+      - 至少 1 dim 真 Holdout 评测（vllm 模式）非 fallback
+      - down-stack 后 infer ECS 销 · 网络保留
+    decision_pending:
+      - "连跑多 dim 是否保留节点（默认 keep_node_for_multi_dim=true · 省启动 5 min × N）"
+      - "是否切 gn7i（速度快 50% 但贵 50%）"
+    blocked_paths:
+      - { code: "BLOCKED(no_lora_weight)", action: "回 step_04 训完再上；启动期允许仅 base 模型 serve（标 DECISION_PENDING）" }
+      - { code: "BLOCKED(vllm_oom)", action: "调小 --max-loras；或切 gn7i" }
+
+  - step_id: p_step_06
+    title: Stack Down 与三档释放纪律
+    l3_doc: ../../共享平台基础/stages/stage_1_启动期/steps/step_06_Stack_Down与三档释放纪律.md
+    l4_doc: ../../../04_阶段规划与实践/共享平台基础/stage_1_启动期/实践记录_step_06_三档释放纪律.md
+    l5_stage_anchor: l5-shared-platform-baseline-step06
+    work_dir: diting-infra/
+    necessity: required
+    creates_cloud_resources: false
+    delivery_scope:
+      - 三档释放矩阵（tier-1 单 chart / tier-2 platform-base / tier-3 FULL_DESTROY）
+      - 命令统一用 chart 名（make down-stack <chart-name>）
+      - 永驻资源 10 项任何 down 都不动（VPC/SG/路由/网关 + NAS/独立盘/OSS/ACR）
+      - Down 前 graceful（drain + DB CHECKPOINT + wal-push）
+      - tier-3 二次确认输入 DESTROY-DATA 字符串
+      - Spot 抢占监听（metadata service 2 min 优雅关闭）
+      - 每次 Down 后 cost-snapshot 入 L4
+    verification_commands:
+      - { cmd: "cd diting-infra && make help | grep -E 'down-stack|down-platform-base|down-all'", expect_exit: 0 }
+      - { cmd: "cd diting-infra && make down-stack diting-training && terraform output -raw nas_id", expect_keywords: ["12db2e48f90"] }  # NAS 仍在
+      - { cmd: "cd diting-infra && make down-platform-base && terraform output -raw vpc_id", expect_keywords: ["vpc-j6cuhmska9vfwqa6my16q"] }  # VPC 仍在
+      - { cmd: "cd diting-infra && make down-all FULL_DESTROY=1 2>&1 | grep -E '请输入 DESTROY-DATA'", expect_exit: 0 }  # 二次确认生效
+    exit_criteria:
+      - 三档命令全部按文档实现
+      - tier-1 后 永驻资源 10 项全在
+      - tier-2 后 VPC + 数据全在 · 仅 K8s 集群级 + 所有 ECS 清
+      - tier-3 二次确认必须输入 DESTROY-DATA 才执行
+    decision_pending: []
+
+  - step_id: p_step_07
+    title: 阶段验收 · 平台快照与生命周期对账
+    l3_doc: ../../共享平台基础/stages/stage_1_启动期/steps/step_07_阶段验收_平台快照.md
+    l4_doc: ../../../04_阶段规划与实践/共享平台基础/stage_1_启动期/实践记录_step_07_阶段验收.md
+    l5_stage_anchor: l5-shared-platform-baseline-step07
+    work_dir: diting-infra/
+    necessity: required
+    creates_cloud_resources: false
+    delivery_scope:
+      - 平台快照 MD 入 06_/03_/平台快照_启动期_YYYYMMDD.md
+      - 4 chart 版本 + helm release 状态全 ✅
+      - 3 stack ECS 起停历史 + 月度成本对账
+      - L5 主表 + 7 step 子锚点全 ✅
+      - 7 L4 实践记录回填完成
+      - 中央索引表加入 P 轨 7 行
+      - 「下次 Up 闭环」DR 演练（可选）
+    verification_commands:
+      - { cmd: "cd diting-infra && make platform-snapshot", expect_exit: 0 }
+      - { cmd: "ls diting-doc/06_追溯与审计/03_审计与一致性报告/平台快照_启动期_*.md", expect_exit: 0 }
+      - { cmd: "helm list -A | grep -E 'diting-(platform-base|stack)'", expect_exit: 0 }
+    exit_criteria:
+      - 平台快照 MD 已落
+      - L5 8 锚点全 ✅
+      - 月度对账 ≤ 预算 130%
+    decision_pending:
+      - "DR 演练是否启动期最后做一次"
+
+# =====================================================================
+# 启动期 → 扩展期 触发条件（不展开扩展期 step）
+# =====================================================================
+stage_2_trigger:
+  conditions:
+    - P 轨 7 step 全 ✅（含 step_07 平台快照）
+    - 业务 D0~D5 启动期全部 ✅（参考 14 表 §9.1）
+    - 月度成本对账 ≤ 预算 130%
+  next_stage: ../../共享平台基础/stages/stage_2_扩展期/
+
+# =====================================================================
+# 修订记录
+# =====================================================================
+revision:
+  - { date: "2026-05-24 v2", change: "P 轨重大修正：①香港 cn-hongkong（替换新加坡）②4 chart × 3 stack 矩阵（diting-platform-base/diting-stack/diting-training/diting-vllm 各独立）③三档释放纪律（命令统一用 chart 名 make down-stack <chart-name>）④永驻资源 10 项（VPC+SG+路由+网关+NAS+独立盘+OSS+ACR · 与数据同级 · 仅 FULL_DESTROY 二次确认可销）⑤随用随起 · 0 节点常态 · 月成本 ¥140-310（v1: ¥400-600 节省 60%）⑥GPU 镜像 ubuntu_22_04 预装 NVIDIA 580 + CUDA 12.8 · 开箱即用⑦新增 02_deploy-engine 扩展规约（多 stack for_each + 三档 destroy + 在外仓改流程）⑧步骤命名同步重写（step_01 → 现状盘点；新增 02 设计文档；step_03 合并原 02+03；step_04/05 用对应 chart；step_06 三档释放纪律）" }
+  - { date: "2026-05-24 v1.1", change: "新增 steps[] 七步 P 轨展开（与 14 表 §6.4 同步）" }
+  - { date: "2026-05-13", change: "v1.0 初版（platform 共享平台基础 · MVP/V1/V2）" }

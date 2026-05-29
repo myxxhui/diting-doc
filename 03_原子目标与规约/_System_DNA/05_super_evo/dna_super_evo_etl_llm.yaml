@@ -1,0 +1,225 @@
+# DNA Y04 · ETL LLM Engine 配置（D5 演进飞轮 · Lighthouse-Alpha）
+# Lighthouse-Alpha 本地小模型清洗中心 DNA · 与 L2 D5 §8A + L3 step_01 + 共享规约 19 严格对齐
+# 版本：v1.0 · 2026-05-21 首版
+# 路径：diting-doc/03_原子目标与规约/_System_DNA/05_super_evo/dna_super_evo_etl_llm.yaml
+
+etl_llm_engine:
+  version: "v1.0"
+  upstream_l1: "06_投资哲学体系总纲.md#基石-演进进化哲学边界维度五演进飞轮"
+  upstream_l2: "02_战略维度/05_维度五_演进飞轮/04_演进实践策略规划.md#八a-lighthouse-alpha-etl-llm-engine-实践规划承接-l1-9-演进哲学--异构-ai-调度栈"
+  upstream_l3: "03_原子目标与规约/05_维度五_演进飞轮/stages/stage_1_启动期/steps/step_01_环境与基础设施.md"
+  upstream_prd: "_drafts/lighthouse_alpha_PRD.md (§1.2 异构 AI 调度栈 + §4.3 ETL LLM Engine)"
+  shared_spec:
+    - "18_动态采集流水线规约.md"
+    - "19_异构AI调度栈规约.md"
+
+  # =========================================================================
+  # 模型与基础设施
+  # =========================================================================
+  base_model:
+    name: "Qwen-14B"
+    license: "open_commercial_free"
+    parameter_size: "14B"
+    rationale: "13B 以下语义抽取召回率不达标；14B 是性价比临界点"
+    serving_framework: "vLLM"
+    serving_endpoint: "http://etl-llm-svc:8000/v1/chat/completions"
+    gpu_requirement:
+      type: "A10 / RTX 4090 / 类似 24GB 显存"
+      count_min: 1
+      count_recommended_startup: 1
+      count_recommended_extension: 4
+
+  lora:
+    enabled: true
+    rank: 16
+    alpha: 32
+    dropout: 0.1
+    target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+
+  # =========================================================================
+  # 训练数据集（4 类）
+  # =========================================================================
+  training_dataset:
+    sources:
+      - name: "招标公告"
+        target_table: "etl_samples_bidding"
+        min_samples_per_class: 5000
+        from: "维度零价值账本人工标注 + 历史招标抽取 - 复核"
+        json_schema_required_fields:
+          - project
+          - bidder
+          - amount
+          - tech
+          - region
+          - winning_announcement_date
+      - name: "财务事件"
+        target_table: "etl_samples_financial_events"
+        min_samples_per_class: 5000
+        json_schema_required_fields:
+          - event_type
+          - symbol
+          - related_party
+          - amount
+          - effective_date
+      - name: "政策公告"
+        target_table: "etl_samples_policy"
+        min_samples_per_class: 5000
+        json_schema_required_fields:
+          - issuing_authority
+          - title
+          - effective_date
+          - scope_codes
+          - keywords
+      - name: "海关数据"
+        target_table: "etl_samples_customs"
+        min_samples_per_class: 5000
+        json_schema_required_fields:
+          - hs_code
+          - destination
+          - month
+          - amount
+          - unit_price
+
+    quality:
+      human_label_kappa_min: 0.80
+      dedup_method: "md5(content[:500])"
+      pii_scrub_required: true              # 同共享规约 19 §五
+
+  # =========================================================================
+  # 训练频率（与 L2 D5 §五战场分级训练频率联动）
+  # =========================================================================
+  training_schedule:
+    incremental_lora:
+      frequency: "monthly"
+      day_of_month: 1
+      time: "02:00"
+    full_retrain:
+      frequency: "quarterly"
+      months: [3, 6, 9, 12]
+      day_of_month: 5
+      time: "00:00"
+    trigger_immediate_retrain_on:
+      - "human_label_kappa < 0.75 for 7 days"
+      - "F1 drop > 5pp vs last version"
+
+  # =========================================================================
+  # 守门 SLI（与 L2 D5 §三 LoRA 守门协议联动）
+  # =========================================================================
+  serving_sli_gates:
+    entity_extraction_f1_min: 0.90
+    json_schema_compliance_min_pct: 0.95
+    p95_latency_ms_max_per_doc: 2000
+    on_gate_fail: "auto_rollback_to_last_lora"
+
+  # =========================================================================
+  # 灰度上线
+  # =========================================================================
+  rollout:
+    stages: [0.05, 0.25, 1.0]
+    monitor_duration_per_stage_hours: 24
+    red_signal_action: "full_rollback_immediately"
+
+  # =========================================================================
+  # 回流闭环（→ D5 飞轮）
+  # =========================================================================
+  feedback_loop:
+    low_confidence_threshold: 0.7
+    on_low_confidence: "send_to_human_review_queue"
+    human_review_queue: "etl_human_review"
+    human_review_sla_hours: 24
+    feed_to_next_training: true
+
+  # =========================================================================
+  # 调用规则（共享规约 19 §三 异构 AI 调度）
+  # =========================================================================
+  dispatcher_scene: "etl"
+  routing: "local_qwen"
+  daily_call_limit: 50000
+  monthly_cost_max_yuan: 400              # GPU 折旧 + 电费
+
+  # =========================================================================
+  # 数据隔离（共享规约 19 §五）
+  # =========================================================================
+  data_isolation:
+    can_access_full_data_including_pii: true
+    output_must_pii_scrubbed_before_persist: true
+    input_retention_days: 30              # 共享规约 19 §六
+    output_retention_days: 30
+
+  # =========================================================================
+  # 基础设施依赖（部署到 K3s）
+  # =========================================================================
+  infra_dependencies:
+    kafka:
+      version_min: "3.5"
+      consumer_topic: "sniffer_raw_text"  # 共享规约 18 §四
+    clickhouse:
+      version_min: "23.8"
+      database: "etl_output"
+      tables:
+        - "extracted_bidding"
+        - "extracted_financial_events"
+        - "extracted_policy"
+        - "extracted_customs"
+    elasticsearch:
+      version_min: "8.10"
+      index_prefix: "etl_"
+    minio:
+      bucket: "etl-models"
+      paths:
+        base_model: "qwen-14b/"
+        lora_versions: "lora/{version}/"
+    helm_chart_ref: "deploy-engine/charts/etl-llm-engine"
+
+  # =========================================================================
+  # 与 D2 进攻能力的训练联动（L2 D5 §8A.3）
+  # =========================================================================
+  d2_offense_feedback:
+    - source: "The Scorer 三维评分 prompt + response + 评分明细"
+      destination: "decision_logs"
+      use: "训练 The Scorer 微调样本（评分一致性 Kappa 标定）"
+    - source: "The Critic 物理证伪判定（通过/拒绝 + 理由）"
+      destination: "decision_logs + 八象限路由 VIOLATION 类"
+      use: "训练 The Critic 物理证伪强化样本"
+    - source: "The Mapper 标的映射（被采纳/被覆盖/命中失败）"
+      destination: "value_ledger"
+      use: "训练 The Mapper 业绩弹性校准"
+    - source: "The Architect 监控字典（被消费/未消费/死字段）"
+      destination: "value_ledger"
+      use: "训练 The Architect 字典生成质量"
+    - source: "The Timer 财报窗口预判（实际兑现/未兑现/提前/滞后）"
+      destination: "decision_logs"
+      use: "训练 The Timer 节奏推演校准"
+
+  # =========================================================================
+  # 永久规则
+  # =========================================================================
+  no_mock_policy_permanent: |
+    本 DNA 严禁伪造 Kafka 业务流 fixture 入 etl_output 业务库；
+    ETL LLM Engine 仅消费真实 sniffer_raw_text；
+    THESIS_GENERATOR_MODE=stub 等占位禁止进入生产路径；
+    占位 fixture 仅 tests/ 单元测试合法。
+
+  # =========================================================================
+  # L5 验收锚点
+  # =========================================================================
+  l5_anchors:
+    stage_1_etl_env: "l5-stage-stage1-d5-step01-etl-llm-env-ready"
+    stage_1_etl_train: "l5-stage-stage1-d5-step01-etl-llm-first-train"
+    stage_1_etl_serving: "l5-stage-stage1-d5-step01-etl-llm-serving-online"
+
+# =========================================================================
+# 修订记录
+# =========================================================================
+revisions:
+  - date: "2026-05-21"
+    trigger: "Lighthouse-Alpha ETL LLM Engine DNA 缺失"
+    content: >
+      首版 v1.0：①基座 Qwen-14B + vLLM + 1 GPU（A10/4090）；②LoRA r=16 a=32 dropout=0.1；
+      ③4 类训练数据集（招标 / 财务事件 / 政策 / 海关 各 ≥ 5000 样本 + Kappa ≥ 0.80）；
+      ④训练频率（月度 incremental + 季度全量 + 触发条件）；⑤守门 SLI（F1 ≥ 0.90 / schema 合规 ≥ 0.95 /
+      P95 ≤ 2s）+ 灰度 5%→25%→100%；⑥回流闭环（confidence < 0.7 入人工复核 / SLA 24h）；
+      ⑦调用规则（daily 50000 / 月度 ≤ ¥400）；⑧数据隔离（全数据可访问 + 输出脱敏 + 30d 留存）；
+      ⑨基础设施依赖（Kafka 3.5+ / ClickHouse 23.8+ / ES 8.10+ / MinIO + Helm chart）；
+      ⑩与 D2 The Scorer/Critic/Mapper/Architect/Timer 5 条回流路径；⑪永久 no-mock-policy；
+      ⑫L5 锚点；与 L1 §9 + L2 D5 §8A + L3 step_01 + 共享规约 18/19 + PRD §1.2 + §4.3 严格对齐。
