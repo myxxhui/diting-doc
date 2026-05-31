@@ -119,6 +119,23 @@ docker rm diting-redis
 
 ---
 
+## 一-2、波次三：价值实现升级 · 四区漏斗 + 三段流水线（M8/M9/M10/M11）
+
+> **定位**：step_11~13（波次二）把 IA 升级为 4+1 导航 + Campaign 6 表 + 6 维只读档案。**波次三**把行情解析工作台从「占位 UI」升级为**端到端有方向的四区漏斗**——🔭雷达发现 → 🗓️滚动路线图时间锚定 → 📝规划证伪 → 🚀执行仓位指导；每区内部统一走 **T0 代码采集 → T1 自训模型压缩 → T2 顶尖模型推理** 三段流水线（全落 `stage_artifacts` 可审计），跨区以 `workspace_artifacts` 精简集级联，模型档位 `model_profile` 配置驱动可选。**架构总纲**：[25_四区漏斗_三段流水线_架构脊柱](../../../../_共享规约/25_四区漏斗_三段流水线_架构脊柱_设计.md)。需求主表：[24_ §9 波次三](../../../../_共享规约/24_行情解析与规划工作台_需求实现表.md)。
+
+| # | Step | 上游 | 关键产出 | 模块 | 文档状态 |
+|---|---|---|---|---|---|
+| 14 | [step_14_行情雷达扫描与三段流水线](./step_14_行情雷达扫描与三段流水线.md) | step_12 + D2/D3 + 行情 | 地基三表（stage_artifacts/workspace_artifacts/model_profile）+ 雷达 3 模式（A热度/B概念/**C标的·先做**）→ 全方位评估 + 候选 promote 晋级 | **M8** | ✅ L3 v1 |
+| 15 | [step_15_滚动路线图双层锚定](./step_15_滚动路线图双层锚定.md) | step_14 | 维度一时间线编排+T0 合理性评估（4 flag）+ 维度二生命周期判定（单/短/中/长多波·inferred）+ 长周期巡检 + 滚动闭环 | **M9** | ✅ L3 v1 |
+| 16 | [step_16_规划中证伪与持续监控](./step_16_规划中证伪与持续监控.md) | step_14/15 + step_12 + D1/D2/D3 | 认知快照 + 4 类证伪任务（物理壁垒/生态位/利好/风险）+ verdict（缺源 pending/被推翻 alert）+ 证据累积 + 晋级就绪度 | **M10** | ✅ L3 v1 |
+| 17 | [step_17_执行中仓位指导](./step_17_执行中仓位指导.md) | step_16 + step_11 + holdings_sot | 持仓×实时价×仓位 → advisory 仓位指导（6 场景）+ 盘后安全扫描门控（fraud→压制加仓）+ 一波归档回流 | **M11** | ✅ L3 v1 |
+
+**波次三永久红线**：M8~M11 全程 `no-auto-execute`（建议 advisory + human_confirmation，禁 buy/qmt/auto_trade/order_id）、`no-mock`（缺引擎 pending/inferred，T1 未训用 `t1_fallback` 显式标）、晋级人工确认、三段审计可查证（stage_artifacts 溯源链）。
+
+**依赖与顺序**：step_14 地基三表（P0 纯工程）+ 模式C（复用最多·先做）→ step_15 维度一（纯规则·快出价值）→ step_16（复用 step_12 monitor 机制）→ step_17（复用 step_11 持仓卡 + holdings_sot）。波次三在波次二 step_12 生产验收（✅）之后启动。雷达模式 A/B、路线图维度二专用引擎、T1 各区 LoRA 为扩展项（见 [25_ §7 优先级](../../../../_共享规约/25_四区漏斗_三段流水线_架构脊柱_设计.md)）。
+
+---
+
 ## 二、Cursor 使用方式
 
 ### 方式一：单步执行
@@ -174,6 +191,10 @@ docker rm diting-redis
 | step_11 | 只读聚合（不新建采集）；缺上游维度 → `pending` 灰态，禁伪造；导航 7→4+1，旧路由保留跳转 |
 | step_12 | Campaign = 图谱(step_13) + 计划(本步)；概念可先于标的（`campaign_symbols.symbol` 可空）；三支柱缺源 → `pending` |
 | step_13 | `confirmed` 必须有官方源 `evidence_ref`（复用 D2 Critic PHYSICAL/SOFT 等级）；`entity` 节点仅选定标的后挂接 |
+| step_14 | 三段流水线每段必落 `stage_artifacts`（T0/T1/T2 + model_id + input_refs）；模式C 先做；T2 默认关（`RADAR_T2_ENABLED=false`）控成本；龙头/壁垒无引擎→inferred 禁伪造 |
+| step_15 | 维度一全 T0 纯规则（合理性 flag）；维度二全 `inferred`（thesis/Timer 代理，confirmed 由 step_16 巡检驱动）；归档保留 long_multiwave 标的回流 |
+| step_16 | 复用 step_12 `monitor.refresh_verdicts` 扩为 4 类证伪（加 falsify_type/hypothesis）；缺源 pending 禁默认 ok；risk 接 `FinancialFraudEngine`；晋级 human_confirmation |
+| step_17 | 复用 step_11 持仓卡 + holdings_sot + MarketQuoteClient；仓位引擎纯 T0 规则 + 引证据；fraud 硬门控压制加仓；no-auto-execute 最强红线 rg=0 |
 
 ---
 
@@ -206,6 +227,10 @@ docker rm diting-redis
 | step_11 | `实践记录_step_11_持仓监管工作台.md` |
 | step_12 | `实践记录_step_12_行情解析与规划工作台.md` |
 | step_13 | `实践记录_step_13_产业图谱关系链研究.md` |
+| step_14 | `实践记录_step_14_行情雷达扫描与三段流水线.md` |
+| step_15 | `实践记录_step_15_滚动路线图双层锚定.md` |
+| step_16 | `实践记录_step_16_规划中证伪与持续监控.md` |
+| step_17 | `实践记录_step_17_执行中仓位指导.md` |
 
 ---
 
@@ -223,4 +248,5 @@ docker rm diting-redis
 | 2026-05-17 | **索引去周次化**：删除 W 跳号说明与日历周列表；**一、** 表仅保留 step 序号与依赖；**五、** 仅 `实践记录_step_NN_*` |
 | 2026-05-17 | 历史上曾对齐 §8.4h 与「周次别名」说明；**即日起本维 steps 以 step_NN 为唯一叙事**，日历节奏见 14_ 共享规约 |
 | 2026-05-17 | **step_08 实施状态 ✅**（月报 PDF 管线、`SelfCircuitBreaker`、`fakeredis` 单测、`copilot.monthly_report` 调度；L4 `实践记录_step_08_月报与熔断.md`） |
+| 2026-05-30 | **新增波次三（价值实现升级 · 四区漏斗 + 三段流水线 M8/M9/M10/M11）**：step_14 行情雷达扫描与三段流水线 / step_15 滚动路线图双层锚定 / step_16 规划中证伪与持续监控 / step_17 执行中仓位指导；新增 §一-2 波次三章节、§三 关键决策 4 行、§五 L4 清单 4 行；新增架构脊柱 [25_四区漏斗_三段流水线](../../../../_共享规约/25_四区漏斗_三段流水线_架构脊柱_设计.md)；同步 DNA `dna_stage_1_启动期.yaml` v1.2（M8~M11 + funnel_pipeline_v3/stage_artifact/model_profile）、[24_ §9 波次三](../../../../_共享规约/24_行情解析与规划工作台_需求实现表.md)。no-auto-execute/no-mock/晋级人工确认/审计可查证 永久红线 |
 | 2026-05-29 | **新增波次二（信息架构升级 · 三大工作台 M5/M6/M7）**：step_11 持仓监管工作台 / step_12 行情解析与规划工作台 / step_13 产业图谱关系链研究；新增 §一-1 波次二章节、§三 关键决策 3 行、§五 L4 清单 3 行；同步 DNA `dna_stage_1_启动期.yaml` v1.1（M5/M6/M7 + `navigation_ia_v2`）、L5 [05_验收标准](../05_验收标准与检查清单.md) 子模块 5/6/7、[04_前端开发与用户体验](../04_前端开发与用户体验.md) §2.1 IA。波次二只读聚合已实现后端，缺上游 `pending`；no-auto-order/no-auto-execute/no-trade 永久红线 |

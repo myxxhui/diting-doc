@@ -1,8 +1,8 @@
 # DNA · 维度零·AI 投资副驾驶·启动期
 # 与 L3 设计 1:1:1 对齐：03_原子目标与规约/00_维度零_AI投资副驾驶/stages/stage_1_启动期/
 
-version: "v1.1"
-last_updated: "2026-05-29"
+version: "v1.2"
+last_updated: "2026-05-30"
 
 dimension:
   id: 0
@@ -80,6 +80,66 @@ deliverables:
       data_model: ["graph_nodes", "graph_edges"]
       depends_on_data: ["related_party_graph（D1 340 节点）", "D2 Architect 产业链 + Critic evidence", "D3 P5/P6/P7 + monitor:dict", "D1 关联交易引擎（风险穿透）"]
       permanent_rule: "no-trade：研究/监控视图，不含下单/执行动作"
+    # ── 波次三：价值实现升级 · 四区漏斗 + 三段流水线（M8/M9/M10/M11）──
+    # 把工作台从占位 UI 升级为端到端有方向的四区漏斗（雷达→路线图→规划→执行→滚动回流）；
+    # 每区内部统一 T0 代码采集 → T1 自训模型压缩 → T2 顶尖模型推理；三段全落 stage_artifacts 可审计。
+    # 架构总纲：_共享规约/25_四区漏斗_三段流水线_架构脊柱_设计.md；需求主表：24_ §9。
+    - id: "M8"
+      name: "行情雷达扫描与三段流水线"
+      l3_step: "step_14_行情雷达扫描与三段流水线.md"
+      key_outputs: ["地基三表（stage_artifacts/workspace_artifacts/model_profile）", "雷达 3 模式（A 热度行业/B 概念表达/C 模糊标的·先做C）", "T0/T1/T2 三段流水线骨架 + ContextMatrixBuilder", "候选全方位评估（生态位/价值链/龙头/壁垒/利润/阶段/利好爆发窗/风险）", "候选 promote 一键晋级 Campaign（带 analysis_snapshot）"]
+      data_model: ["stage_artifacts", "workspace_artifacts", "model_profile", "radar_scans", "radar_candidates"]
+      depends_on_data: ["D2 ProfitCapturePlaybook/EvidenceChainBuilder/Lighthouse(AIDispatcher)", "D3 market_phase/MonitorDictReader", "行情 MarketQuoteClient"]
+      permanent_rule: "no-mock：龙头/壁垒/概念无引擎→inferred 禁伪造；T1 未训用 t1_fallback；T2 默认关 RADAR_T2_ENABLED=false 控成本"
+    - id: "M9"
+      name: "滚动路线图双层锚定"
+      l3_step: "step_15_滚动路线图双层锚定.md"
+      key_outputs: ["维度一：时间线编排 + T0 合理性评估（建仓窗/窗口冲突/资金撞车/排序倒挂 4 flag）", "维度二：行情生命周期判定（single/short/mid/long_multiwave，启动期 thesis/Timer 代理全 inferred）", "长周期巡检订阅（falsify_type=regime）", "滚动闭环（归档保留 long 标的 + next_wave_window）"]
+      data_model: ["regime_assessments", "campaign_timeline（扩展 window_start/end/build_lead_days/feasibility_flags/sequence_no）"]
+      depends_on_data: ["step_14 radar_candidates.catalyst_window", "D2 Timer/thesis.horizon（生命周期代理）", "交易日历 akshare"]
+      permanent_rule: "维度一全 T0 纯规则；维度二全 inferred，confirmed 由 step_16 巡检证据驱动"
+    - id: "M10"
+      name: "规划中证伪与持续监控"
+      l3_step: "step_16_规划中证伪与持续监控.md"
+      key_outputs: ["认知快照（analysis_snapshot + workspace_artifacts + 溯源链）", "4 类证伪任务（moat 物理壁垒/niche 生态位/catalyst 利好追踪/risk 风险）", "证伪 verdict 引擎（缺源 pending/被推翻 alert）", "证据累积 stage_artifacts(planning)", "晋级就绪度 advisory"]
+      data_model: ["monitor_subscriptions（扩展 falsify_type/hypothesis）", "stage_artifacts(workspace=planning)"]
+      depends_on_data: ["D3 P5/P6/P7+MonitorDictReader（moat）", "D2 Architect（niche）+Sniffer（catalyst）", "D1 FinancialFraudEngine+health（risk）"]
+      permanent_rule: "no-mock：缺源 pending 禁默认 ok；被推翻 alert；晋级 human_confirmation；独立源交叉验证（22_ 规约）"
+    - id: "M11"
+      name: "执行中仓位指导"
+      l3_step: "step_17_执行中仓位指导.md"
+      key_outputs: ["持仓×实时价×仓位 → advisory 仓位指导（建仓/加仓/浮盈减仓/浮亏处理/持有/清仓提示 6 场景）", "盘后安全扫描门控（FinancialFraudEngine fraud→压制加仓）", "一波完成归档 + long_multiwave 回流路线图（漏斗闭环）"]
+      data_model: ["execution_advices"]
+      depends_on_data: ["holdings_sot（持仓 SoT）", "MarketQuoteClient（实时价）", "D1 FinancialFraudEngine（安全扫描 T1）", "step_16 就绪度"]
+      permanent_rule: "no-auto-execute 最强红线：execute_mode=advisory + human_confirmation；schema/模板/路由禁 buy/qmt/auto_trade/order_id；rg=0"
+
+# 波次三架构脊柱（四区漏斗 + 三段流水线 + 模型路由）· 详见 _共享规约/25_
+funnel_pipeline_v3:
+  arch_spine_doc: "03_原子目标与规约/_共享规约/25_四区漏斗_三段流水线_架构脊柱_设计.md"
+  funnel:
+    - { zone: radar,     cn: "行情雷达",   step: "step_14", role: "认知生成（顶级模型全方位评估）" }
+    - { zone: roadmap,   cn: "滚动路线图", step: "step_15", role: "双层时间锚定（编排合理性 / 生命周期巡检）" }
+    - { zone: planning,  cn: "规划中",     step: "step_16", role: "验证证伪（4 类证伪任务 + 持续监控）" }
+    - { zone: executing, cn: "执行中",     step: "step_17", role: "持仓指导（advisory 仓位 + 安全门控）" }
+  gate: "每区晋级需 human_confirmation；long_multiwave 归档后回流 roadmap 滚动"
+  three_stage:
+    T0: "代码/规则采集（确定性·免费·全量）：行情/阶段/利润/探针/持仓/价格"
+    T1: "自训功能模型压缩（LoRA·vLLM，缺则规则 fallback）：关键数据集/语义抽取/财务测谎/生命周期初判"
+    T2: "顶尖大模型推理（Anthropic Opus·只读 T1 压缩集+上游 artifact）：跨维因果/证伪/最终决断"
+stage_artifact:
+  tables: ["stage_artifacts", "workspace_artifacts"]
+  audit: "三段全落库（model_id+prompt_ver+engine_ver+input_refs）；区间 workspace_artifacts.upstream_refs 级联；溯源链可回溯"
+  cost_control: "T2 幂等缓存（input_refs hash 未变复用）；RADAR_T2_ENABLED 默认 false；月预算上限"
+model_profile:
+  desc: "配置驱动模型路由，升级 AIDispatcher scene；每区 UI 可选档位（默认/略高级/顶尖/本地自训），override_allowed 时临时覆盖"
+  tiers: ["T0 功能引擎(无LLM)", "T1 本地自训LoRA(vllm)", "T2 顶尖大模型(anthropic:opus)"]
+  safety_scan: "FinancialFraudEngine(T1 LoRA) 横切，规划区按需+定时 / 执行区盘后；fraud→压制加仓 advisory"
+roadmap_dual_anchor:
+  dim1: "本次作战时间线编排 + 合理性评估（建仓窗/窗口冲突/资金撞车/排序倒挂）"
+  dim2: "行情生命周期判定（单次/短/中/长多波）+ 长周期巡检确认 + 滚动闭环"
+decision_pending_v3:
+  - "T2 Opus 高频深度评估月成本可能 > ¥100：默认 T0/T1 兜底，主动触发 T2 + 月预算 + 幂等缓存"
+  - "T1 各区专业 LoRA 训练需 GPU：沿用 P 轨按需 GPU，先规则/通用占位逐个替换"
 
 # 波次二导航信息架构（IA）：7 平铺项 → 4+1
 navigation_ia_v2:
@@ -148,3 +208,5 @@ revision:
     note: "初版（M1~M4 最小闭环）"
   - date: "2026-05-29"
     note: "v1.1 波次二：新增 M5 持仓监管工作台 / M6 行情解析与规划工作台 / M7 产业图谱关系链研究（对应 L3 step_11/12/13）+ navigation_ia_v2（7→4+1）；只读聚合已实现后端，缺上游 pending；no-auto-order/no-auto-execute/no-trade 永久红线"
+  - date: "2026-05-30"
+    note: "v1.2 波次三（价值实现升级·四区漏斗+三段流水线）：新增 M8 行情雷达扫描与三段流水线 / M9 滚动路线图双层锚定 / M10 规划中证伪与持续监控 / M11 执行中仓位指导（对应 L3 step_14/15/16/17）+ 架构键 funnel_pipeline_v3（四区漏斗+T0/T1/T2 三段）/ stage_artifact（两级落库审计+溯源+成本控制）/ model_profile（配置驱动模型路由+安全扫描）/ roadmap_dual_anchor（时间线合理性+生命周期巡检）+ decision_pending_v3（T2 成本/T1 GPU）；架构脊柱 _共享规约/25_；需求主表 24_ §9；no-auto-execute/no-mock/晋级人工确认/审计可查证 永久红线"
