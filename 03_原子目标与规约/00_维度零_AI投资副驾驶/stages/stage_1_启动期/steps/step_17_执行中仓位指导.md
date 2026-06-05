@@ -22,7 +22,7 @@
 
 > [!NOTE] **[TRACEBACK]**
 > - **架构脊柱**：[25_ §1.2 执行区职责 / §5 安全扫描门控 / §8 no-auto-execute](../../../../_共享规约/25_四区漏斗_三段流水线_架构脊柱_设计.md)
-> - **执行中工作区（独立功能 · 可选参考）**：[28_ 执行中专属 T0-T2 监控开发计划](../../../../_共享规约/28_工业富联执行中专属T0-T2监控开发计划.md)（以执行区为主文档 · 香港 ECS · 601138 首版 profile · **不绑定本 step 准出**）
+> - **执行中工作区（独立功能 · 可选参考）**：[28_ 执行中工作区 · 标的深度监控 T0-T2](../../../../_共享规约/28_执行中工作区_标的深度监控_T0-T2开发计划.md)（以执行区为主文档 · profile 可扩展 · 601138 首版样板 · **不绑定本 step 准出**）
 > - **本阶段总览**：[steps/README §一-2 波次三](./README.md)
 > - **DNA 键**：[`dna_stage_1_启动期.yaml`](../../../../_System_DNA/00_co_pilot/dna_stage_1_启动期.yaml) `deliverables.modules[M11] / execution_advisory`
 > - **L4 实践记录**：[实践记录_step_17_执行中仓位指导](../../../../../04_阶段规划与实践/00_维度零_AI投资副驾驶/stage_1_启动期/实践记录_step_17_执行中仓位指导.md)（执行时生成）
@@ -140,7 +140,7 @@
 5. **归档回流闭环**：了结 long_multiwave 标的回 step_15 路线图，形成完整漏斗滚动。
 6. **L4 回写**：持仓×实时价×浮盈亏 JSON、各 advice 分支、fraud 压制 demo、归档回流、advisory rg 0、≥12 pytest。
 7. **审计**：`rg -i "buy|qmt|auto_trade|order_id|webhook_target|立即|一键|下单" apps/copilot/modules/execution/ apps/copilot/templates/planning/` = 0。
-8. **执行中工作区（28_）**：若做 601138 深度体检，以 [28_](../../../../_共享规约/28_工业富联执行中专属T0-T2监控开发计划.md) 为准（`modules/executing/` · 香港 Pod · 前端持仓 CRUD）；本 step 的 `advisor.py` 仅可复用，**不得**用本 step 裁剪 28_ 功能范围。
+8. **执行中工作区（28_）**：若做 601138 深度体检，以 [28_](../../../../_共享规约/28_执行中工作区_标的深度监控_T0-T2开发计划.md) 为准（`modules/executing/` · 香港 Pod · 前端持仓 CRUD）；本 step 的 `advisor.py` 仅可复用，**不得**用本 step 裁剪 28_ 功能范围。
 
 ## §8 部署节奏
 
@@ -196,5 +196,5 @@ ConfigMap 增 `EXEC_PNL_TAKE_PROFIT_PCT`/`EXEC_PNL_STOP_PCT`/`EXEC_MAX_SINGLE_PO
 
 | 日期 | 内容 |
 |---|---|
-| 2026-06-04 | 链入 [28_ 执行中工作区开发计划](../../../../_共享规约/28_工业富联执行中专属T0-T2监控开发计划.md)（独立功能文档 · 香港 ECS · 与 M11 可选参考） |
+| 2026-06-04 | 链入 [28_ 执行中工作区开发计划](../../../../_共享规约/28_执行中工作区_标的深度监控_T0-T2开发计划.md)（独立功能文档 · 香港 ECS · 与 M11 可选参考） |
 | 2026-05-30 | 初版（波次三 M11 · 漏斗末端）：执行区持仓×实时价×仓位 → advisory 仓位指导引擎（建仓/加仓/浮盈减仓/浮亏处理/持有/清仓提示 6 场景规则 + 引规划证伪/阶段/建仓窗证据）+ 盘后安全扫描门控（FinancialFraudEngine fraud→压制加仓）+ 一波完成归档 + long_multiwave 回流路线图闭环；execution_advices 表；X1~X7 质量矩阵；no-auto-execute 最强红线（schema/模板/路由 rg=0） |
