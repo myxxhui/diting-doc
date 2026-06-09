@@ -1,0 +1,937 @@
+{
+  "probe_key": "qmt_atr_trailing",
+  "spec_ref": "28_ §2.2.2",
+  "merged_at": "2026-06-08T09:15:15Z",
+  "production_pg": {
+    "symbols": {
+      "601138": {
+        "pg_count": 251,
+        "loaded": 250,
+        "range": [
+          "2025-05-28",
+          "2026-06-08"
+        ],
+        "last_5_bars": {
+          "dates": [
+            "2026-06-02",
+            "2026-06-03",
+            "2026-06-04",
+            "2026-06-05",
+            "2026-06-08"
+          ],
+          "open": [
+            75.0,
+            79.95,
+            80.0,
+            77.5,
+            69.99
+          ],
+          "high": [
+            81.11,
+            84.95,
+            80.86,
+            78.21,
+            73.3
+          ],
+          "low": [
+            73.85,
+            78.43,
+            77.35,
+            73.1,
+            69.34
+          ],
+          "close": [
+            80.01,
+            81.05,
+            78.55,
+            74.06,
+            70.48
+          ],
+          "volume": [
+            3778912.0,
+            3866136.0,
+            2805857.0,
+            2616486.0,
+            1973161.0
+          ]
+        },
+        "t0_raw_latest": {
+          "collected_at": "2026-06-08T08:27:35.987003",
+          "payload": {
+            "ok": true,
+            "blocker": null,
+            "payload": {
+              "as_of": "2026-06-08",
+              "atr20": 4.7285,
+              "value": 3.06,
+              "source": "PG executing_daily_bars · tencent_fqkline",
+              "current": 70.48,
+              "bars_count": 250,
+              "peak_price": 84.95,
+              "atr_multiple": 3.0602,
+              "indicator_key": "qmt_atr_trailing",
+              "fact_statement": "当前价格距离建仓以来的绝对峰值，已回撤 3.06 倍 ATR。",
+              "entry_date_used": "2026-04-14",
+              "calculation_logic": "(建仓后最高价 84.95 - 当前价 70.48) / 近20日ATR 4.73"
+            }
+          }
+        }
+      },
+      "002837": {
+        "pg_count": 251,
+        "loaded": 250,
+        "range": [
+          "2025-05-28",
+          "2026-06-08"
+        ],
+        "last_5_bars": {
+          "dates": [
+            "2026-06-02",
+            "2026-06-03",
+            "2026-06-04",
+            "2026-06-05",
+            "2026-06-08"
+          ],
+          "open": [
+            66.3,
+            67.5,
+            67.49,
+            68.6,
+            62.4
+          ],
+          "high": [
+            68.0,
+            70.92,
+            69.89,
+            68.6,
+            65.8
+          ],
+          "low": [
+            64.4,
+            67.28,
+            67.18,
+            65.58,
+            62.2
+          ],
+          "close": [
+            67.49,
+            68.32,
+            69.22,
+            65.9,
+            63.38
+          ],
+          "volume": [
+            514809.0,
+            652871.0,
+            475321.0,
+            468850.0,
+            402509.0
+          ]
+        },
+        "t0_raw_latest": {
+          "collected_at": "2026-06-08T03:21:47.543146",
+          "payload": {
+            "ok": true,
+            "blocker": null,
+            "payload": {
+              "as_of": "2026-06-08",
+              "atr20": 4.875,
+              "current": 64.13,
+              "bars_count": 251,
+              "peak_price": 93.515,
+              "atr_multiple": 6.0278,
+              "entry_date_used": null
+            }
+          }
+        }
+      },
+      "300502": {
+        "pg_count": 251,
+        "loaded": 250,
+        "range": [
+          "2025-05-28",
+          "2026-06-08"
+        ],
+        "last_5_bars": {
+          "dates": [
+            "2026-06-02",
+            "2026-06-03",
+            "2026-06-04",
+            "2026-06-05",
+            "2026-06-08"
+          ],
+          "open": [
+            696.0,
+            760.0,
+            773.46,
+            790.0,
+            711.11
+          ],
+          "high": [
+            752.0,
+            815.98,
+            785.97,
+            818.38,
+            745.0
+          ],
+          "low": [
+            693.1,
+            758.07,
+            764.0,
+            730.0,
+            705.89
+          ],
+          "close": [
+            747.0,
+            782.25,
+            775.94,
+            748.0,
+            725.0
+          ],
+          "volume": [
+            387107.0,
+            426909.0,
+            254101.0,
+            441765.0,
+            322561.0
+          ]
+        },
+        "t0_raw_latest": {
+          "collected_at": "2026-06-08T07:53:19.137648",
+          "payload": {
+            "ok": false,
+            "blocker": "建仓日缺失 · 须在 user_positions.opened_at 配置",
+            "payload": null
+          }
+        }
+      }
+    },
+    "watermarks": [
+      {
+        "job_id": "quote-intraday",
+        "symbol": "*",
+        "last_success_at": "2026-06-08T07:55:04.270822",
+        "last_trade_date": "2026-06-08",
+        "last_row_count": 3
+      },
+      {
+        "job_id": "l4-atr-bars-sync",
+        "symbol": "601138",
+        "last_success_at": "2026-06-08T08:00:03.857772",
+        "last_trade_date": "2026-06-08",
+        "last_row_count": 251
+      },
+      {
+        "job_id": "l4-atr-bars-sync",
+        "symbol": "002837",
+        "last_success_at": "2026-06-08T08:00:04.043587",
+        "last_trade_date": "2026-06-08",
+        "last_row_count": 251
+      },
+      {
+        "job_id": "l4-atr-bars-sync",
+        "symbol": "300502",
+        "last_success_at": "2026-06-08T08:00:04.219184",
+        "last_trade_date": "2026-06-08",
+        "last_row_count": 251
+      },
+      {
+        "job_id": "l4-atr-bars-sync",
+        "symbol": "*",
+        "last_success_at": "2026-06-08T08:00:04.219743",
+        "last_trade_date": "2026-06-08",
+        "last_row_count": 753
+      }
+    ]
+  },
+  "redis_intraday": {
+    "601138": {
+      "draft_bar": null,
+      "quote": null,
+      "atr_intraday": null
+    },
+    "002837": {
+      "draft_bar": null,
+      "quote": null,
+      "atr_intraday": null
+    },
+    "300502": {
+      "draft_bar": null,
+      "quote": null,
+      "atr_intraday": null
+    }
+  },
+  "tencent_fqkline_live": {
+    "601138": {
+      "source": "tencent_fqkline",
+      "count": 6,
+      "bars": {
+        "dates": [
+          "2026-06-01",
+          "2026-06-02",
+          "2026-06-03",
+          "2026-06-04",
+          "2026-06-05",
+          "2026-06-08"
+        ],
+        "open": [
+          75.2,
+          75.0,
+          79.95,
+          80.0,
+          77.5,
+          69.99
+        ],
+        "high": [
+          76.5,
+          81.11,
+          84.95,
+          80.86,
+          78.21,
+          73.3
+        ],
+        "low": [
+          72.19,
+          73.85,
+          78.43,
+          77.35,
+          73.1,
+          69.34
+        ],
+        "close": [
+          73.75,
+          80.01,
+          81.05,
+          78.55,
+          74.06,
+          70.48
+        ],
+        "volume": [
+          3013251.0,
+          3778912.0,
+          3866136.0,
+          2805857.0,
+          2616486.0,
+          1973161.0
+        ]
+      },
+      "today_draft_candidate": {
+        "trade_date": "2026-06-08",
+        "open": 69.99,
+        "high": 73.3,
+        "low": 69.34,
+        "close": 70.48,
+        "volume": 1973161.0,
+        "is_today": true
+      }
+    },
+    "002837": {
+      "source": "tencent_fqkline",
+      "count": 6,
+      "bars": {
+        "dates": [
+          "2026-06-01",
+          "2026-06-02",
+          "2026-06-03",
+          "2026-06-04",
+          "2026-06-05",
+          "2026-06-08"
+        ],
+        "open": [
+          68.51,
+          66.3,
+          67.5,
+          67.49,
+          68.6,
+          62.4
+        ],
+        "high": [
+          70.59,
+          68.0,
+          70.92,
+          69.89,
+          68.6,
+          65.8
+        ],
+        "low": [
+          65.66,
+          64.4,
+          67.28,
+          67.18,
+          65.58,
+          62.2
+        ],
+        "close": [
+          66.06,
+          67.49,
+          68.32,
+          69.22,
+          65.9,
+          63.38
+        ],
+        "volume": [
+          653410.0,
+          514809.0,
+          652871.0,
+          475321.0,
+          468850.0,
+          402509.0
+        ]
+      },
+      "today_draft_candidate": {
+        "trade_date": "2026-06-08",
+        "open": 62.4,
+        "high": 65.8,
+        "low": 62.2,
+        "close": 63.38,
+        "volume": 402509.0,
+        "is_today": true
+      }
+    },
+    "300502": {
+      "source": "tencent_fqkline",
+      "count": 6,
+      "bars": {
+        "dates": [
+          "2026-06-01",
+          "2026-06-02",
+          "2026-06-03",
+          "2026-06-04",
+          "2026-06-05",
+          "2026-06-08"
+        ],
+        "open": [
+          709.14,
+          696.0,
+          760.0,
+          773.46,
+          790.0,
+          711.11
+        ],
+        "high": [
+          713.73,
+          752.0,
+          815.98,
+          785.97,
+          818.38,
+          745.0
+        ],
+        "low": [
+          673.1,
+          693.1,
+          758.07,
+          764.0,
+          730.0,
+          705.89
+        ],
+        "close": [
+          679.82,
+          747.0,
+          782.25,
+          775.94,
+          748.0,
+          725.0
+        ],
+        "volume": [
+          295925.0,
+          387107.0,
+          426909.0,
+          254101.0,
+          441765.0,
+          322561.0
+        ]
+      },
+      "today_draft_candidate": {
+        "trade_date": "2026-06-08",
+        "open": 711.11,
+        "high": 745.0,
+        "low": 705.89,
+        "close": 725.0,
+        "volume": 322561.0,
+        "is_today": true
+      }
+    }
+  },
+  "copilot_api_snapshot": {
+    "t1_batch": {
+      "batch_meta": {
+        "execution_id": "batch_task_20260608_091442",
+        "timestamp": "2026-06-08T09:14:42Z",
+        "total_stocks_checked": 3,
+        "system_status": "Nominal",
+        "account_available_cash": 75747.63,
+        "money_unit": "人民币"
+      },
+      "portfolio_signals": {
+        "601138.SH": {
+          "stock_name": "工业富联",
+          "indicators": {
+            "qmt_atr_trailing": {
+              "indicator_name": "动态ATR追踪止盈",
+              "value": 3.06,
+              "fact_statement": "收盘价为 70.48，较持仓期绝对峰值 84.95 回撤 3.06 倍 ATR。",
+              "calculation_logic": "(84.95 - 70.48) / 4.73 = 3.06",
+              "source": "PG executing_daily_bars · tencent_fqkline",
+              "raw_metrics": {
+                "atr_20": 4.73,
+                "peak_price": 84.95,
+                "current_price": 70.48,
+                "bar_as_of": "2026-06-08"
+              }
+            }
+          },
+          "position_context": {
+            "entry_date": "2026-04-14",
+            "cost_basis": 56.82,
+            "current_price": 70.48,
+            "unrealized_profit_pct": "24.04%",
+            "holding_volume": 1500.0,
+            "position_pct": "29.7%"
+          }
+        },
+        "002837.SZ": {
+          "stock_name": "英维克",
+          "indicators": {
+            "qmt_atr_trailing": {
+              "indicator_name": "动态ATR追踪止盈",
+              "value": 3.75,
+              "fact_statement": "收盘价为 63.38，较持仓期绝对峰值 81.66 回撤 3.75 倍 ATR。",
+              "calculation_logic": "(81.66 - 63.38) / 4.88 = 3.75",
+              "source": "PG executing_daily_bars · tencent_fqkline",
+              "raw_metrics": {
+                "atr_20": 4.88,
+                "peak_price": 81.66,
+                "current_price": 63.38,
+                "bar_as_of": "2026-06-08"
+              }
+            }
+          },
+          "position_context": {
+            "entry_date": "2026-05-25",
+            "cost_basis": 83.65,
+            "current_price": 63.38,
+            "unrealized_profit_pct": "-24.23%",
+            "holding_volume": 1150.0,
+            "position_pct": "20.15%"
+          }
+        },
+        "300502.SZ": {
+          "stock_name": "新易盛",
+          "indicators": {
+            "qmt_atr_trailing": {
+              "indicator_name": "动态ATR追踪止盈",
+              "value": 2.03,
+              "fact_statement": "收盘价为 725.00，较持仓期绝对峰值 818.38 回撤 2.03 倍 ATR。",
+              "calculation_logic": "(818.38 - 725.00) / 46.08 = 2.03",
+              "source": "PG executing_daily_bars · tencent_fqkline",
+              "raw_metrics": {
+                "atr_20": 46.08,
+                "peak_price": 818.38,
+                "current_price": 725.0,
+                "bar_as_of": "2026-06-08"
+              }
+            }
+          },
+          "position_context": {
+            "entry_date": "2026-05-20",
+            "cost_basis": 601.04,
+            "current_price": 725.0,
+            "unrealized_profit_pct": "20.62%",
+            "holding_volume": 100.0,
+            "position_pct": "20.04%"
+          }
+        }
+      }
+    },
+    "sync_status": {
+      "collect_symbols": [
+        "601138",
+        "002837",
+        "300502"
+      ],
+      "watermarks": [
+        {
+          "job_id": "collect-once",
+          "symbol": "300502",
+          "last_success_at": "2026-06-08T07:53:19.233309",
+          "last_success_at_cst": "2026-06-08 15:53:19",
+          "last_error": null
+        },
+        {
+          "job_id": "daily-pipeline",
+          "symbol": "300502",
+          "last_success_at": "2026-06-08T07:53:50.647857",
+          "last_success_at_cst": "2026-06-08 15:53:50",
+          "last_error": null
+        },
+        {
+          "job_id": "quote-intraday",
+          "symbol": "*",
+          "last_success_at": "2026-06-08T07:55:04.270822",
+          "last_success_at_cst": "2026-06-08 15:55:04",
+          "last_error": null
+        },
+        {
+          "job_id": "l4-atr-bars-sync",
+          "symbol": "601138",
+          "last_success_at": "2026-06-08T08:00:03.857772",
+          "last_success_at_cst": "2026-06-08 16:00:03",
+          "last_error": null
+        },
+        {
+          "job_id": "l4-atr-bars-sync",
+          "symbol": "002837",
+          "last_success_at": "2026-06-08T08:00:04.043587",
+          "last_success_at_cst": "2026-06-08 16:00:04",
+          "last_error": null
+        },
+        {
+          "job_id": "l4-micro-eod",
+          "symbol": "*",
+          "last_success_at": "2026-06-05T08:11:19.317547",
+          "last_success_at_cst": "2026-06-05 16:11:19",
+          "last_error": null
+        },
+        {
+          "job_id": "l4-atr-bars-sync",
+          "symbol": "300502",
+          "last_success_at": "2026-06-08T08:00:04.219184",
+          "last_success_at_cst": "2026-06-08 16:00:04",
+          "last_error": null
+        },
+        {
+          "job_id": "collect-once",
+          "symbol": "*",
+          "last_success_at": "2026-06-05T09:26:55.280763",
+          "last_success_at_cst": "2026-06-05 17:26:55",
+          "last_error": null
+        },
+        {
+          "job_id": "l4-atr-bars-sync",
+          "symbol": "*",
+          "last_success_at": "2026-06-08T08:00:04.219743",
+          "last_success_at_cst": "2026-06-08 16:00:04",
+          "last_error": null
+        },
+        {
+          "job_id": "l3-news-daily",
+          "symbol": "*",
+          "last_success_at": "2026-06-05T10:06:03.009665",
+          "last_success_at_cst": "2026-06-05 18:06:03",
+          "last_error": null
+        },
+        {
+          "job_id": "collect-once",
+          "symbol": "002837",
+          "last_success_at": "2026-06-05T10:51:32.378024",
+          "last_success_at_cst": "2026-06-05 18:51:32",
+          "last_error": null
+        },
+        {
+          "job_id": "daily-pipeline",
+          "symbol": "002837",
+          "last_success_at": null,
+          "last_success_at_cst": null,
+          "last_error": "unknown"
+        },
+        {
+          "job_id": "bootstrap-sync",
+          "symbol": "*",
+          "last_success_at": "2026-06-05T05:25:17.985840",
+          "last_success_at_cst": "2026-06-05 13:25:17",
+          "last_error": null
+        },
+        {
+          "job_id": "collect-once",
+          "symbol": "601138",
+          "last_success_at": "2026-06-08T08:27:36.017804",
+          "last_success_at_cst": "2026-06-08 16:27:36",
+          "last_error": null
+        },
+        {
+          "job_id": "executing-bars250-bootstrap",
+          "symbol": "*",
+          "last_success_at": "2026-06-08T03:21:47.989644",
+          "last_success_at_cst": "2026-06-08 11:21:47",
+          "last_error": null
+        },
+        {
+          "job_id": "daily-pipeline",
+          "symbol": "601138",
+          "last_success_at": "2026-06-08T08:28:12.945732",
+          "last_success_at_cst": "2026-06-08 16:28:12",
+          "last_error": null
+        }
+      ],
+      "stale_count": 73,
+      "stale_probes": [
+        {
+          "symbol": "601138",
+          "key": "cloud_capex_consensus",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "contract_liabilities",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "copper_cost_pressure",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "cpi_ppi_spread",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "etf_redemption_impact",
+          "status": "missing",
+          "blocker": "[C] push2delay ETF 列表无周份额变动字段·禁止仅份额数 ok"
+        },
+        {
+          "symbol": "601138",
+          "key": "exchange_rate_impact",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "gb200_iteration_node",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "gross_margin_trend",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "insider_sell_actual",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "inventory_turnover",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "level2_super_order",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "margin_short_skew",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "mgmt_and_core_team",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "northbound_net_flow",
+          "status": "stale"
+        },
+        {
+          "symbol": "601138",
+          "key": "nvda_gpu_leadtime",
+          "status": "missing",
+          "blocker": "[A] 分销商 API / external_facts 未实现（禁止行业快讯词表顶替）"
+        },
+        {
+          "symbol": "300502",
+          "key": "block_trade_discount",
+          "status": "stale"
+        },
+        {
+          "symbol": "300502",
+          "key": "cloud_capex_consensus",
+          "status": "stale"
+        },
+        {
+          "symbol": "300502",
+          "key": "contract_liabilities",
+          "status": "stale"
+        },
+        {
+          "symbol": "300502",
+          "key": "copper_cost_pressure",
+          "status": "stale"
+        },
+        {
+          "symbol": "300502",
+          "key": "insider_sell_actual",
+          "status": "missing",
+          "blocker": "[A] 有减持标题但未解析出占总股本%（禁止仅标题 ok）"
+        },
+        {
+          "symbol": "300502",
+          "key": "level2_super_order",
+          "status": "stale"
+        },
+        {
+          "symbol": "300502",
+          "key": "margin_short_skew",
+          "status": "stale"
+        },
+        {
+          "symbol": "300502",
+          "key": "mgmt_and_core_team",
+          "status": "stale"
+        },
+        {
+          "symbol": "300502",
+          "key": "northbound_net_flow",
+          "status": "stale"
+        },
+        {
+          "symbol": "300502",
+          "key": "nvda_gpu_leadtime",
+          "status": "missing",
+          "blocker": "[A] 分销商 API / external_facts 未实现（禁止行业快讯词表顶替）"
+        },
+        {
+          "symbol": "300502",
+          "key": "parent_honhai_revenue",
+          "status": "missing",
+          "blocker": "[A] TWSE Open API 2317 月营收未实现（禁止 akshare HK 替代标 ok）"
+        },
+        {
+          "symbol": "300502",
+          "key": "qmt_atr_trailing",
+          "status": "missing",
+          "blocker": "建仓日缺失 · 须在 user_positions.opened_at 配置"
+        },
+        {
+          "symbol": "300502",
+          "key": "related_party_trans",
+          "status": "missing",
+          "blocker": "[A] D1 关联交易表环比未接入"
+        },
+        {
+          "symbol": "300502",
+          "key": "retail_concentration",
+          "status": "stale"
+        },
+        {
+          "symbol": "300502",
+          "key": "smci_quanta_share",
+          "status": "missing",
+          "blocker": "[A] 纪要 PDF→DeepSeek 份额抽取未实现"
+        },
+        {
+          "symbol": "300502",
+          "key": "tech_beta_correlation",
+          "status": "stale"
+        },
+        {
+          "symbol": "300502",
+          "key": "tsmc_cowos_capacity",
+          "status": "missing",
+          "blocker": "[A] 巨潮/台媒→vLLM 抽取 CoWoS 四字段未实现"
+        },
+        {
+          "symbol": "300502",
+          "key": "turnover_acceleration",
+          "status": "missing",
+          "blocker": "[C] 换手率序列不足(0)·禁止仅用成交量比 ok"
+        },
+        {
+          "symbol": "300502",
+          "key": "volume_price_div",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "block_trade_discount",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "cloud_capex_consensus",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "contract_liabilities",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "copper_cost_pressure",
+          "status": "missing",
+          "blocker": "沪铜序列不足"
+        },
+        {
+          "symbol": "002837",
+          "key": "cpi_ppi_spread",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "etf_redemption_impact",
+          "status": "missing",
+          "blocker": "[C] push2delay ETF 列表无周份额变动字段·禁止仅份额数 ok"
+        },
+        {
+          "symbol": "002837",
+          "key": "exchange_rate_impact",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "gb200_iteration_node",
+          "status": "missing",
+          "blocker": "[D] 已扫130条·无规划关键词命中（非「无披露」准出）"
+        },
+        {
+          "symbol": "002837",
+          "key": "gross_margin_trend",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "insider_sell_actual",
+          "status": "missing",
+          "blocker": "[A] 有减持标题但未解析出占总股本%（禁止仅标题 ok）"
+        },
+        {
+          "symbol": "002837",
+          "key": "inventory_turnover",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "level2_super_order",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "margin_short_skew",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "mgmt_and_core_team",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "northbound_net_flow",
+          "status": "stale"
+        },
+        {
+          "symbol": "002837",
+          "key": "nvda_gpu_leadtime",
+          "status": "missing",
+          "blocker": "[A] 分销商 API / external_facts 未实现（禁止行业快讯词表顶替）"
+        }
+      ],
+      "missing_count": 1
+    }
+  }
+}

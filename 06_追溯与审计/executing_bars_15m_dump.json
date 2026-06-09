@@ -1,0 +1,194 @@
+{
+  "probe_key": "volume_price_div",
+  "symbols": {
+    "601138": {
+      "fetch": {
+        "bars_count": 200,
+        "source": "tencent_mkline_m15_qfq",
+        "first_datetime": "2026-05-21 13:15",
+        "last_datetime": "2026-06-08 15:00",
+        "tail_3": [
+          {
+            "datetime": "2026-06-08 14:30",
+            "open": 70.51,
+            "high": 71.26,
+            "low": 70.51,
+            "close": 71.24,
+            "volume": 55840.0
+          },
+          {
+            "datetime": "2026-06-08 14:45",
+            "open": 71.24,
+            "high": 71.28,
+            "low": 70.51,
+            "close": 70.84,
+            "volume": 59805.0
+          },
+          {
+            "datetime": "2026-06-08 15:00",
+            "open": 70.82,
+            "high": 70.95,
+            "low": 70.38,
+            "close": 70.48,
+            "volume": 112714.0
+          }
+        ]
+      },
+      "t1_preview": {
+        "indicator_key": "volume_price_div",
+        "value": 0.66,
+        "source": "tencent_mkline_m15_qfq",
+        "calculation_logic": "近200根15min：上涨量=17616116 下跌量=18247669；高位(收盘≥78.84)下跌量=2578456 / 高位上涨量=3903307 = 0.6606",
+        "fact_statement": "近 200 根 15 分钟 K 线中，价格高位区间下跌成交量 与高位上涨成交量比值为 0.66（全样本涨跌量比 0.9654）。",
+        "up_volume": 17616116.18,
+        "down_volume": 18247668.95,
+        "ratio": 0.9654,
+        "high_down_volume": 2578456.07,
+        "high_up_volume": 3903306.96,
+        "divergence_index": 0.6606,
+        "bars_count": 200,
+        "high_threshold": 78.84
+      },
+      "redis": {
+        "collected_at": "2026-06-08 17:32:27",
+        "bars_count": 200,
+        "last_bar": [
+          {
+            "datetime": "2026-06-08 15:00",
+            "open": 70.82,
+            "high": 70.95,
+            "low": 70.38,
+            "close": 70.48,
+            "volume": 112714.0
+          }
+        ]
+      }
+    },
+    "002837": {
+      "fetch": {
+        "bars_count": 200,
+        "source": "tencent_mkline_m15_qfq",
+        "first_datetime": "2026-05-21 13:15",
+        "last_datetime": "2026-06-08 15:00",
+        "tail_3": [
+          {
+            "datetime": "2026-06-08 14:30",
+            "open": 63.2,
+            "high": 64.26,
+            "low": 63.19,
+            "close": 64.26,
+            "volume": 15006.0
+          },
+          {
+            "datetime": "2026-06-08 14:45",
+            "open": 64.25,
+            "high": 64.25,
+            "low": 63.32,
+            "close": 63.52,
+            "volume": 15186.0
+          },
+          {
+            "datetime": "2026-06-08 15:00",
+            "open": 63.52,
+            "high": 63.75,
+            "low": 63.3,
+            "close": 63.38,
+            "volume": 20790.0
+          }
+        ]
+      },
+      "t1_preview": {
+        "indicator_key": "volume_price_div",
+        "value": 1.44,
+        "source": "tencent_mkline_m15_qfq",
+        "calculation_logic": "近200根15min：上涨量=2783703 下跌量=3790935；高位(收盘≥93.08)下跌量=1630639 / 高位上涨量=1128525 = 1.4449",
+        "fact_statement": "近 200 根 15 分钟 K 线中，价格高位区间下跌成交量 与高位上涨成交量比值为 1.44（全样本涨跌量比 0.7343）。",
+        "up_volume": 2783703.0,
+        "down_volume": 3790934.83,
+        "ratio": 0.7343,
+        "high_down_volume": 1630639.15,
+        "high_up_volume": 1128525.43,
+        "divergence_index": 1.4449,
+        "bars_count": 200,
+        "high_threshold": 93.08
+      },
+      "redis": {
+        "collected_at": "2026-06-08 17:32:59",
+        "bars_count": 200,
+        "last_bar": [
+          {
+            "datetime": "2026-06-08 15:00",
+            "open": 63.52,
+            "high": 63.75,
+            "low": 63.3,
+            "close": 63.38,
+            "volume": 20790.0
+          }
+        ]
+      }
+    },
+    "300502": {
+      "fetch": {
+        "bars_count": 200,
+        "source": "tencent_mkline_m15_qfq",
+        "first_datetime": "2026-05-21 13:15",
+        "last_datetime": "2026-06-08 15:00",
+        "tail_3": [
+          {
+            "datetime": "2026-06-08 14:30",
+            "open": 722.21,
+            "high": 732.56,
+            "low": 722.21,
+            "close": 731.98,
+            "volume": 11913.0
+          },
+          {
+            "datetime": "2026-06-08 14:45",
+            "open": 731.3,
+            "high": 731.96,
+            "low": 721.37,
+            "close": 724.6,
+            "volume": 11224.0
+          },
+          {
+            "datetime": "2026-06-08 15:00",
+            "open": 724.62,
+            "high": 727.6,
+            "low": 720.82,
+            "close": 725.0,
+            "volume": 14114.0
+          }
+        ]
+      },
+      "t1_preview": {
+        "indicator_key": "volume_price_div",
+        "value": 0.69,
+        "source": "tencent_mkline_m15_qfq",
+        "calculation_logic": "近200根15min：上涨量=2722530 下跌量=1904315；高位(收盘≥739.89)下跌量=524590 / 高位上涨量=756019 = 0.6939",
+        "fact_statement": "近 200 根 15 分钟 K 线中，价格高位区间下跌成交量 与高位上涨成交量比值为 0.69（全样本涨跌量比 1.4297）。",
+        "up_volume": 2722529.82,
+        "down_volume": 1904315.35,
+        "ratio": 1.4297,
+        "high_down_volume": 524590.0,
+        "high_up_volume": 756019.14,
+        "divergence_index": 0.6939,
+        "bars_count": 200,
+        "high_threshold": 739.89
+      },
+      "redis": {
+        "collected_at": "2026-06-08 17:33:25",
+        "bars_count": 200,
+        "last_bar": [
+          {
+            "datetime": "2026-06-08 15:00",
+            "open": 724.62,
+            "high": 727.6,
+            "low": 720.82,
+            "close": 725.0,
+            "volume": 14114.0
+          }
+        ]
+      }
+    }
+  }
+}

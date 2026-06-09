@@ -1,0 +1,60 @@
+{
+  "batch_meta": {
+    "execution_id": "batch_task_20260608_080212",
+    "timestamp": "2026-06-08T08:02:12Z",
+    "total_stocks_checked": 3,
+    "system_status": "Degraded",
+    "account_available_cash": 75747.63
+  },
+  "portfolio_signals": {
+    "601138.SH": {
+      "stock_name": "工业富联",
+      "indicators": {
+        "qmt_atr_trailing": {
+          "value": 3.06,
+          "source": "PG executing_daily_bars · tencent_fqkline",
+          "calculation_logic": "(建仓后最高价 84.95 - 当前价 70.48) / 近20日ATR 4.73",
+          "fact_statement": "当前价格距离建仓以来的绝对峰值，已回撤 3.06 倍 ATR。",
+          "atr20": 4.7285,
+          "peak_price": 84.95,
+          "current": 70.48,
+          "atr_multiple": 3.0602,
+          "as_of": "2026-06-08",
+          "entry_date_used": "2026-04-14"
+        }
+      },
+      "position_context": {
+        "entry_date": "2026-04-14",
+        "cost_basis": 56.8213,
+        "current_price": 70.48,
+        "unrealized_profit_pct": 24.04,
+        "holding_volume": 1500.0,
+        "position_pct": 29.7
+      }
+    },
+    "002837.SZ": {
+      "stock_name": "英维克",
+      "indicators": {},
+      "position_context": {
+        "current_price": 63.38,
+        "holding_volume": 0.0
+      },
+      "degraded_probes": [
+        "qmt_atr_trailing (AtrTrailingError: 建仓日缺失 · 须在 user_positions.opened_at 配置)",
+        "qmt_atr_trailing (未采集)"
+      ]
+    },
+    "300502.SZ": {
+      "stock_name": "新易盛",
+      "indicators": {},
+      "position_context": {
+        "current_price": 725.0,
+        "holding_volume": 0.0
+      },
+      "degraded_probes": [
+        "qmt_atr_trailing (AtrTrailingError: 建仓日缺失 · 须在 user_positions.opened_at 配置)",
+        "qmt_atr_trailing (建仓日缺失 · 须在 user_positions.opened_at 配置)"
+      ]
+    }
+  }
+}

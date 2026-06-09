@@ -1,0 +1,580 @@
+{
+  "workspace_settings": {
+    "available_cash": 75747.63,
+    "updated_at": "2026-06-08T06:02:04.239877"
+  },
+  "symbols": [
+    {
+      "symbol": "601138",
+      "symbol_base": {
+        "symbol": "601138",
+        "has_base": true,
+        "name": "工业富联",
+        "quantity": 1500.0,
+        "cost_price": 56.8213,
+        "position_pct": 29.7,
+        "opened_at": "2026-04-14",
+        "notes": null,
+        "enabled": true
+      },
+      "latest_audit": {
+        "id": 29,
+        "t2_status": "error",
+        "created_at": "2026-06-05T10:45:03.999734",
+        "telemetry_json": {
+          "as_of": "2026-06-05",
+          "symbol": "601138",
+          "L4_Game": {
+            "qmt_atr_trailing": {
+              "value": 2.3490077653149264,
+              "source": "HK Pod·250日K线自算ATR",
+              "fact_statement": "距高点回撤 2.3490077653149264 倍ATR（20日）",
+              "calculation_logic": "ATR20=4.636 peak=84.95 cur=74.06"
+            },
+            "volume_price_div": {
+              "value": 1.5798,
+              "source": "HK Pod·10日涨跌日量比",
+              "fact_statement": "量价比值 1.5798",
+              "calculation_logic": "10日上涨日量/下跌日量"
+            },
+            "margin_short_skew": {
+              "value": "{\"skew\": 0.000198, \"margin_buy\": 2579899844.0, \"trade_date\": \"20260604\", \"short_balance\": 510740.0, \"margin_balance\": 11548427475.0}",
+              "source": "akshare stock_margin_detail_sse:20260604",
+              "fact_statement": "已采集 margin_short_skew 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=margin_short_skew"
+            },
+            "level2_super_order": {
+              "value": -2488268736.0,
+              "source": "eastmoney:push2his/fflow/daykline",
+              "fact_statement": "超大单5日合计 -2488268736.0",
+              "calculation_logic": "东财超大单5日净额"
+            },
+            "insider_sell_actual": {
+              "value": 1,
+              "source": "cninfo:iter_cninfo_announcements+stock_news_em",
+              "fact_statement": "匹配 1 条相关标题",
+              "calculation_logic": "公告/新闻关键词"
+            },
+            "northbound_net_flow": {
+              "value": 1779282.0,
+              "source": "akshare stock_hsgt_individual_em",
+              "fact_statement": "北向3日持股变化 1779282.0",
+              "calculation_logic": "近3日持股变化合计"
+            },
+            "block_trade_discount": {
+              "value": "{\"amount\": 192812300.0, \"trade_date\": \"2026-05-27\", \"discount_pct\": -0.065068493151}",
+              "source": "akshare stock_dzjy_mrmx A股过滤",
+              "fact_statement": "已采集 block_trade_discount 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=block_trade_discount"
+            },
+            "retail_concentration": {
+              "value": "{\"as_of\": \"2026-03-31\", \"holder_num\": 722584.0, \"prev_holder_num\": 732173, \"holder_num_change_pct\": -1.30966315338}",
+              "source": "eastmoney:RPT_HOLDERNUM_DET",
+              "fact_statement": "已采集 retail_concentration 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=retail_concentration"
+            },
+            "etf_redemption_impact": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "tech_beta_correlation": {
+              "value": "{\"rho_10d\": 0.0016, \"benchmark\": \"000852\", \"window_days\": 10, \"benchmark_name\": \"中证1000\"}",
+              "source": "eastmoney:kline_returns_corr",
+              "fact_statement": "已采集 tech_beta_correlation 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=tech_beta_correlation"
+            },
+            "turnover_acceleration": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            }
+          },
+          "blockers": [
+            {
+              "key": "nvda_gpu_leadtime",
+              "reason": "[A] 分销商 API / external_facts 未实现（禁止行业快讯词表顶替）"
+            },
+            {
+              "key": "tsmc_cowos_capacity",
+              "reason": "[A] 巨潮/台媒→vLLM 抽取 CoWoS 四字段未实现"
+            },
+            {
+              "key": "parent_honhai_revenue",
+              "reason": "[A] TWSE Open API 2317 月营收未实现（禁止 akshare HK 替代标 ok）"
+            },
+            {
+              "key": "smci_quanta_share",
+              "reason": "[A] 纪要 PDF→DeepSeek 份额抽取未实现"
+            },
+            {
+              "key": "related_party_trans",
+              "reason": "[A] D1 关联交易表环比未接入"
+            },
+            {
+              "key": "turnover_acceleration",
+              "reason": "[C] 换手率序列不足(0)·禁止仅用成交量比 ok"
+            },
+            {
+              "key": "etf_redemption_impact",
+              "reason": "[C] push2delay ETF 列表无周份额变动字段·禁止仅份额数 ok"
+            }
+          ],
+          "L3_Business": {
+            "cpi_ppi_spread": {
+              "value": "{\"cpi_month\": \"2026年04月份\", \"ppi_month\": \"2026年04月份\", \"spread_ppt\": -1.6, \"cpi_yoy_pct\": 1.2, \"ppi_yoy_pct\": 2.8}",
+              "source": "akshare macro_china_cpi + macro_china_ppi",
+              "fact_statement": "已采集 cpi_ppi_spread 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=cpi_ppi_spread"
+            },
+            "nvda_gpu_leadtime": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "smci_quanta_share": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "gross_margin_trend": {
+              "value": "{\"report_date\": \"2026-03-31\", \"gross_margin_pct\": 7.3505079165, \"gross_margin_qoq_pct\": 5.3682}",
+              "source": "eastmoney:RPT_F10_FINANCE_MAINFINADATA",
+              "fact_statement": "已采集 gross_margin_trend 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=gross_margin_trend"
+            },
+            "inventory_turnover": {
+              "value": "{\"report_date\": \"2026-03-31\", \"inventory_turnover_days\": 61.563307246508}",
+              "source": "eastmoney:RPT_F10_FINANCE_MAINFINADATA",
+              "fact_statement": "已采集 inventory_turnover 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=inventory_turnover"
+            },
+            "mgmt_and_core_team": {
+              "value": 12,
+              "source": "cninfo:iter_cninfo_announcements",
+              "fact_statement": "人事相关 12 条",
+              "calculation_logic": "巨潮董监高"
+            },
+            "related_party_trans": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "tsmc_cowos_capacity": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "contract_liabilities": {
+              "value": "{\"report_date\": \"2026-03-31\", \"contract_liabilities\": 37.686072453711, \"contract_liabilities_qoq_pct\": -3.9565}",
+              "source": "eastmoney:RPT_F10_FINANCE_MAINFINADATA",
+              "fact_statement": "已采集 contract_liabilities 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=contract_liabilities"
+            },
+            "copper_cost_pressure": {
+              "value": 2.29,
+              "source": "akshare futures_main_sina CU0",
+              "fact_statement": "沪铜近30日涨跌 2.29%",
+              "calculation_logic": "沪铜30日涨跌幅"
+            },
+            "exchange_rate_impact": {
+              "value": 6.7554,
+              "source": "akshare currency_boc_sina USD 30d",
+              "fact_statement": "美元兑人民币 6.7554",
+              "calculation_logic": "USD/CNY现货"
+            },
+            "gb200_iteration_node": {
+              "value": 3,
+              "source": "cninfo:iter_cninfo_announcements+stock_news_em",
+              "fact_statement": "匹配 3 条相关标题",
+              "calculation_logic": "公告/新闻关键词"
+            },
+            "cloud_capex_consensus": {
+              "value": 142234000000.0,
+              "source": "sec.gov companyfacts CapitalExpenditure",
+              "fact_statement": "四云商CapEx合计USD 142234000000.0（4家）",
+              "calculation_logic": "SEC EDGAR 四云商 CapEx"
+            },
+            "parent_honhai_revenue": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            }
+          },
+          "profit_context": {
+            "name": "工业富联",
+            "symbol": "601138",
+            "quantity": 1500.0,
+            "opened_at": null,
+            "cost_price": 56.8213,
+            "mark_price": 74.06,
+            "price_stale": false,
+            "has_position": true,
+            "position_pct": 29.7,
+            "unrealized_pnl_pct": 30.34
+          },
+          "unavailable_data": [
+            "nvda_gpu_leadtime",
+            "tsmc_cowos_capacity",
+            "parent_honhai_revenue",
+            "smci_quanta_share",
+            "related_party_trans",
+            "turnover_acceleration",
+            "etf_redemption_impact"
+          ]
+        },
+        "audit_json": {
+          "error": "Opus API 不可达：Error code: 401 - {'type': 'error', 'error': {'type': 'authentication_error', 'message': 'invalid x-api-key'}, 'request_id': 'req_011CbjymfsVDHFg2B7kMuB1z'}；请配置 ANTHROPIC_HTTPS_PROXY 或本机预拉后 sync 缓存"
+        }
+      }
+    },
+    {
+      "symbol": "002837",
+      "symbol_base": {
+        "symbol": "002837",
+        "has_base": true,
+        "name": "英维克",
+        "quantity": 0.0,
+        "cost_price": 0.0,
+        "position_pct": null,
+        "opened_at": null,
+        "notes": null,
+        "enabled": true
+      },
+      "latest_audit": {
+        "id": 31,
+        "t2_status": "error",
+        "created_at": "2026-06-05T10:45:03.999734",
+        "telemetry_json": {
+          "as_of": "2026-06-05",
+          "symbol": "002837",
+          "L4_Game": {
+            "qmt_atr_trailing": {
+              "value": 5.62475175932621,
+              "source": "HK Pod·250日K线自算ATR",
+              "fact_statement": "距高点回撤 5.62475175932621 倍ATR（20日）",
+              "calculation_logic": "ATR20=4.9096 peak=93.515 cur=65.9"
+            },
+            "volume_price_div": {
+              "value": 0.5935,
+              "source": "HK Pod·10日涨跌日量比",
+              "fact_statement": "量价比值 0.5935",
+              "calculation_logic": "10日上涨日量/下跌日量"
+            },
+            "margin_short_skew": {
+              "value": "{\"skew\": 0.001035, \"margin_buy\": 266236456.0, \"trade_date\": \"20260604\", \"short_balance\": 275514.0, \"margin_balance\": 4115262973.0}",
+              "source": "akshare stock_margin_detail_szse:20260604",
+              "fact_statement": "已采集 margin_short_skew 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=margin_short_skew"
+            },
+            "level2_super_order": {
+              "value": -272801048.0,
+              "source": "eastmoney:push2his/fflow/daykline",
+              "fact_statement": "超大单5日合计 -272801048.0",
+              "calculation_logic": "东财超大单5日净额"
+            },
+            "insider_sell_actual": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "northbound_net_flow": {
+              "value": -1685120.0,
+              "source": "akshare stock_hsgt_individual_em",
+              "fact_statement": "北向3日持股变化 -1685120.0",
+              "calculation_logic": "近3日持股变化合计"
+            },
+            "block_trade_discount": {
+              "value": "{\"amount\": 4871400.0, \"trade_date\": \"2026-04-14\", \"discount_pct\": -0.146734675289}",
+              "source": "akshare stock_dzjy_mrmx A股过滤",
+              "fact_statement": "已采集 block_trade_discount 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=block_trade_discount"
+            },
+            "retail_concentration": {
+              "value": "{\"as_of\": \"2026-05-29\", \"holder_num\": 221500.0, \"prev_holder_num\": 180000, \"holder_num_change_pct\": 23.055555555556}",
+              "source": "eastmoney:RPT_HOLDERNUM_DET",
+              "fact_statement": "已采集 retail_concentration 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=retail_concentration"
+            },
+            "etf_redemption_impact": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "tech_beta_correlation": {
+              "value": "{\"rho_10d\": 0.0793, \"benchmark\": \"000852\", \"window_days\": 10, \"benchmark_name\": \"中证1000\"}",
+              "source": "eastmoney:kline_returns_corr",
+              "fact_statement": "已采集 tech_beta_correlation 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=tech_beta_correlation"
+            },
+            "turnover_acceleration": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            }
+          },
+          "blockers": [
+            {
+              "key": "nvda_gpu_leadtime",
+              "reason": "[A] 分销商 API / external_facts 未实现（禁止行业快讯词表顶替）"
+            },
+            {
+              "key": "tsmc_cowos_capacity",
+              "reason": "[A] 巨潮/台媒→vLLM 抽取 CoWoS 四字段未实现"
+            },
+            {
+              "key": "parent_honhai_revenue",
+              "reason": "[A] TWSE Open API 2317 月营收未实现（禁止 akshare HK 替代标 ok）"
+            },
+            {
+              "key": "smci_quanta_share",
+              "reason": "[A] 纪要 PDF→DeepSeek 份额抽取未实现"
+            },
+            {
+              "key": "gb200_iteration_node",
+              "reason": "[D] 已扫130条·无规划关键词命中（非「无披露」准出）"
+            },
+            {
+              "key": "copper_cost_pressure",
+              "reason": "沪铜序列不足"
+            },
+            {
+              "key": "related_party_trans",
+              "reason": "[A] D1 关联交易表环比未接入"
+            },
+            {
+              "key": "turnover_acceleration",
+              "reason": "[C] 换手率序列不足(0)·禁止仅用成交量比 ok"
+            },
+            {
+              "key": "insider_sell_actual",
+              "reason": "[A] 有减持标题但未解析出占总股本%（禁止仅标题 ok）"
+            },
+            {
+              "key": "etf_redemption_impact",
+              "reason": "[C] push2delay ETF 列表无周份额变动字段·禁止仅份额数 ok"
+            }
+          ],
+          "L3_Business": {
+            "cpi_ppi_spread": {
+              "value": "{\"cpi_month\": \"2026年04月份\", \"ppi_month\": \"2026年04月份\", \"spread_ppt\": -1.6, \"cpi_yoy_pct\": 1.2, \"ppi_yoy_pct\": 2.8}",
+              "source": "akshare macro_china_cpi + macro_china_ppi",
+              "fact_statement": "已采集 cpi_ppi_spread 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=cpi_ppi_spread"
+            },
+            "nvda_gpu_leadtime": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "smci_quanta_share": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "gross_margin_trend": {
+              "value": "{\"report_date\": \"2026-03-31\", \"gross_margin_pct\": 24.2934619169, \"gross_margin_qoq_pct\": -12.8097}",
+              "source": "eastmoney:RPT_F10_FINANCE_MAINFINADATA",
+              "fact_statement": "已采集 gross_margin_trend 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=gross_margin_trend"
+            },
+            "inventory_turnover": {
+              "value": "{\"report_date\": \"2026-03-31\", \"inventory_turnover_days\": 132.580225522801}",
+              "source": "eastmoney:RPT_F10_FINANCE_MAINFINADATA",
+              "fact_statement": "已采集 inventory_turnover 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=inventory_turnover"
+            },
+            "mgmt_and_core_team": {
+              "value": 12,
+              "source": "cninfo:iter_cninfo_announcements",
+              "fact_statement": "人事相关 12 条",
+              "calculation_logic": "巨潮董监高"
+            },
+            "related_party_trans": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "tsmc_cowos_capacity": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "contract_liabilities": {
+              "value": "{\"report_date\": \"2026-03-31\", \"contract_liabilities\": 24.40356606436, \"contract_liabilities_qoq_pct\": -25.3174}",
+              "source": "eastmoney:RPT_F10_FINANCE_MAINFINADATA",
+              "fact_statement": "已采集 contract_liabilities 原始指标",
+              "calculation_logic": "T0 payload 摘要 key=contract_liabilities"
+            },
+            "copper_cost_pressure": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "exchange_rate_impact": {
+              "value": 6.7554,
+              "source": "akshare currency_boc_sina USD 30d",
+              "fact_statement": "美元兑人民币 6.7554",
+              "calculation_logic": "USD/CNY现货"
+            },
+            "gb200_iteration_node": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            },
+            "cloud_capex_consensus": {
+              "value": 142234000000.0,
+              "source": "sec.gov companyfacts CapitalExpenditure",
+              "fact_statement": "四云商CapEx合计USD 142234000000.0（4家）",
+              "calculation_logic": "SEC EDGAR 四云商 CapEx"
+            },
+            "parent_honhai_revenue": {
+              "value": null,
+              "source": "",
+              "fact_statement": "无数据",
+              "calculation_logic": "未采集"
+            }
+          },
+          "profit_context": {
+            "symbol": "002837",
+            "has_position": false
+          },
+          "unavailable_data": [
+            "nvda_gpu_leadtime",
+            "tsmc_cowos_capacity",
+            "parent_honhai_revenue",
+            "smci_quanta_share",
+            "gb200_iteration_node",
+            "copper_cost_pressure",
+            "related_party_trans",
+            "turnover_acceleration",
+            "insider_sell_actual",
+            "etf_redemption_impact"
+          ]
+        },
+        "audit_json": {
+          "error": "Opus API 不可达：Error code: 401 - {'type': 'error', 'error': {'type': 'authentication_error', 'message': 'invalid x-api-key'}, 'request_id': 'req_011Cbjz7mNgx6FTLmFvo2kYq'}；请配置 ANTHROPIC_HTTPS_PROXY 或本机预拉后 sync 缓存"
+        }
+      }
+    },
+    {
+      "symbol": "300502",
+      "symbol_base": {
+        "symbol": "300502",
+        "has_base": true,
+        "name": "新易盛",
+        "quantity": 0.0,
+        "cost_price": 0.0,
+        "position_pct": null,
+        "opened_at": null,
+        "notes": null,
+        "enabled": true
+      },
+      "latest_audit": {
+        "id": 32,
+        "t2_status": "ok",
+        "created_at": "2026-06-08T07:53:19.137648",
+        "telemetry_json": {
+          "batch_meta": {
+            "timestamp": "2026-06-08T07:53:19Z",
+            "execution_id": "batch_task_20260608_5692d3af",
+            "system_status": "Degraded",
+            "total_stocks_checked": 1,
+            "account_available_cash": 75747.63
+          },
+          "portfolio_signals": {
+            "300502.SZ": {
+              "indicators": {},
+              "stock_name": "新易盛",
+              "degraded_probes": [
+                "qmt_atr_trailing (AtrTrailingError: 建仓日缺失 · 须在 user_positions.opened_at 配置)",
+                "qmt_atr_trailing (建仓日缺失 · 须在 user_positions.opened_at 配置)"
+              ],
+              "position_context": {
+                "current_price": 725.0,
+                "holding_volume": 0.0
+              }
+            }
+          }
+        },
+        "audit_json": {
+          "meta": {
+            "model": "claude-opus-4-6",
+            "route": "remote",
+            "latency_ms": 29352,
+            "anthropic_proxy_configured": true
+          },
+          "probe_coverage": {
+            "verdict": "探针覆盖率为零，风控遥测完全失效。系统处于 Degraded 状态，须在任何交易操作前完成修复。",
+            "coverage_ratio": "0.00%",
+            "probes_healthy": 0,
+            "degraded_detail": [
+              "qmt_atr_trailing — AtrTrailingError: 建仓日缺失 · 须在 user_positions.opened_at 配置"
+            ],
+            "probes_degraded": 2,
+            "total_probes_expected": 2
+          },
+          "Reasoning_Engine": {
+            "300502.SZ": {
+              "stock_name": "新易盛",
+              "current_price": 725.0,
+              "holding_volume": 0.0,
+              "degraded_probes": [
+                "qmt_atr_trailing (AtrTrailingError: 建仓日缺失 · 须在 user_positions.opened_at 配置)",
+                "qmt_atr_trailing (建仓日缺失 · 须在 user_positions.opened_at 配置)"
+              ],
+              "risk_assessment": {
+                "severity": "LOW_PRACTICAL / HIGH_OPERATIONAL",
+                "rationale": [
+                  "holding_volume = 0.0，实际无持仓敞口，当前无市值风险。",
+                  "indicators 字段为空：所有探针均未返回有效遥测数据，风控引擎处于盲区状态。",
+                  "system_status = Degraded：qmt_atr_trailing 探针因 user_positions.opened_at 未配置而连续报错，ATR 追踪止损逻辑完全失效。",
+                  "若后续建仓而不修复 opened_at 配置，ATR 止损将持续缺失，构成重大风控缺口。"
+                ],
+                "latent_risk": "探针降级未修复前，任何新建仓将缺乏止损保护。",
+                "immediate_risk": "无持仓，无即时损失风险。"
+              },
+              "effective_exposure": 0.0,
+              "indicators_returned": {},
+              "probe_failure_count": 2
+            }
+          },
+          "Execution_Command": {
+            "300502.SZ": {
+              "action": "hold",
+              "justification": "holding_volume = 0.0，无持仓可操作。trim/dump/rotate 均无标的。维持 hold 并优先修复探针配置。",
+              "mandatory_remediation": [
+                "立即在 user_positions.opened_at 中补全 300502.SZ 的建仓日期配置，恢复 qmt_atr_trailing 探针正常运行。",
+                "修复后重新触发巡检，确认 indicators 正常返回且 system_status 恢复为 Normal。",
+                "在探针恢复前，禁止对 300502.SZ 新建任何仓位。"
+              ]
+            }
+          },
+          "Executing_Daily_Audit": {
+            "timestamp": "2026-06-08T07:53:19Z",
+            "execution_id": "batch_task_20260608_5692d3af",
+            "system_status": "Degraded",
+            "total_stocks_checked": 1,
+            "account_available_cash": 75747.63
+          }
+        }
+      }
+    }
+  ]
+}
