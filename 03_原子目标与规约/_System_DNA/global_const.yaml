@@ -274,7 +274,8 @@ tech_stack:
   data_store_primary: postgresql_15_plus
   data_store_timeseries: timescaledb
   data_store_object: s3_compatible
-  search: opensearch
+  search: opensearch  # 极寒/态势 pillar 审计检索；Copilot 长文语义主链见 semantic_long_text_platform
+  semantic_long_text_platform: deepsea_v2
   vector_store_candidate: [milvus, pgvector, opensearch_dense_vector]
   message_bus: kafka
   cache: redis
