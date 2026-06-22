@@ -42,6 +42,7 @@
 | **[31_Spot 计费感知与巡检规约](./31_Spot计费感知与巡检规约.md)** | ✨ **Phase 1（2026-06-12）**：deploy Spot 优先 · 15min cron 巡检 · 交互切换 · `diting-infra` Spot Guard |
 | **[35_Tushare 数据源优先收敛规约](./35_Tushare数据源优先收敛规约.md)** | ✨ **v1.0（2026-06-17）**：结构化指标 Tushare 主源矩阵 · 东财 §3 白名单 · 联动 27_/28_/L2 依赖表 · 禁止 F10 静默混源 |
 | **[36_Z0-M2 政策赛道 T1 语义工程化方案](./36_Z0-M2政策赛道T1-语义工程化方案.md)** | ✨ **v1.0（2026-06-19）**：`M.policy.sector_direction` 全文入模 · evidence_spans 回检 · wind_scan 政策支路 · 链 34_ §3.2/§9 |
+| **[39_产业关系图谱系统_全栈工程化设计](./39_产业关系图谱系统_全栈工程化设计.md)** | ✨ **v1.0（2026-06-22）**：新 Pillar 架构脊柱 · Cytoscape.js + Neo4j + Claude + GraphRAG 四维技术选型 · 全栈架构（前端 SPA / 后端 FastAPI / LLM Agent / 部署拓扑）· 产业传导 LLM 推演引擎 · diting-stack 扩展部署 · Phase 1-3 实施路径 |
 
 ## 二、引用规则
 
